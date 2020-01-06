@@ -1,6 +1,6 @@
 all: build run clean
 
-build: bin/Main.class bin/Shares.class
+build: bin/Main.class bin/Shares.class bin/ShareInfo.class
 
 bin/%.class: src/%.java
 	javac -d bin --class-path bin --source-path src $<
