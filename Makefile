@@ -1,6 +1,10 @@
+sources = $(wildcard src/*.java)
+transformed = $(patsubst src/%, bin/%, $(sources))
+classes = $(transformed:.java=.class)
+
 all: build run clean
 
-build: bin/Main.class bin/Shares.class bin/ShareInfo.class bin/ShareUtil.class bin/APIFinance.class bin/PickShareImperative.class
+build: $(classes)
 
 bin/%.class: src/%.java
 	javac -d bin --class-path bin --source-path src $<
