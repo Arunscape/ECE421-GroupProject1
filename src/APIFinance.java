@@ -21,7 +21,7 @@ public class APIFinance {
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.contains("price")) {
                     price = new BigDecimal(line.split("\"")[3].trim());
-                } }
+                } else { System.err.println("REEEEE");} }
             bufferedReader.close(); } catch (IOException e) {
                 System.out.println("failure sending request");
             }
