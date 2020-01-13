@@ -1,0 +1,63 @@
+\documentclass[letterpaper]{article}
+\synctex=1
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+\usepackage{lipsum}
+\usepackage{float}
+
+% \usepackage[
+%     style=ieee,
+%     backend=biber
+%     ]{biblatex}
+% \addbibresource{references.bib}
+
+\usepackage{hyperref}
+
+\usepackage{amssymb}
+
+\usepackage{siunitx}
+
+\usepackage{multirow}
+% for merging table cells I think
+
+\usepackage{tabularx}
+\renewcommand\tabularxcolumn[1]{m{#1}}% for vertical centering text in X column
+% allows for linewrap within cells
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\usepackage{todonotes}
+\usepackage{pdfpages}
+
+\usepackage{fancyhdr} %header
+\fancyhf{}
+\fancyhead[R]{Arun Woosaree XXXXXXX}
+\renewcommand\headrulewidth{0pt}
+\fancyfoot[C]{\thepage}
+\renewcommand\footrulewidth{0pt}
+\pagestyle{fancy}
+
+\usepackage[pdf]{graphviz}
+\usepackage{adjustbox}
+
+\usepackage{amsmath}
+
+% make subsection use letters
+\renewcommand{\thesubsection}{\alph{subsection})}
+
+\usepackage{minted}
+
+% \usepackage{amsthm}
+\title{ECE 421 Project 1\\
+Stock Project Monitor}
+\author{Arun Woosaree\\
+Alexander Rostron\\
+Jacob Reckhard
+}
+
+%actual document
+\begin{document}
+
+\maketitle %insert titlepage here
+
+\end{document}
