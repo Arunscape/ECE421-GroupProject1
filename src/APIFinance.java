@@ -22,7 +22,7 @@ public class APIFinance {
                 if (line.contains("price")) {
                     price = new BigDecimal(line.split("\"")[3].trim());
                 }
-			 }
+            }
             bufferedReader.close(); } catch (IOException e) {
                 System.out.println("failure sending request");
             }
