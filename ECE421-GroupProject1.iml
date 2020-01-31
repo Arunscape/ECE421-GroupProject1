@@ -10,6 +10,6 @@
     <orderEntry type="library" name="org.mockito:mockito-junit-jupiter:3.2.4" level="project" />
     <orderEntry type="library" name="junit:junit:4.13" level="project" />
     <orderEntry type="library" name="org.powermock:powermock-module-junit4:2.0.5" level="project" />
-    <orderEntry type="library" name="org.powermock:powermock-api-mockito:1.7.4" level="project" />
+    <orderEntry type="library" name="org.powermock:powermock-api-mockito2:2.0.5" level="project" />
   </component>
 </module>
