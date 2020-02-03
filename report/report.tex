@@ -71,20 +71,9 @@ number of stocks. The runtime of this software is primarily bounded by
 the API limitations, but does produce the correct result (assuming
 stock prices haven't changed during the runtime of the program).
 
-In the event that there are two stocks with the highest price we
-arbitrarily pick one of the stocks and return that.
-
-The functional features of Java we used were effectivley, maps,
-reduces, filters, and lambdas. Thus the pickShareFunctional method
+The functional features of Java we used were effectively, maps,
+reduces, filters, and lambdas. Thus the \texttt{pickShareFunctional} method
 ends up effectively being a one-liner with no local variables.
-had to make some adjustments to the specifications. Since the API limits the
-number of calls per minute, thus, the software is unable to make enough API
-calls in under a minute to gather the required information on 10 stocks. So,
-we thought it more correct to stall the program until it reviced information
-on all 10 stocks instead of proceeding with information on a limited number of
-stocks. The runtime of this software is primarily bounded by the API
-limitations, but does produce the correct result (assuming stock prices
-havent changed during the runtime of the program).
 
 In the event that there are two stocks with the highest price under \$500 we
 arbitrarily pick one of the stocks and return that.
