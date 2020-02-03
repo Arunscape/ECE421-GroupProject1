@@ -63,7 +63,7 @@ Jacob Reckhard
 Since this software interacts with an external entity with API
 limitations, we had to make some adjustments to the
 specifications. Since the API limits the number of calls per minute,
-thus, the software is unable to make enough API calls in under a
+the software is unable to make enough API calls in under a
 minute to gather the required information on 10 stocks. So, we thought
 it more correct to stall the program until it received information on
 all 10 stocks instead of proceeding with information on a limited
@@ -99,4 +99,16 @@ check. That means it will take at least a minute to run regardless of
 how the code is designed. This delay greatly overshadows any other
 aspect of the code.
 
+\section{Answer to Questions}
+b) The step that took the longest out of the 3 was step 1 ``Create a list of
+ShareInfo filled with the price for each of the symbols in Shares''.
+
+\begin{itemize}
+  \item The imparative method took 72.212964388 seconds to run.
+  \item The functional method took 77.073074973 seconds to run.
+  \item The functional method with parallel streams took 63.897638033 to run 
+\end{itemize}
+
+The functional method with parallelStream took less time likely because tasks
+are being executed concurrently, thus saving a bit of time.
 \end{document}
