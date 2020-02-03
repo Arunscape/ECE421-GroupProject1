@@ -71,11 +71,18 @@ stocks. The runtime of this software is primarily bounded by the API
 limitations, but does produce the correct result (assuming stock prices
 havent changed during the runtime of the program).
 
-In the event that there are two stocks with the highest price we arbitrarily
-pick one of the stocks and return that.
+In the event that there are two stocks with the highest price under \$500 we
+arbitrarily pick one of the stocks and return that.
+
+In the event that the api does not give a response with the price, it is assumed
+that the price of the stock is 0.
 
 \section{Testing}
-A simple Unit test was written to verify the correctness of the function we
+Unit tests were created to verify two simple scenarios. The first test was for
+the normal case, where all of the stock prices returned are different, and we
+expect the function to return the stock with the highest price under \$500. For
+the second test, we assert that in the case where there there is more than one
+stock under \$500 with the maximum value, any one of those stocks is returned. 
 
 \section{Defects}
 
