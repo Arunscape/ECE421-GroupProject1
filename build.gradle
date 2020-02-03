@@ -9,6 +9,7 @@ plugins {
     id 'java'
     id 'eclipse' // optional (to generate Eclipse project files)
     id 'idea' // optional (to generate IntelliJ IDEA project files)
+    id 'application'
 }
 dependencies {
     testImplementation('junit:junit:4.13')
@@ -21,4 +22,7 @@ dependencies {
 }
 repositories {
     mavenCentral()
+}
+application {
+    mainClassName = 'Main'
 }
