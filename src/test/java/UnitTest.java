@@ -1,4 +1,6 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -7,9 +9,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 
 @RunWith(PowerMockRunner.class)
@@ -65,8 +65,18 @@ public class UnitTest {
         data.put(stocks[8], new BigDecimal(499));
         data.put(stocks[9], new BigDecimal(10));
 
-
-        runTest(data, stocks[7]);
+        PowerMockito.mockStatic(APIFinance.class);
+        data.forEach((k,v)->{
+            Mockito.when(APIFinance.getPrice(k)).thenReturn(v);
+        });
+        assertTrue(
+                PickShareFunctional.findHighPriced(Shares.symbols.stream()).symbol.equals(stocks[7]) ||
+                        PickShareFunctional.findHighPriced(Shares.symbols.stream()).symbol.equals(stocks[8])
+        );
+        assertTrue(
+                PickShareFunctional.findHighPriced(Shares.symbols.parallelStream()).symbol.equals(stocks[7]) ||
+                        PickShareFunctional.findHighPriced(Shares.symbols.parallelStream()).symbol.equals(stocks[8])
+        );
     }
 
 }
