@@ -7,7 +7,7 @@ all: build run clean
 build: $(classes)
 
 bin/%.class: src/%.java
-	javac -d bin --class-path bin --source-path src $<
+	javac -d bin --class-path bin --source-path src -classpath lib/*.jar $<
 
 clean:
 	rm -rf bin
