@@ -78,7 +78,7 @@ ends up effectively being a one-liner with no local variables.
 In the event that there are two stocks with the highest price under \$500 we
 arbitrarily pick one of the stocks and return that.
 
-In the event that the api does not give a response with the price, it is assumed
+In the event that the API does not give a response with the price, it is assumed
 that the price of the stock is 0. This can happen when an invalid stock is
 passed to the function, and can also happen in the event that the API is down or
 returns an error response.
@@ -87,7 +87,7 @@ returns an error response.
 Unit tests were created to verify two simple scenarios. The first test was for
 the normal case, where all of the stock prices returned are different, and we
 expect the function to return the stock with the highest price under \$500. For
-the second test, we assert that in the case where there there is more than one
+the second test, we assert that in the case where there is more than one
 stock under \$500 with the maximum value, any one of those stocks is returned. 
 
 \section{Defects}
