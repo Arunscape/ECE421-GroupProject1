@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 public class APIFinance {
@@ -21,10 +22,14 @@ public class APIFinance {
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.contains("price")) {
                     price = new BigDecimal(line.split("\"")[3].trim());
-                }
+                } else if (line.contains("Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency."))
+                    try{
+                      TimeUnit.MINUTES.sleep(1);
+                    } catch (Exception e) {}
             }
+            
             bufferedReader.close(); } catch (IOException e) {
-                System.out.println("failure sending request");
+                System.err.println("failure sending request");
             }
         return price;
     }
