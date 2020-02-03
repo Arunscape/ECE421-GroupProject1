@@ -45,7 +45,7 @@
 % make subsection use letters
 \renewcommand{\thesubsection}{\alph{subsection})}
 
-\usepackage{minted}
+%\usepackage{minted}
 
 % \usepackage{amsthm}
 \title{ECE 421 Project 1\\
@@ -61,12 +61,26 @@ Jacob Reckhard
 \maketitle %insert titlepage here
 
 \section{Rationale}
-\lipsum
+Since this software interacts with an external entity with API limitations, we
+had to make some adjustments to the specifications. Since the API limits the
+number of calls per minute, thus, the software is unable to make enough API
+calls in under a minute to gather the required information on 10 stocks. So,
+we thought it more correct to stall the program until it reviced information
+on all 10 stocks instead of proceeding with information on a limited number of
+stocks. The runtime of this software is primarily bounded by the API
+limitations, but does produce the correct result (assuming stock prices
+havent changed during the runtime of the program). Other than the decision to
+stall the program untill all the stocks have been recived, there aren't really
+any unique design decisions to note.
 
 \section{Testing}
-\lipsum
 
 \section{Defects}
-\lipsum
+
+The biggest fault of the program is that there is an API key limitation in that
+it can only get 5 stock prices every minute. This is problematic, because there
+is 10 stocks the program is to check. That means it will take at least a minute
+to run regardless of how the code is designed. This delay greatly overshadows
+any other aspect of the code.
 
 \end{document}
