@@ -1,3 +1,4 @@
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -10,6 +11,6 @@ public class PickShareFunctional {
             .map( (symbol) -> new ShareInfo(symbol, APIFinance.getPrice(symbol)))
             .filter( (shareinfo) -> shareinfo.price.compareTo(new BigDecimal(500)) < 0)
             .max(Comparator.comparing(a -> a.price))
-            .orElseThrow(NoSuchElementException::new);
+            .get();
     }
 }
