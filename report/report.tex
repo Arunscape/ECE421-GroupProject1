@@ -45,7 +45,7 @@
 % make subsection use letters
 \renewcommand{\thesubsection}{\alph{subsection})}
 
-\usepackage{minted}
+%\usepackage{minted}
 
 % \usepackage{amsthm}
 \title{ECE 421 Project 1\\
@@ -61,12 +61,15 @@ Jacob Reckhard
 \maketitle %insert titlepage here
 
 \section{Rationale}
-\lipsum
 
 \section{Testing}
-\lipsum
 
 \section{Defects}
-\lipsum
+
+The biggest fault of the program is that there is an API key limitation in that
+it can only get 5 stock prices every minute. This is problematic, because there
+is 10 stocks the program is to check. That means it will take at least a minute
+to run regardless of how the code is designed. This delay greatly overshadows
+any other aspect of the code.
 
 \end{document}
