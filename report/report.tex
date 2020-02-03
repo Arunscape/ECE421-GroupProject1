@@ -90,7 +90,9 @@ In the event that there are two stocks with the highest price under \$500 we
 arbitrarily pick one of the stocks and return that.
 
 In the event that the api does not give a response with the price, it is assumed
-that the price of the stock is 0.
+that the price of the stock is 0. This can happen when an invalid stock is
+passed to the function, and can also happen in the event that the API is down or
+returns an error response.
 
 \section{Testing}
 Unit tests were created to verify two simple scenarios. The first test was for
