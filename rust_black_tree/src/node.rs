@@ -13,6 +13,7 @@ pub enum Side {
     Right,
 }
 
+
 impl Not for Side {
     type Output = Side;
     fn not(self) -> Self::Output {
@@ -33,42 +34,36 @@ pub struct Node<T> {
     pub color: Color,
 }
 
-pub trait TreeNode<T> {
-    fn get_child(&self, side: Side) -> Option<usize>;
-    fn set_child(data: &mut Vec<Node<T>>, selfptr: usize, child: usize, side: Side);
-    fn is_child(&self, data: &Vec<Node<T>>, side: Side) -> bool;
-    fn side(&self, data: &Vec<Node<T>>) -> Side;
-    fn get_sibling(&self, data: &Vec<Node<T>>) -> Option<usize>;
-    fn get_uncle(&self, data: &Vec<Node<T>>) -> Option<usize>;
-    fn to_string(&self, data: &Vec<Node<T>>) -> String;
-    fn to_pretty_string(&self, data: &Vec<Node<T>>, indent: usize) -> String;
-    fn get(data: &Vec<Node<T>>, ptr: usize) -> &Node<T>;
-    fn get_mut(data: &mut Vec<Node<T>>, ptr: usize) -> &mut Node<T>;
-    fn get_height(&self, data: &Vec<Node<T>>) -> usize;
-    fn get_size(&self, data: &Vec<Node<T>>) -> usize;
-    fn find_min(&self, data: &Vec<Node<T>>) -> usize;
-}
-
-pub trait ColourNode<T>: TreeNode<T> {
-    fn new(val: T, selfptr: usize) -> Self;
-    fn is_red(&self) -> bool;
-    fn is_child_black(&self, data: &Vec<Node<T>>, side: Side) -> bool;
-    fn is_sibling_black(&self, data: &Vec<Node<T>>) -> bool;
-    fn is_parent_black(&self, data: &Vec<Node<T>>) -> bool;
-}
-
-impl<T> TreeNode<T> for Node<T>
+impl<T> Node<T>
 where
     T: std::fmt::Debug,
 {
-    fn get_child(&self, side: Side) -> Option<usize> {
+    pub fn new(val: T, selfptr: usize) -> Self {
+        Node::<T> {
+            value: val,
+            ptr: selfptr,
+            parent: None,
+            lchild: None,
+            rchild: None,
+            color: Color::Black,
+        }
+    }
+
+    pub fn is_red(&self) -> bool {
+        match self.color {
+            Color::Red => true,
+            Color::Black => false,
+        }
+    }
+
+    pub fn get_child(&self, side: Side) -> Option<usize> {
         match side {
             Side::Left => self.lchild,
             Side::Right => self.rchild,
         }
     }
 
-    fn set_child(data: &mut Vec<Node<T>>, selfptr: usize, child: usize, side: Side) {
+    pub fn set_child(data: &mut Vec<Node<T>>, selfptr: usize, child: usize, side: Side) {
         match side {
             Side::Left => data[selfptr].lchild = Some(child),
             Side::Right => data[selfptr].rchild = Some(child),
@@ -76,15 +71,43 @@ where
         data[child].parent = Some(selfptr);
     }
 
-    fn is_child(&self, data: &Vec<Node<T>>, side: Side) -> bool {
+    pub fn is_child(&self, data: &Vec<Node<T>>, side: Side) -> bool {
         if let Some(p) = self.parent {
-            let parent = Self::get(data, p);
-            parent.get_child(side).is_some() && parent.get_child(side).unwrap() == self.ptr
+            let parent = Node::get(data, p);
+            parent.get_child(side).is_some()
+                && parent.get_child(side).unwrap() == self.ptr
         } else {
             false
         }
     }
-    fn side(&self, data: &Vec<Node<T>>) -> Side {
+
+    // Nil nodes are black children too
+    pub fn is_child_black(&self, data: &Vec<Node<T>>, side: Side) -> bool{
+        let child = self.get_child(side);
+        if child.is_some() && Node::get(data, child.unwrap()).is_red() {
+            false
+        } else {
+            true
+        }
+    }
+
+    // this will panic of called on root node
+    pub fn is_parent_black(&self, data: &Vec<Node<T>>) -> bool {
+        let p = self.parent.unwrap();
+        !Node::get(data, p).is_red()
+    }
+
+    // Nil nodes are black children too
+    pub fn is_sibling_black(&self, data: &Vec<Node<T>>) -> bool {
+        let sib = self.get_sibling(data);
+        if sib.is_some() && Node::get(data, sib.unwrap()).is_red() {
+            false
+        } else {
+            true
+        }
+    }
+
+    pub fn side(&self, data: &Vec<Node<T>>) -> Side {
         if self.is_child(data, Side::Left) {
             Side::Left
         } else {
@@ -92,9 +115,9 @@ where
         }
     }
 
-    fn get_sibling(&self, data: &Vec<Node<T>>) -> Option<usize> {
+    pub fn get_sibling(&self, data: &Vec<Node<T>>) -> Option<usize> {
         if let Some(p) = self.parent {
-            let parent = Self::get(data, p);
+            let parent = Node::get(data, p);
             if self.is_child(data, Side::Left) {
                 parent.rchild
             } else if self.is_child(data, Side::Right) {
@@ -107,13 +130,13 @@ where
         }
     }
 
-    fn get_uncle(&self, data: &Vec<Node<T>>) -> Option<usize> {
+    pub fn get_uncle(&self, data: &Vec<Node<T>>) -> Option<usize> {
         self.parent
-            .and_then(|p| Some(Self::get(data, p)))
+            .and_then(|p| Some(Node::get(data, p)))
             .and_then(|p| p.get_sibling(data))
     }
 
-    fn to_string(&self, data: &Vec<Node<T>>) -> String {
+    pub fn to_string(&self, data: &Vec<Node<T>>) -> String {
         let mut m_str = format!(
             "([P:{:?} C:{:?} V:{:?}]",
             self.parent, self.color, self.value
@@ -135,7 +158,7 @@ where
         m_str + ")"
     }
 
-    fn to_pretty_string(&self, data: &Vec<Node<T>>, indent: usize) -> String {
+    pub fn to_pretty_string(&self, data: &Vec<Node<T>>, indent: usize) -> String {
         let i = indent * 2;
         let mut m_str = format!(
             "([P:{:?} C:{:?} V:{:?}]",
@@ -160,82 +183,33 @@ where
         m_str + ")"
     }
 
-    fn get(data: &Vec<Node<T>>, ptr: usize) -> &Node<T> {
+    pub fn get(data: &Vec<Node<T>>, ptr: usize) -> &Node<T> {
         &data[ptr]
     }
 
-    fn get_mut(data: &mut Vec<Node<T>>, ptr: usize) -> &mut Node<T> {
+    pub fn get_mut(data: &mut Vec<Node<T>>, ptr: usize) -> &mut Node<T> {
         &mut data[ptr]
     }
 
-    fn get_height(&self, data: &Vec<Node<T>>) -> usize {
-        let f = |c| Some(1 + Self::get(data, c).get_height(data));
+    pub fn get_height(&self, data: &Vec<Node<T>>) -> usize {
+        let f = |c| Some(1 + Node::get(data, c).get_height(data));
         max(
             self.lchild.and_then(f).unwrap_or(1),
             self.rchild.and_then(f).unwrap_or(1),
         )
     }
 
-    fn get_size(&self, data: &Vec<Node<T>>) -> usize {
-        let f = |c| Some(Self::get(data, c).get_size(data));
+    pub fn get_size(&self, data: &Vec<Node<T>>) -> usize {
+        let f = |c| Some(Node::get(data, c).get_size(data));
 
         1 + self.lchild.and_then(f).unwrap_or(0) + self.rchild.and_then(f).unwrap_or(0)
     }
 
-    fn find_min(&self, data: &Vec<Node<T>>) -> usize {
+    pub fn find_min(&self, data: &Vec<Node<T>>) -> usize {
         if let Some(l) = self.lchild {
-            Self::get(data, l).find_min(data)
+            Node::get(data, l).find_min(data)
         } else {
             self.ptr
-        }
-    }
-}
-
-impl<T> ColourNode<T> for Node<T>
-where
-    T: std::fmt::Debug,
-{
-    fn new(val: T, selfptr: usize) -> Self {
-        Node::<T> {
-            value: val,
-            ptr: selfptr,
-            parent: None,
-            lchild: None,
-            rchild: None,
-            color: Color::Black,
-        }
-    }
-
-    fn is_red(&self) -> bool {
-        match self.color {
-            Color::Red => true,
-            Color::Black => false,
-        }
-    }
-
-    // Nil nodes are black children too
-    fn is_child_black(&self, data: &Vec<Node<T>>, side: Side) -> bool {
-        let child = self.get_child(side);
-        if child.is_some() && Self::get(data, child.unwrap()).is_red() {
-            false
-        } else {
-            true
-        }
-    }
-
-    // this will panic of called on root node
-    fn is_parent_black(&self, data: &Vec<Node<T>>) -> bool {
-        let p = self.parent.unwrap();
-        !Self::get(data, p).is_red()
-    }
-
-    // Nil nodes are black children too
-    fn is_sibling_black(&self, data: &Vec<Node<T>>) -> bool {
-        let sib = self.get_sibling(data);
-        if sib.is_some() && Self::get(data, sib.unwrap()).is_red() {
-            false
-        } else {
-            true
         }
     }
 }
