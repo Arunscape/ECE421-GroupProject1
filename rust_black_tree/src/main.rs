@@ -4,7 +4,11 @@ use rust_black_trees::test;
 
 use std::io::{self, BufRead, Write};
 
-use nom::{branch::alt, character::is_digit, sequence::separated_pair, IResult};
+use nom::{
+    branch::alt,
+    character::{is_alphabetic, is_digit},
+    IResult,
+};
 
 #[derive(Debug)]
 enum Cmd {
@@ -14,7 +18,7 @@ enum Cmd {
     Quit,
     Clear,
     Help,
-    // New,
+    New(bool),
 }
 
 fn delete(input: &[u8]) -> IResult<&[u8], Cmd> {
@@ -57,6 +61,25 @@ fn add(input: &[u8]) -> IResult<&[u8], Cmd> {
     })
 }
 
+fn new(input: &[u8]) -> IResult<&[u8], Cmd> {
+    named!(
+        newnameparser,
+        alt!(tag!("new") | tag!("create") | tag!("n") | tag!("c"))
+    );
+    named!( newparser( &[u8] ) -> (&[u8], &[u8]),
+            separated_pair!(
+                newnameparser,
+                char!(' '),
+                take_while!(is_alphabetic)
+            )
+    );
+    newparser(input).and_then(|(s, (_a, b))| match std::str::from_utf8(b).unwrap() {
+        "rb" => Ok((s, Cmd::New(false))),
+        "avl" => Ok((s, Cmd::New(true))),
+        _ => Err(nom::Err::Failure((s, nom::error::ErrorKind::NoneOf))),
+    })
+}
+
 fn help(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(quitparse, alt!(tag!("help") | tag!("h")));
     let x = quitparse(input);
@@ -84,7 +107,7 @@ fn print(input: &[u8]) -> IResult<&[u8], Cmd> {
 fn command(input: &[u8]) -> IResult<&[u8], Cmd> {
     //named!(commandparse, alt!(quit | print | clear) );
     //let x = commandparse(input);
-    let x = alt((quit, print, clear, help, add, delete))(input);
+    let x = alt((quit, print, clear, help, add, delete, new))(input);
     x
 }
 
@@ -113,6 +136,7 @@ fn eval(cmd: Cmd) {
             println!("  clear");
             println!("  quit");
         }
+        Cmd::New(v) => println!("New: {}", v),
     }
 }
 
