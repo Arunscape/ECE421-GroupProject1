@@ -4,7 +4,7 @@ use rust_black_trees::test;
 
 use std::io::{self, BufRead, Write};
 
-use nom::{branch::alt, sequence::separated_pair, character::is_digit, IResult};
+use nom::{branch::alt, character::is_digit, sequence::separated_pair, IResult};
 
 #[derive(Debug)]
 enum Cmd {
@@ -14,15 +14,28 @@ enum Cmd {
     Quit,
     Clear,
     Help,
+    // New,
 }
 
-// fn delete(input: &str) -> IResult<&str, Cmd> {
-//     separated_pair(
-//         alt!(tag!("del") | tag!("delete") | tag!("sub") | tag!("rm")),
-//         char!(' '),
-//         take_while!(is_digit),
-//     )(input).map(|(a, b)| (a, Cmd::Quit))
-// }
+fn delete(input: &[u8]) -> IResult<&[u8], Cmd> {
+    named!(
+        delnameparser,
+        alt!(tag!("delete") | tag!("del") | tag!("remove") | tag!("d") | tag!("r"))
+    );
+    named!( delparser( &[u8] ) -> (&[u8], &[u8]),
+            separated_pair!(
+                delnameparser,
+                char!(' '),
+                take_while!(is_digit)
+            )
+    );
+    delparser(input).map(|(s, (_a, b))| {
+        (
+            s,
+            Cmd::Delete(std::str::from_utf8(b).unwrap().parse().unwrap()),
+        )
+    })
+}
 
 fn add(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(
@@ -36,7 +49,12 @@ fn add(input: &[u8]) -> IResult<&[u8], Cmd> {
                 take_while!(is_digit)
             )
     );
-    addparser(input).map(|(s, (_a, b))| (s, Cmd::Add(3)))
+    addparser(input).map(|(s, (_a, b))| {
+        (
+            s,
+            Cmd::Add(std::str::from_utf8(b).unwrap().parse().unwrap()),
+        )
+    })
 }
 
 fn help(input: &[u8]) -> IResult<&[u8], Cmd> {
@@ -66,7 +84,7 @@ fn print(input: &[u8]) -> IResult<&[u8], Cmd> {
 fn command(input: &[u8]) -> IResult<&[u8], Cmd> {
     //named!(commandparse, alt!(quit | print | clear) );
     //let x = commandparse(input);
-    let x = alt((quit, print, clear, help))(input);
+    let x = alt((quit, print, clear, help, add, delete))(input);
     x
 }
 
