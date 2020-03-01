@@ -5,18 +5,19 @@ use super::node::*;
  * Arena based memory tree structure
 */
 #[derive(Debug)]
-pub struct Tree<T> {
+pub struct Tree<T, D> {
     root: Option<usize>,
     size: usize,
-    data: Vec<Node<T>>,
+    data: Vec<Node<T, D>>,
     free: Vec<usize>,
 }
 
-impl<T> Tree<T>
+impl<T, D> Tree<T, D>
 where
     T: PartialOrd,
     T: PartialEq,
     T: std::fmt::Debug,
+    D: std::fmt::Debug + RedBlack,
 {
     pub fn new() -> Self {
         Self {
@@ -82,7 +83,7 @@ where
 
     // sets a node to black if it exists. This is fine, cause all
     // nodes that don't exist are by definition black anyways
-    fn set_maybe_black (&mut self, no: Option<usize>) {
+    fn set_maybe_black(&mut self, no: Option<usize>) {
         if let Some(n) = no {
             Node::get_mut(&mut self.data, n).color = Color::Black;
         }
@@ -109,7 +110,9 @@ where
 
     fn delete_case_3(&mut self, n: usize) {
         dbg!("delete case 3");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D3 S");
+        let s = Node::get(&self.data, n)
+            .get_sibling(&self.data)
+            .expect("D3 S");
         let p = Node::get(&self.data, n).parent.expect("D3 P");
         if Node::get(&self.data, n).is_parent_black(&self.data)
             && !Node::get(&self.data, s).is_red()
@@ -142,7 +145,9 @@ where
 
     fn delete_case_5(&mut self, n: usize) {
         dbg!("delete case 5");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D5 S");
+        let s = Node::get(&self.data, n)
+            .get_sibling(&self.data)
+            .expect("D5 S");
         if !Node::get(&self.data, s).is_red() {
             if Node::get(&self.data, n).is_child(&self.data, Side::Left)
                 && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
@@ -167,7 +172,9 @@ where
 
     fn delete_case_6(&mut self, n: usize) {
         dbg!("delete case 6");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D6 S");
+        let s = Node::get(&self.data, n)
+            .get_sibling(&self.data)
+            .expect("D6 S");
         let p = Node::get(&self.data, n).parent.expect("D6 P");
         let pc = Node::get(&self.data, p).color;
         Node::get_mut(&mut self.data, s).color = pc;
@@ -498,6 +505,5 @@ mod tests {
         dbg!(tree.to_pretty_string());
         tree.delete(85);
         assert_eq!(tree.to_string(), "uuhhh");
-
     }
 }
