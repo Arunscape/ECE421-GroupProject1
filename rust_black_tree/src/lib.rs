@@ -1,3 +1,4 @@
+pub mod avltree;
 mod node;
 pub mod rbtree;
 
