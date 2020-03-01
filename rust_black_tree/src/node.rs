@@ -81,6 +81,40 @@ where
         }
     }
 
+    // Nil nodes are black children too
+    pub fn is_child_black(&self, data: &Vec<Node<T>>, side: Side) -> bool{
+        let child = self.get_child(side);
+        if child.is_some() && Node::get(data, child.unwrap()).is_red() {
+            false
+        } else {
+            true
+        }
+    }
+
+    // this will panic of called on root node
+    pub fn is_parent_black(&self, data: &Vec<Node<T>>) -> bool {
+        let p = self.parent.unwrap();
+        !Node::get(data, p).is_red()
+    }
+
+    // Nil nodes are black children too
+    pub fn is_sibling_black(&self, data: &Vec<Node<T>>) -> bool {
+        let sib = self.get_sibling(data);
+        if sib.is_some() && Node::get(data, sib.unwrap()).is_red() {
+            false
+        } else {
+            true
+        }
+    }
+
+    pub fn side(&self, data: &Vec<Node<T>>) -> Side {
+        if self.is_child(data, Side::Left) {
+            Side::Left
+        } else {
+            Side::Right
+        }
+    }
+
     pub fn get_sibling(&self, data: &Vec<Node<T>>) -> Option<usize> {
         if let Some(p) = self.parent {
             let parent = Node::get(data, p);

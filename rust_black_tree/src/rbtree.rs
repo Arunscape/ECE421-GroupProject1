@@ -61,15 +61,119 @@ where
         } else {
             let n = self.find(&val);
             let del = self.delete_replace(n);
-            self.fix_del_color(n, del);
+            self.fix_del_color(del, n);
             self.delete_node(del);
             self.size -= 1;
             true
         }
     }
 
-    pub fn fix_del_color(&mut self, n: usize, del: usize) {
-        //TODO
+    pub fn fix_del_color(&mut self, n: usize, child: usize) {
+        if !Node::get(&self.data, n).is_red() {
+            if Node::get(&self.data, child).is_red() {
+                Node::get_mut(&mut self.data, child).color = Color::Black;
+            } else {
+                self.delete_case_1(child);
+            }
+        }
+    }
+
+    // sets a node to black if it exists. This is fine, cause all
+    // nodes that don't exist are by definition black anyways
+    fn set_maybe_black (&mut self, no: Option<usize>) {
+        if let Some(n) = no {
+            Node::get_mut(&mut self.data, n).color = Color::Black;
+        }
+    }
+
+    fn delete_case_1(&mut self, n: usize) {
+        if (Node::get(&self.data, n).parent.is_some()) {
+            self.delete_case_2(n);
+        }
+    }
+
+    fn delete_case_2(&mut self, n: usize) {
+        let s = Node::get(&self.data, n).get_sibling(&self.data);
+        if Node::get(&self.data, n).is_sibling_black(&self.data) {
+            let p = Node::get(&self.data, n).parent.expect("D2 P");
+            self.set_maybe_black(s);
+            Node::get_mut(&mut self.data, p).color = Color::Red;
+            self.rotate(Node::get(&self.data, n).side(&self.data), p);
+        }
+        self.delete_case_3(n);
+    }
+
+    fn delete_case_3(&mut self, n: usize) {
+        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D3 S");
+        let p = Node::get(&self.data, n).parent.expect("D3 P");
+        if Node::get(&self.data, n).is_parent_black(&self.data)
+            && !Node::get(&self.data, s).is_red()
+            && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
+            && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+        {
+            self.delete_case_1(p);
+        } else {
+            self.delete_case_4(p);
+        }
+    }
+
+    fn delete_case_4(&mut self, n: usize) {
+        let node = Node::get(&self.data, n);
+        let s = node.get_sibling(&self.data).expect("D4 S");
+        let p = node.parent.expect("D4 P");
+
+        if !node.is_parent_black(&self.data)
+            && node.is_sibling_black(&self.data)
+            && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
+            && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+        {
+            Node::get_mut(&mut self.data, s).color = Color::Red;
+            Node::get_mut(&mut self.data, p).color = Color::Black;
+        } else {
+            self.delete_case_5(n)
+        }
+    }
+
+    fn delete_case_5(&mut self, n: usize) {
+        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D5 S");
+        if !Node::get(&self.data, s).is_red() {
+            if Node::get(&self.data, n).is_child(&self.data, Side::Left)
+                && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+                && !Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
+            {
+                let scl = Node::get(&self.data, s).get_child(Side::Left);
+                Node::get_mut(&mut self.data, s).color = Color::Red;
+                self.set_maybe_black(scl);
+                self.rotate(Side::Right, s);
+            } else if Node::get(&self.data, n).is_child(&self.data, Side::Right)
+                && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
+                && !Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+            {
+                let scr = Node::get(&self.data, s).get_child(Side::Right);
+                Node::get_mut(&mut self.data, s).color = Color::Red;
+                self.set_maybe_black(scr);
+                self.rotate(Side::Left, s);
+            }
+        }
+        self.delete_case_6(n)
+    }
+
+    fn delete_case_6(&mut self, n: usize) {
+        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D6 S");
+        let p = Node::get(&self.data, n).parent.expect("D6 P");
+        let pc = Node::get(&self.data, p).color;
+        Node::get_mut(&mut self.data, s).color = pc;
+        Node::get_mut(&mut self.data, p).color = Color::Black;
+
+        if Node::get(&self.data, n).is_child(&self.data, Side::Left) {
+            let scr = Node::get(&self.data, s).get_child(Side::Right);
+            self.set_maybe_black(scr);
+            self.rotate(Side::Left, p);
+        } else {
+            let scl = Node::get(&self.data, s).get_child(Side::Left);
+            self.set_maybe_black(scl);
+            self.rotate(Side::Right, p);
+        }
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
@@ -85,8 +189,8 @@ where
                 Node::get_mut(&mut self.data, n).rchild = Some(rc);
                 Node::get_mut(&mut self.data, n).parent = p;
                 Node::get_mut(&mut self.data, n).ptr = n;
-                return successor
-            },
+                return successor;
+            }
             (None, Some(_rc)) => self.replace_node(n, Node::get(&self.data, n).rchild),
             (Some(_lc), None) => self.replace_node(n, Node::get(&self.data, n).lchild),
             (None, None) => self.replace_node(n, None),
@@ -366,5 +470,17 @@ mod tests {
         tree.insert(50);
         assert_eq!(tree.data.len(), 15);
         double_size_test(&tree, 15);
+    }
+
+    #[test]
+    fn test_delete() {
+        let mut tree = make_fake_tree_node_no_balance();
+        double_size_test(&tree, 15);
+        tree.delete(100);
+        tree.delete(80);
+        tree.delete(85);
+        dbg!(&tree);
+        assert_eq!(tree.to_string(), "uuhhh");
+
     }
 }
