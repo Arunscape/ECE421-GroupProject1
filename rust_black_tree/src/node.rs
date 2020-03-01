@@ -158,6 +158,31 @@ where
         m_str + ")"
     }
 
+    pub fn to_pretty_string(&self, data: &Vec<Node<T>>, indent: usize) -> String {
+        let i = indent * 2;
+        let mut m_str = format!(
+            "([P:{:?} C:{:?} V:{:?}]",
+            self.parent, self.color, self.value
+        );
+        m_str = m_str
+            + "\n"
+            + &" ".repeat(i)
+            + &(if let Some(child) = self.get_child(Side::Left) {
+                data[child].to_pretty_string(data, indent + 1)
+            } else {
+                String::from("()")
+            });
+        m_str = m_str
+            + "\n"
+            + &" ".repeat(i)
+            + &(if let Some(child) = self.get_child(Side::Right) {
+                data[child].to_pretty_string(data, indent + 1)
+            } else {
+                String::from("()")
+            });
+        m_str + ")"
+    }
+
     pub fn get(data: &Vec<Node<T>>, ptr: usize) -> &Node<T> {
         &data[ptr]
     }

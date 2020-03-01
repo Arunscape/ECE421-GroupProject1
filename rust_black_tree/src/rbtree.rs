@@ -61,14 +61,16 @@ where
         } else {
             let n = self.find(&val);
             let del = self.delete_replace(n);
-            self.fix_del_color(del, n);
             self.delete_node(del);
             self.size -= 1;
+            self.fix_del_color(del, n);
             true
         }
     }
 
+    // child is the new node in the location, n is being deleted
     pub fn fix_del_color(&mut self, n: usize, child: usize) {
+        dbg!("Fix_del_color");
         if !Node::get(&self.data, n).is_red() {
             if Node::get(&self.data, child).is_red() {
                 Node::get_mut(&mut self.data, child).color = Color::Black;
@@ -87,12 +89,14 @@ where
     }
 
     fn delete_case_1(&mut self, n: usize) {
-        if (Node::get(&self.data, n).parent.is_some()) {
+        dbg!("delete case 1");
+        if Node::get(&self.data, n).parent.is_some() {
             self.delete_case_2(n);
         }
     }
 
     fn delete_case_2(&mut self, n: usize) {
+        dbg!("delete case 2");
         let s = Node::get(&self.data, n).get_sibling(&self.data);
         if Node::get(&self.data, n).is_sibling_black(&self.data) {
             let p = Node::get(&self.data, n).parent.expect("D2 P");
@@ -104,6 +108,7 @@ where
     }
 
     fn delete_case_3(&mut self, n: usize) {
+        dbg!("delete case 3");
         let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D3 S");
         let p = Node::get(&self.data, n).parent.expect("D3 P");
         if Node::get(&self.data, n).is_parent_black(&self.data)
@@ -118,6 +123,7 @@ where
     }
 
     fn delete_case_4(&mut self, n: usize) {
+        dbg!("delete case 4");
         let node = Node::get(&self.data, n);
         let s = node.get_sibling(&self.data).expect("D4 S");
         let p = node.parent.expect("D4 P");
@@ -135,6 +141,7 @@ where
     }
 
     fn delete_case_5(&mut self, n: usize) {
+        dbg!("delete case 5");
         let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D5 S");
         if !Node::get(&self.data, s).is_red() {
             if Node::get(&self.data, n).is_child(&self.data, Side::Left)
@@ -159,6 +166,7 @@ where
     }
 
     fn delete_case_6(&mut self, n: usize) {
+        dbg!("delete case 6");
         let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D6 S");
         let p = Node::get(&self.data, n).parent.expect("D6 P");
         let pc = Node::get(&self.data, p).color;
@@ -232,6 +240,14 @@ where
     pub fn to_string(&self) -> String {
         if let Some(root) = self.root {
             Node::get(&self.data, root).to_string(&self.data)
+        } else {
+            String::from("(Empty tree)")
+        }
+    }
+
+    pub fn to_pretty_string(&self) -> String {
+        if let Some(root) = self.root {
+            Node::get(&self.data, root).to_pretty_string(&self.data, 0)
         } else {
             String::from("(Empty tree)")
         }
@@ -477,9 +493,10 @@ mod tests {
         let mut tree = make_fake_tree_node_no_balance();
         double_size_test(&tree, 15);
         tree.delete(100);
+        dbg!(tree.to_pretty_string());
         tree.delete(80);
+        dbg!(tree.to_pretty_string());
         tree.delete(85);
-        dbg!(&tree);
         assert_eq!(tree.to_string(), "uuhhh");
 
     }
