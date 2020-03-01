@@ -83,25 +83,25 @@ fn new(input: &[u8]) -> IResult<&[u8], Cmd> {
 fn help(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(quitparse, alt!(tag!("help") | tag!("h")));
     let x = quitparse(input);
-    x.map(|(a, b)| (a, Cmd::Help))
+    x.map(|(a, _b)| (a, Cmd::Help))
 }
 
 fn quit(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(quitparse, alt!(tag!("quit") | tag!("exit")));
     let x = quitparse(input);
-    x.map(|(a, b)| (a, Cmd::Quit))
+    x.map(|(a, _b)| (a, Cmd::Quit))
 }
 
 fn clear(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(clearparse, alt!(tag!("clear") | tag!("clr")));
     let x = clearparse(input);
-    x.map(|(a, b)| (a, Cmd::Clear))
+    x.map(|(a, _b)| (a, Cmd::Clear))
 }
 
 fn print(input: &[u8]) -> IResult<&[u8], Cmd> {
     named!(printparse, alt!(tag!("print") | tag!("p")));
     let x = printparse(input);
-    x.map(|(a, b)| (a, Cmd::Print))
+    x.map(|(a, _b)| (a, Cmd::Print))
 }
 
 fn command(input: &[u8]) -> IResult<&[u8], Cmd> {
