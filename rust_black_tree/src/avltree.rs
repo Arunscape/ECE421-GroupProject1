@@ -246,15 +246,55 @@ where
 	T: std::fmt::Debug,
 {
 	fn retrace(&mut self, z: usize) {
-		loop{
+		loop {
+		//for (X = parent(Z); X != null; X = parent(Z)) { // Loop (possibly up to the root)
+			// get the parent of current node
 			let x = self.get(z).parent;
-			if !x.is_some() {return}
-			let x = x.expect("Retrace get z parent");
-			panic!("RETRACE ISNT'T IMPLEMENTED YET");
+			if !x.is_some() {
+				// current node z is the root of the tree
+				// nothing to do, return?
+				return
+			}
+			let x:usize = x.expect("Retrace get z parent");
+
+			if self.get(z).is_child(Side::Right) { // The right subtree increases
+				if self.is_heavy_on_side(Side::Right, x) {
+					if self.is_heavy_on_side(Side::Left, z) {
+						self.rotate(Side::Right, z);
+						self.rotate(Side::Left, x);
+					} else {
+						self.rotate(Side::Left, x);
+					}
+				} else {
+					if self.is_heavy_on_side(Side::Left, x) {
+						self.set_balance_factor(x, 0);
+						break;
+					}
+					self.set_balance_factor(x, 1);
+					//Z = X; // Height(Z) increases by 1
+					continue;
+				}
+			} else {
+				if self.is_heavy_on_side(Side::Left, x) {
+					if self.is_heavy_on_side(Side::Right, z) {
+						self.rotate(Side::Left, z);
+						self.rotate(Side::Right, x);
+					} else {
+						self.rotate(Side::Right, x);
+					}
+				} else {
+					if self.is_heavy_on_side(Side::Right, x) {
+						self.set_balance_factor(x, 0);
+						break; // Leave the loop
+					}
+					self.set_balance_factor(x, -1);
+					//Z = X; // Height(Z) increases by 1
+					continue;
+				}
+			}
+			break;
 		}
-		/* retrace source code from AVL wiki:
-			https://en.wikipedia.org/wiki/AVL_tree
-		*/
+	// Unless loop is left via break, the height of the total tree increases by 1.
 	}
 
 	fn get_balance_factor(&self, n: usize) -> isize {
@@ -319,6 +359,7 @@ mod tests {
 		let mut tree = AVLTree::<i32>::new();
 		tree.insert(1);
 		tree.insert(2);
+		println!("{}", tree.to_string());
 		let root = tree.root.expect("tree root");
 		//assert!(tree.get_balance_factor(root) == 0);
 		assert!(tree.is_heavy_on_side(Side::Right, root));
