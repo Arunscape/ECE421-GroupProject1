@@ -80,11 +80,21 @@ blocks. This approach allowed us to re-use common functionality between the
 different types of nodes, while still allowing for new, separate functionality
 defined by the different nodes. 
 
+\subsection{The Tree Trait}
 For the Tree structs for the Red Black tree and AVL trees, we decided to not go
 through the trouble of sharing code. There is a small amount of code
 duplication, but because the tree deals with different types of nodes, we deemed
 it reasonable to have a little bit of code duplication, like the \texttt{find}
 method, for example.
+\todo{are we sharing the trait?}
+
+Both the Red Black tree and the AVL tree share a Tree trait, with default
+implementations for contains, \dots \todo{}. Then, the functionality which is
+specific to either the Red Black tree or the AVL tree is implemented in the Red
+Black tree struct, and the AVL tree struct, respectively.This approach allowed
+us to re-use common functionality between the
+different types of trees, while still allowing for new, separate functionality
+defined by the different trees.
 
 \subsection{Arena based allocation}
 The way the memory is allocated for the nodes is a little unusual, in that the
@@ -184,6 +194,9 @@ Option<T>, Result<T, E>, etc..)}
 \textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
 Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
 The Red Black tree and the AVL tree have a ColorNode, and a DepthNode,
-respectively. These nodes share the Node trait, which we have defined
+respectively. These nodes share the Node trait, which we have defined.
+Furthermore, the Red Black tree and the AVL tree share a Tree trait, which
+handles common functionality such as determining if the tree contains a certain
+value.
 Please see the design rationale above for more details. \ref{dry}
 \end{document}
