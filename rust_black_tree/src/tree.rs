@@ -74,7 +74,32 @@ pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
         }
     }
 
-    fn rotate(&mut self, side: Side, n: usize);
+    fn rotate(&mut self, side: Side, n: usize) {
+        let p = self.get(n).get_parent().unwrap();
+
+        if let Some(c) = self.get(n).get_child(side) {
+            self.attach_child(p, c, !side);
+        } else {
+            match !side {
+                Side::Left => self.get_mut(p).set_child_opt(None, Side::Left),
+                Side::Right => self.get_mut(p).set_child_opt(None, Side::Right),
+            }
+        }
+        if let Some(g) = self.get(p).get_parent() {
+            self.get_mut(n).set_parent(Some(g));
+            let pside = if self.get(p).is_child(Side::Left) {
+                Side::Left
+            } else {
+                Side::Right
+            };
+            self.attach_child(g, n, pside);
+        } else {
+            self.set_root(Some(n));
+            self.get_mut(n).set_parent(None);
+        }
+        self.attach_child(n, p, side);
+    }
+
     fn find(&self, val: &T) -> usize {
         let mut n = self.get_root().unwrap();
         loop {
