@@ -15,7 +15,6 @@ pub enum Side {
     Right,
 }
 
-
 impl Not for Side {
     type Output = Side;
     fn not(self) -> Self::Output {
@@ -161,11 +160,18 @@ pub trait Node {
     }
 }
 
-impl<T> ColorNode<T>
+pub trait ColoredNode<T>: Node {
+    fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self;
+    fn is_red(&self) -> bool;
+    fn is_child_black(&self, side: Side) -> bool;
+    fn is_parent_black(&self) -> bool;
+    fn is_sibling_black(&self) -> bool;
+}
+impl <T> ColoredNode<T> for ColorNode<T>
 where
     T: std::fmt::Debug,
 {
-    pub fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
+    fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
         Self {
             value: val,
             ptr: selfptr,
@@ -177,7 +183,7 @@ where
         }
     }
 
-    pub fn is_red(&self) -> bool {
+    fn is_red(&self) -> bool {
         match self.color {
             Color::Red => true,
             Color::Black => false,
@@ -185,7 +191,7 @@ where
     }
 
     // Nil nodes are black children too
-    pub fn is_child_black(&self, side: Side) -> bool{
+    fn is_child_black(&self, side: Side) -> bool{
         let child = self.get_child(side);
         if child.is_some() && self.get(child.unwrap()).is_red() {
             false
@@ -195,13 +201,13 @@ where
     }
 
     // this will panic of called on root node
-    pub fn is_parent_black(&self) -> bool {
+    fn is_parent_black(&self) -> bool {
         let p = self.parent.unwrap();
         !self.get(p).is_red()
     }
 
     // Nil nodes are black children too
-    pub fn is_sibling_black(&self) -> bool {
+    fn is_sibling_black(&self) -> bool {
         let sib = self.get_sibling();
         if sib.is_some() && self.get(sib.unwrap()).is_red() {
             false
