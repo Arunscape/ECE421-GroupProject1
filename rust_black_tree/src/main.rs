@@ -1,4 +1,3 @@
-mod benchmark;
 #[macro_use]
 extern crate nom;
 use rust_black_trees::test;
