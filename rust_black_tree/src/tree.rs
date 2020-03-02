@@ -140,7 +140,7 @@ pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
 
 }
 
-pub trait RTree<T, N: ColoredNode<T>>: Tree<T, N> {
+pub trait RbTree<T, N: ColoredNode<T>>: Tree<T, N> {
     fn fix_ins_color(&mut self, n: usize);
     fn fix_del_color(&mut self, n: usize, child: usize);
 
@@ -167,7 +167,21 @@ pub struct RBTree<T> {
     free: Vec<usize>,
 }
 
-impl<T> RBTree<T>
+/*
+impl<T, N: ColoredNode<T>> Tree<T, N> for RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{}
+impl<T, N: ColoredNode<T>> BaseTree<T, N> for RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{}
+*/
+impl<T, /*N: ColoredNode<T>*/> /*RbTree<T, N> for */ RBTree<T>
 where
     T: PartialOrd,
     T: PartialEq,
@@ -181,7 +195,6 @@ where
             free: Vec::new(),
         }
     }
-
     /**
      * In order to return a reference to a value of a vector contained within a refcell, a raw
      * pointer is used. The unsafe code could be avoided by replacing each call to self.get(n) with
