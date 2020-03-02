@@ -24,7 +24,7 @@ pub trait BaseTree<T> {
     fn crement_size(&mut self, val: isize);
 }
 
-pub trait Tree<T>: BaseTree<T> {
+pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
     fn new() -> Self;
 
     fn contains(&self, val: &T) -> bool {
@@ -62,9 +62,9 @@ pub trait Tree<T>: BaseTree<T> {
         } else {
             let n = self.find(&val);
             let del = self.delete_replace(n);
+            self.rebalance_del(del, n);
             self.delete_node(del);
             self.crement_size(-1);
-            self.rebalance_del(del, n);
             true
         }
     }
@@ -127,7 +127,7 @@ pub trait Tree<T>: BaseTree<T> {
 
     fn to_pretty_string(&self) -> String {
         if let Some(root) = self.get_root() {
-            self.get(root).to_pretty_string(0)
+            self.get(root).to_pretty_string(1)
         } else {
             String::from("(Empty tree)")
         }

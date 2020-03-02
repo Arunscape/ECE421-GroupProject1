@@ -172,7 +172,7 @@ where
         }
     }
 }
-
+const TREE_END: usize = 0xFFFFFFFF;
 impl<T> BaseTree<T> for RBTree<T>
 where
     T: PartialOrd,
@@ -214,37 +214,56 @@ where
     }
 
     fn rebalance_ins(&mut self, n: usize) {
-        self.fix_ins_color(n)
+        self.fix_ins_color(n);
     }
 
     fn rebalance_del(&mut self, n: usize, child: usize) {
-        self.fix_del_color(n, child)
+        println!("Deleting {} with {}: ", n, child);
+        for n in self.data.borrow().iter() {
+            print!("({} -> {:?})", &n.ptr, &n.value);
+        }
+        println!();
+        println!("From tree:\n{}", self.to_pretty_string());
+        if self.get(n).ptr == TREE_END || self.get(child).ptr == TREE_END {
+            println!("Long delete");
+            self.fix_del_color_long();
+        } else {
+            println!("fast delete");
+            self.fix_del_color(n, child)
+        }
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
-        let node = self.get(n);
-        match (node.lchild, node.rchild) {
-            (Some(lc), Some(rc)) => {
-                let p = node.parent;
-                let successor = self.get(rc).find_min();
-                self.delete_replace(successor);
-                self.data.borrow_mut().swap(successor, n);
+        let mut delete_replace_recursive = |n: usize| {
+            let node = self.get(n);
+            match (node.lchild, node.rchild) {
+                (Some(lc), Some(rc)) => {
+                    let p = node.parent;
+                    let successor = self.get(rc).find_min();
+                    self.delete_replace(successor);
+                    self.data.borrow_mut().swap(successor, n);
 
-                self.get_mut(n).lchild = Some(lc);
-                self.get_mut(n).rchild = Some(rc);
-                self.get_mut(n).parent = p;
-                self.get_mut(n).ptr = n;
-                return successor;
-            }
-            (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
-            (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
-            (None, None) => self.replace_node(n, None),
+                    self.get_mut(successor).lchild = Some(lc);
+                    self.get_mut(successor).rchild = Some(rc);
+                    self.get_mut(successor).parent = p;
+                    self.get_mut(successor).ptr = n;
+                    return successor;
+                }
+                (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
+                (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
+                (None, None) => self.replace_node(n, None),
+            };
+            n
         };
-        n
+
+        let val = delete_replace_recursive(n);
+        self.get_mut(n).ptr = TREE_END;
+        val
     }
 
     fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
         let node = self.get(to_delete);
+        self.get_mut(to_delete).ptr = TREE_END;
         if let Some(p) = node.parent {
             if node.is_child(Side::Left) {
                 self.get_mut(p).lchild = to_attach;
@@ -261,22 +280,11 @@ where
     }
 
     fn create_node(&mut self, val: T) -> usize {
-        // update this so it reuses deleted slots
-        if self.free.len() > 0 {
-            let n = self.free.pop().expect("pop should not fail if len > 0");
-            let mut d = self.get_mut(n);
-            d.ptr = n;
-            d.lchild = None;
-            d.rchild = None;
-            d.parent = None;
-            n
-        } else {
-            let loc = self.data.borrow().len();
-            self.data
-                .borrow_mut()
-                .push(ColorNode::new(val, loc, self.data.clone()));
-            loc
-        }
+        let loc = self.data.borrow().len();
+        self.data
+            .borrow_mut()
+            .push(ColorNode::new(val, loc, self.data.clone()));
+        loc
     }
 
     fn delete_node(&mut self, index: usize) {
@@ -292,7 +300,7 @@ where
 {
     // child is the new node in the location, n is being deleted
     fn fix_del_color(&mut self, n: usize, child: usize) {
-        dbg!("Fix_del_color");
+        dbg!("Fix_del_color", n, child);
         if !self.get(n).is_red() {
             if self.get(child).is_red() {
                 self.get_mut(child).color = Color::Black;
@@ -311,14 +319,12 @@ where
     }
 
     fn delete_case_1(&mut self, n: usize) {
-        dbg!("delete case 1");
         if self.get(n).parent.is_some() {
             self.delete_case_2(n);
         }
     }
 
     fn delete_case_2(&mut self, n: usize) {
-        dbg!("delete case 2");
         let s = self.get(n).get_sibling();
         if self.get(n).is_sibling_black() {
             let p = self.get(n).parent.expect("D2 P");
@@ -330,7 +336,6 @@ where
     }
 
     fn delete_case_3(&mut self, n: usize) {
-        dbg!("delete case 3");
         let s = self.get(n).get_sibling().expect("D3 S");
         let p = self.get(n).parent.expect("D3 P");
         if self.get(n).is_parent_black()
@@ -345,7 +350,6 @@ where
     }
 
     fn delete_case_4(&mut self, n: usize) {
-        dbg!("delete case 4");
         let node = self.get(n);
         let s = node.get_sibling().expect("D4 S");
         let p = node.parent.expect("D4 P");
@@ -353,8 +357,7 @@ where
         if !node.is_parent_black()
             && node.is_sibling_black()
             && self.get(s).is_child_black(Side::Left)
-            && self.get(s).is_child_black(Side::Right)
-        {
+            && self.get(s).is_child_black(Side::Right) {
             self.get_mut(s).color = Color::Red;
             self.get_mut(p).color = Color::Black;
         } else {
@@ -363,7 +366,6 @@ where
     }
 
     fn delete_case_5(&mut self, n: usize) {
-        dbg!("delete case 5");
         let s = self.get(n).get_sibling().expect("D5 S");
         if !self.get(s).is_red() {
             if self.get(n).is_child(Side::Left)
@@ -388,7 +390,6 @@ where
     }
 
     fn delete_case_6(&mut self, n: usize) {
-        dbg!("delete case 6");
         let s = self.get(n).get_sibling().expect("D6 S");
         let p = self.get(n).parent.expect("D6 P");
         let pc = self.get(p).color;
@@ -404,6 +405,26 @@ where
             self.set_maybe_black(scl);
             self.rotate(Side::Right, p);
         }
+    }
+
+    fn fix_del_color_long(&mut self) {
+        let mut t = RBTree::new();
+        let mut v = self.data.borrow_mut().pop();
+        while v.is_some() {
+            let n = v.unwrap();
+            if n.ptr != TREE_END {
+                t.insert(n.value);
+            }
+            v = self.data.borrow_mut().pop();
+        }
+
+        //self.data = t.data;
+        //self.root = t.root;
+        //self.size = t.size;
+        //self.free = t.free;
+        // println!("the new post deleted tree:\n{}", t.to_pretty_string());
+        *self = t;
+        self.size += 1;
     }
 
     fn fix_ins_color(&mut self, n: usize) {
@@ -443,6 +464,7 @@ where
             self.rotate(Side::Right, n);
             n = self.get(n).get_child(Side::Right).unwrap();
         }
+
         self.do_ins_hard_case2(n);
     }
 
@@ -454,7 +476,7 @@ where
         self.get_mut(g).color = Color::Red;
         if self.get(p).is_child(Side::Right) {
             self.rotate(Side::Left, p);
-        } else if self.get(p).is_child(Side::Right) {
+        } else if self.get(p).is_child(Side::Left) {
             self.rotate(Side::Right, p);
         }
     }
@@ -535,6 +557,18 @@ mod tests {
         assert_eq!(tree.to_string(), "([P:None C:Black V:3] ([P:Some(3) C:Black V:1] ([P:Some(1) C:Black V:0] () ()) ([P:Some(1) C:Black V:2] () ())) ([P:Some(3) C:Black V:5] ([P:Some(5) C:Black V:4] () ()) ([P:Some(5) C:Red V:7] ([P:Some(7) C:Black V:6] () ()) ([P:Some(7) C:Black V:8] () ([P:Some(8) C:Red V:9] () ())))))");
     }
 
+    #[test]
+    fn test_insert_2() {
+        let mut tree = RBTree::<usize>::new();
+        let size = 15;
+        for x in (0..size).rev() {
+            tree.insert(x);
+        }
+
+        assert_eq!(tree.to_string(), "([P:None C:Black V:11] ([P:Some(3) C:Red V:7] ([P:Some(7) C:Black V:5] ([P:Some(9) C:Red V:3] ([P:Some(11) C:Black V:1] ([P:Some(13) C:Red V:0] () ()) ([P:Some(13) C:Red V:2] () ())) ([P:Some(11) C:Black V:4] () ())) ([P:Some(9) C:Black V:6] () ())) ([P:Some(7) C:Black V:9] ([P:Some(5) C:Black V:8] () ()) ([P:Some(5) C:Black V:10] () ()))) ([P:Some(3) C:Black V:13] ([P:Some(1) C:Black V:12] () ()) ([P:Some(1) C:Black V:14] () ())))");
+    }
+
+
     fn double_size_test<T: PartialEq + PartialOrd + std::fmt::Debug>(
         tree: &RBTree<T>,
         expect: usize,
@@ -568,28 +602,34 @@ mod tests {
 
         tree.delete(0);
         double_size_test(&tree, 14);
-        assert_eq!(tree.data.borrow().len(), 15);
+        for n in tree.data.borrow().iter() {
+            print!("({} -> {:?})", &n.ptr, &n.value);
+        }
+        println!();
+        println!("{:?}", tree.free);
         tree.insert(0);
-        assert_eq!(tree.data.borrow().len(), 15);
+        for n in tree.data.borrow().iter() {
+            print!("({} -> {:?})", &n.ptr, &n.value);
+        }
+        println!();
         double_size_test(&tree, 15);
 
         tree.delete(50);
         double_size_test(&tree, 14);
-        assert_eq!(tree.data.borrow().len(), 15);
         tree.insert(50);
-        assert_eq!(tree.data.borrow().len(), 15);
         double_size_test(&tree, 15);
     }
 
     #[test]
     fn test_delete() {
-        let mut tree = make_fake_tree_node_no_balance();
+        let mut tree = RBTree::new();
+        for x in 0..15 {
+            tree.insert(x);
+        }
         double_size_test(&tree, 15);
-        tree.delete(100);
-        println!("{}", tree.to_pretty_string());
-        tree.delete(80);
-        println!("{}", tree.to_pretty_string());
-        tree.delete(85);
-        assert_eq!(tree.to_string(), "uuhhh");
+        tree.delete(14);
+        tree.delete(12);
+        tree.delete(13);
+        assert_eq!(tree.to_string(), "([P:None C:Black V:3] ([P:Some(3) C:Black V:1] ([P:Some(1) C:Black V:0] () ()) ([P:Some(1) C:Black V:2] () ())) ([P:Some(3) C:Black V:7] ([P:Some(7) C:Red V:5] ([P:Some(5) C:Black V:4] () ()) ([P:Some(5) C:Black V:6] () ())) ([P:Some(7) C:Red V:9] ([P:Some(9) C:Black V:8] () ()) ([P:Some(9) C:Black V:11] ([P:Some(11) C:Red V:10] () ()) ([P:Some(11) C:Red V:12] () ())))))");
     }
 }
