@@ -1,0 +1,202 @@
+\documentclass[letterpaper]{article}
+\synctex=1
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+\usepackage{lipsum}
+\usepackage{float}
+
+% \usepackage[
+%     style=ieee,
+%     backend=biber
+%     ]{biblatex}
+% \addbibresource{references.bib}
+
+\usepackage{hyperref}
+
+\usepackage{amssymb}
+
+\usepackage{siunitx}
+
+\usepackage{multirow}
+% for merging table cells I think
+
+\usepackage{tabularx}
+\renewcommand\tabularxcolumn[1]{m{#1}}% for vertical centering text in X column
+% allows for linewrap within cells
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\usepackage{todonotes}
+\usepackage{pdfpages}
+
+\usepackage{fancyhdr} %header
+\fancyhf{}
+\renewcommand\headrulewidth{0pt}
+\fancyfoot[C]{\thepage}
+\renewcommand\footrulewidth{0pt}
+\pagestyle{fancy}
+
+\usepackage[pdf]{graphviz}
+\usepackage{adjustbox}
+
+\usepackage{amsmath}
+
+% make subsection use letters
+%\renewcommand{\thesubsection}{\alph{subsection}}
+
+%\usepackage{minted}
+
+% \usepackage{amsthm}
+\title{ECE 421 Project 2\\
+Trees, Trees, and More Trees}
+\author{Arun Woosaree\\
+Alexander Rostron\\
+Jacob Reckhard
+}
+
+%actual document
+\begin{document}
+
+\maketitle %insert titlepage here
+
+\section{Rationale}
+From the beginning, we knew there would be a fair amount of shared functionality
+for the Red Black tree and the AVL tree. Therefore, special considerations were
+taken to ensure a low level of code duplication, in order to adhere to the DRY
+(Don't Repeat Yourself) principle.
+
+\subsection{The Node Trait}\label{dry}
+Both the Red Black tree and the AVL tree have nodes, but the Red Black Tree's
+nodes need to store colour information, while the AVL tree's nodes need to store
+depth information. Thus, a Node trait was created, with default implementations
+for getting a string representation of the Node, getting the Node's height, its
+size, min, side, sibling, uncle, and determining if the node is a child.
+
+To use this trait, a ColorNode struct, and a DepthNode struct were created,
+which have implementations for methods defined by the Node trait but do not have
+default implementations. Then, the functionality which is specific to either
+ColorNode, or the DepthNode is found in the structs' respective implementation
+blocks. This approach allowed us to re-use common functionality between the
+different types of nodes, while still allowing for new, separate functionality
+defined by the different nodes. 
+
+\subsection{The Tree Trait}
+For the Tree structs for the Red Black tree and AVL trees, we decided to not go
+through the trouble of sharing code. There is a small amount of code
+duplication, but because the tree deals with different types of nodes, we deemed
+it reasonable to have a little bit of code duplication, like the \texttt{find}
+method, for example.
+\todo{are we sharing the trait?}
+
+Both the Red Black tree and the AVL tree share a Tree trait, with default
+implementations for contains, \dots \todo{}. Then, the functionality which is
+specific to either the Red Black tree or the AVL tree is implemented in the Red
+Black tree struct, and the AVL tree struct, respectively.This approach allowed
+us to re-use common functionality between the
+different types of trees, while still allowing for new, separate functionality
+defined by the different trees.
+
+\subsection{Arena based allocation}
+The way the memory is allocated for the nodes is a little unusual, in that the
+nodes are actually stored in a vector. This allows us to deal with indices,
+which reduces the amount of pointers we have to deal with. Essentially, there is
+a vector in the tree which contains all the nodes, and each node stores its
+parent child relationships as an \texttt{Option<usize>}. This also allowed us to
+deal with less headaches dealing with lifetimes and ownership.
+
+\subsection{Unsafe}
+In order to return a reference to a value of a vector contained within a
+refcell, a raw pointer is used. The unsafe code could be avoided by replacing
+each call to self.get(n) with \texttt{\&self.data.borrow()[n]} and each call to
+\texttt{self.get\_mut(n)} with \texttt{\&mut self.data.borrow()[n]}. This allows
+us to do the same thing with less keystrokes. It does make the program not
+thread-safe, but self-balancing trees are a pretty questionable choice for a
+multi-threaded data structure anyways, since re-balancing can require that most
+of the tree be locked to one thread during an insertion or deletion
+
+\section{Testing}
+Several unit tests were created to verify the functionality of the Red Black
+tree and the AVL trees. 
+
+For both the Red Black tree, and the AVL tree, there are tests to verify:
+\begin{enumerate}
+  \item the \texttt{contains} function
+  \item insertion
+  \item printing a string representation of the tree
+  \item verifying the tree's height is correct
+  \item deletion
+\end{enumerate}
+
+Furthermore, tests were created for the \texttt{Node} class. These tests verify
+the following functionality:
+\begin{enumerate}
+  \item getting a children nodes
+  \item getting the sibling node
+  \item getting uncle nodes
+  \item getting the size of a node
+  \item getting the height of a node
+  \item finding the min value
+  \item printing a string representation of the node
+\end{enumerate}
+
+\section{Defects}
+
+There are no known faults in the program.
+(Or we could mention that the CLI will panic if we haven't handled erroneous
+input yet)
+
+\section{Benchmarking}
+Both the Red Black tree and the AVL tree were benchmarked against each other.
+Overall, the \todo{} tree seemed to be faster.
+
+The results are illustrated below.
+\todo{create charts}
+
+\section{Additional features}
+We decided to create a macro for instantiating the trees.  This will make it
+easier for programmers who decide to use our library for some reason to fill
+trees with initial values conveniently.  Similar to how vectors in Rust have a
+macro \texttt{vec!}, a Red Black tree, or AVL tree can be created using the
+following macros:
+
+\begin{texttt}
+  redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9}
+\end{texttt}
+
+\begin{texttt}
+  avl!{1, 2, 3, 4, 5, 6, 7, 8, 9}
+\end{texttt}
+
+\section{Answers to questions}
+
+\textit{What does a red-black tree provide that cannot be accomplished with
+ordinary binary search trees?}
+
+Red Black trees, unlike ordinary Binary Search trees, allow for efficient
+in-order traversal (the order Left–Root–Right) of their elements.
+Because  height of a Red Black tree remains \(O(\log n)\) after every
+insertion and deletion, we can then guarantee that the
+upper bound for searching, inserting, deleting, etc is also \(O(\log n)\)
+
+In comparison, an unbalanced Binary Search tree might have a worst-case scenario
+of a traversal of size \(O(n)\), for example if every single element was
+inserted in ascending or descending order such that each child in the tree is
+either all on the left side or all on the right side.
+
+\textit{Please add a command-line interface (function main) to your crate to
+allow users to test it.}
+\todo{print help output of the CLI}
+
+\textit{Do you need to apply any kind of error handling in your system (e.g., panic macro,
+Option<T>, Result<T, E>, etc..)}
+\todo{i dunno\dots}
+
+\textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
+Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
+The Red Black tree and the AVL tree have a ColorNode, and a DepthNode,
+respectively. These nodes share the Node trait, which we have defined.
+Furthermore, the Red Black tree and the AVL tree share a Tree trait, which
+handles common functionality such as determining if the tree contains a certain
+value.
+Please see the design rationale above for more details. \ref{dry}
+\end{document}
