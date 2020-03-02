@@ -6,32 +6,116 @@ use super::node::ColorNode;
 use super::node::ColoredNode;
 use super::node::*;
 
-pub trait Tree<T> {
-    fn new() -> Self;
-    fn contains(&self, val: &T) -> bool;
-    fn insert(&mut self, val: T);
-    fn delete(&mut self, val: T) -> bool;
 
-    fn get_height(&self) -> usize;
-    fn get_size(&self) -> usize;
-
-    fn to_pretty_string(&self) -> String;
-    fn to_string(&self) -> String;
-
-    fn rotate(&mut self, side: Side, n: usize);
-    fn attach_child(&self, p: usize, c: usize, side: Side);
-    fn find(&self, val: &T) -> usize;
-}
-
-pub trait NodeTree<T, N: Node>: Tree<T> {
+pub trait BaseTree<T, N: Node<T>> {
     fn get(&self, val: usize) -> &N;
     fn get_mut(&self, val: usize) -> &mut N;
 
     fn delete_node(&mut self, index: usize);
     fn create_node(&mut self, val: T) -> usize;
+
+    fn rebalance_ins(&mut self, n: usize);
+    fn rebalance_del(&mut self, n: usize, child: usize);
+
+    fn delete_replace(&mut self, n: usize) -> usize;
+    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>);
+
+    fn attach_child(&self, p: usize, c: usize, side: Side);
+
+    fn get_root(&self) -> Option<usize>;
+    fn set_root(&self, new_root: Option<usize>);
+
+    fn get_size(&self) -> usize;
+    fn crement_size(&self, val: isize);
 }
 
-trait RTree<T, N: ColoredNode<T>>: NodeTree<T, N> {
+pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
+    fn new() -> Self;
+
+    fn contains(&self, val: &T) -> bool {
+        let n = self.find(val);
+        self.get(n).is(val)
+    }
+
+    fn insert(&mut self, val: T) {
+        if let Some(_root) = self.get_root() {
+            let n = self.find(&val);
+            let node = self.get(n);
+            if node.is(&val) {
+                // value already in tree
+                self.crement_size(-1);
+            } else {
+                let side = if node.lesser(&val) {
+                    Side::Right
+                } else {
+                    Side::Left
+                };
+                let node = self.create_node(val);
+                self.attach_child(n, node, side);
+                self.rebalance_ins(node);
+            }
+        } else {
+            let r = Some(self.create_node(val));
+            self.set_root(r);
+        }
+        self.crement_size(1);
+    }
+
+    fn delete(&mut self, val: T) -> bool {
+        if !self.contains(&val) {
+            false
+        } else {
+            let n = self.find(&val);
+            let del = self.delete_replace(n);
+            self.delete_node(del);
+            self.crement_size(-1);
+            self.rebalance_del(del, n);
+            true
+        }
+    }
+
+    fn rotate(&mut self, side: Side, n: usize);
+    fn find(&self, val: &T) -> usize {
+        let mut n = self.get_root().unwrap();
+        loop {
+            let node = self.get(n);
+            if node.lesser(val) && node.get_child(Side::Right).is_some() {
+                n = node.get_child(Side::Right).unwrap();
+            } else if node.greater(val) && node.get_child(Side::Left).is_some() {
+                n = node.get_child(Side::Left).unwrap();
+            } else {
+                return n;
+            }
+        }
+    }
+
+    fn get_height(&self) -> usize {
+        if let Some(root) = self.get_root() {
+            self.get(root).get_height()
+        } else {
+            0
+        }
+    }
+
+    fn to_string(&self) -> String {
+        if let Some(root) = self.get_root() {
+            self.get(root).to_string()
+        } else {
+            String::from("(Empty tree)")
+        }
+    }
+
+    fn to_pretty_string(&self) -> String {
+        if let Some(root) = self.get_root() {
+            self.get(root).to_pretty_string(0)
+        } else {
+            String::from("(Empty tree)")
+        }
+    }
+
+}
+
+pub trait RTree<T, N: ColoredNode<T>>: Tree<T, N> {
     fn fix_ins_color(&mut self, n: usize);
     fn fix_del_color(&mut self, n: usize, child: usize);
 
@@ -42,8 +126,6 @@ trait RTree<T, N: ColoredNode<T>>: NodeTree<T, N> {
     fn delete_case_4(&mut self, n: usize);
     fn delete_case_5(&mut self, n: usize);
     fn delete_case_6(&mut self, n: usize);
-    fn delete_replace(&mut self, n: usize) -> usize;
-    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>);
 
     fn do_ins_hard_case(&mut self, nn: usize);
     fn do_ins_hard_case2(&mut self, n: usize);
