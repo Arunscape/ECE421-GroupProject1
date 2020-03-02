@@ -9,6 +9,13 @@ edition = "2018"
 [dependencies]
 nom = "5.1.1"
 
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
+
 [lib]
 name = "rust_black_trees"
 path = "src/lib.rs"
