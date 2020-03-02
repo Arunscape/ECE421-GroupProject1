@@ -586,9 +586,9 @@ mod tests {
         let mut tree = make_fake_tree_node_no_balance();
         double_size_test(&tree, 15);
         tree.delete(100);
-        dbg!(tree.to_pretty_string());
+        println!("{}", tree.to_pretty_string());
         tree.delete(80);
-        dbg!(tree.to_pretty_string());
+        println!("{}", tree.to_pretty_string());
         tree.delete(85);
         assert_eq!(tree.to_string(), "uuhhh");
     }

@@ -71,20 +71,20 @@ pub trait Node<T> {
         let i = indent * 2;
         let mut m_str = format!("({}", self.to_self_string());
         m_str = m_str
-            + "\n"
-            + &" ".repeat(i)
             + &(if let Some(child) = self.get_child(Side::Left) {
-                self.get(child).to_pretty_string(indent + 1)
+                "\n".to_owned()
+                + &" ".repeat(i)
+                + &self.get(child).to_pretty_string(indent + 1)
             } else {
-                String::from("()")
+                String::from(" ()")
             });
         m_str = m_str
-            + "\n"
-            + &" ".repeat(i)
             + &(if let Some(child) = self.get_child(Side::Right) {
-                self.get(child).to_pretty_string(indent + 1)
+                "\n".to_owned()
+                + &" ".repeat(i)
+                + &self.get(child).to_pretty_string(indent + 1)
             } else {
-                String::from("()")
+                String::from(" ()")
             });
         m_str + ")"
     }
