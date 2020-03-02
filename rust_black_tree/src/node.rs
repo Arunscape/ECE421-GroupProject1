@@ -172,6 +172,7 @@ pub trait ColoredNode<T>: Node<T> {
     fn is_parent_black(&self) -> bool;
     fn is_sibling_black(&self) -> bool;
 }
+
 impl <T> ColoredNode<T> for ColorNode<T>
 where
     T: std::fmt::Debug,
