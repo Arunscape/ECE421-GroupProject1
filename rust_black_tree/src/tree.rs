@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 use super::node::Node;
 use super::node::ColorNode;
@@ -76,21 +76,20 @@ where
     }
 
     /**
-    * In order to return a reference to a value of a vector contained within a
-    * refcell, a raw pointer is used. The unsafe code could be avoided by
-    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
-    * to self.get_mut(n) with &mut self.data.borrow()[n]
-    */
+     * In order to return a reference to a value of a vector contained within a refcell, a raw
+     * pointer is used. The unsafe code could be avoided by replacing each call to self.get(n) with
+     * &self.data.borrow()[n] and each call to self.get_mut(n) with &mut self.data.borrow()[n]. This
+     * allows us to do the same thing with less keystrokes. It does make the program not
+     * thread-safe, but a this data structure is a pretty terrible choice for a multi-threaded data
+     * structure anyways, since re-balancing can require that most of the tree be locked to one
+     * thread during an insertion or deletion
+     */
     fn get(&self, val: usize) -> &ColorNode<T> {
-        unsafe {
-            &(*self.data.as_ptr())[val]
-        }
+        unsafe { &(*self.data.as_ptr())[val] }
     }
 
     fn get_mut(&self, val: usize) -> &mut ColorNode<T> {
-        unsafe {
-            &mut (*self.data.as_ptr())[val]
-        }
+        unsafe { &mut (*self.data.as_ptr())[val] }
     }
 
     fn attach_child(&self, p: usize, c: usize, side: Side) {
@@ -152,7 +151,7 @@ where
 
     // sets a node to black if it exists. This is fine, cause all
     // nodes that don't exist are by definition black anyways
-    fn set_maybe_black (&mut self, no: Option<usize>) {
+    fn set_maybe_black(&mut self, no: Option<usize>) {
         if let Some(n) = no {
             self.get_mut(n).color = Color::Black;
         }
@@ -330,10 +329,7 @@ where
                 // parent is black
                 // do nothing
             } else if self.get(n).get_uncle().is_some()
-                && self.get(
-                    self.get(n).get_uncle().unwrap(),
-                )
-                .is_red()
+                && self.get(self.get(n).get_uncle().unwrap()).is_red()
             {
                 // uncle exists and is red
                 let p = self.get(n).parent.unwrap();
@@ -353,17 +349,13 @@ where
     fn do_ins_hard_case(&mut self, nn: usize) {
         let mut n = nn;
         let mut p = self.get(n).parent.unwrap();
-        if self.get(p).is_child(Side::Left)
-            && self.get(n).is_child(Side::Right)
-        {
+        if self.get(p).is_child(Side::Left) && self.get(n).is_child(Side::Right) {
             self.rotate(Side::Left, n);
             n = self.get(n).get_child(Side::Left).unwrap();
         }
 
         p = self.get(n).parent.unwrap();
-        if self.get(p).is_child(Side::Right)
-            && self.get(n).is_child(Side::Left)
-        {
+        if self.get(p).is_child(Side::Right) && self.get(n).is_child(Side::Left) {
             self.rotate(Side::Right, n);
             n = self.get(n).get_child(Side::Right).unwrap();
         }
@@ -437,7 +429,9 @@ where
             n
         } else {
             let loc = self.data.borrow().len();
-            self.data.borrow_mut().push(ColorNode::new(val, loc, self.data.clone()));
+            self.data
+                .borrow_mut()
+                .push(ColorNode::new(val, loc, self.data.clone()));
             loc
         }
     }
@@ -568,6 +562,5 @@ mod tests {
         dbg!(tree.to_pretty_string());
         tree.delete(85);
         assert_eq!(tree.to_string(), "uuhhh");
-
     }
 }
