@@ -1,28 +1,72 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::node::Node as NodeTrait;
-use super::node::ColorNode as Node;
+use super::node::Node;
+use super::node::ColorNode;
+use super::node::ColoredNode;
 use super::node::*;
+
+pub trait Tree<T> {
+    fn new() -> Self;
+    fn contains(&self, val: &T) -> bool;
+    fn insert(&mut self, val: T);
+    fn delete(&mut self, val: T) -> bool;
+
+    fn get_height(&self) -> usize;
+    fn get_size(&self) -> usize;
+
+    fn to_pretty_string(&self) -> String;
+    fn to_string(&self) -> String;
+
+    fn rotate(&mut self, side: Side, n: usize);
+    fn attach_child(&self, p: usize, c: usize, side: Side);
+    fn find(&self, val: &T) -> usize;
+}
+
+pub trait NodeTree<T, N: Node>: Tree<T> {
+    fn get(&self, val: usize) -> &N;
+    fn get_mut(&self, val: usize) -> &mut N;
+
+    fn delete_node(&mut self, index: usize);
+    fn create_node(&mut self, val: T) -> usize;
+}
+
+trait RTree<T, N: ColoredNode<T>>: NodeTree<T, N> {
+    fn fix_ins_color(&mut self, n: usize);
+    fn fix_del_color(&mut self, n: usize, child: usize);
+
+    fn set_maybe_black (&mut self, no: Option<usize>);
+    fn delete_case_1(&mut self, n: usize);
+    fn delete_case_2(&mut self, n: usize);
+    fn delete_case_3(&mut self, n: usize);
+    fn delete_case_4(&mut self, n: usize);
+    fn delete_case_5(&mut self, n: usize);
+    fn delete_case_6(&mut self, n: usize);
+    fn delete_replace(&mut self, n: usize) -> usize;
+    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>);
+
+    fn do_ins_hard_case(&mut self, nn: usize);
+    fn do_ins_hard_case2(&mut self, n: usize);
+}
 
 /**
  * Arena based memory tree structure
 */
 #[derive(Debug)]
-pub struct Tree<T> {
+pub struct RBTree<T> {
     root: Option<usize>,
     size: usize,
-    data: Rc<RefCell<Vec<Node<T>>>>,
+    data: Rc<RefCell<Vec<ColorNode<T>>>>,
     free: Vec<usize>,
 }
 
-impl<T> Tree<T>
+impl<T> RBTree<T>
 where
     T: PartialOrd,
     T: PartialEq,
     T: std::fmt::Debug,
 {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             root: None,
             data: Rc::new(RefCell::new(Vec::new())),
@@ -37,13 +81,13 @@ where
     * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
     * to self.get_mut(n) with &mut self.data.borrow()[n]
     */
-    fn get(&self, val: usize) -> &Node<T> {
+    fn get(&self, val: usize) -> &ColorNode<T> {
         unsafe {
             &(*self.data.as_ptr())[val]
         }
     }
 
-    fn get_mut(&self, val: usize) -> &mut Node<T> {
+    fn get_mut(&self, val: usize) -> &mut ColorNode<T> {
         unsafe {
             &mut (*self.data.as_ptr())[val]
         }
@@ -53,12 +97,12 @@ where
         self.get_mut(p).set_child(c, side)
     }
 
-    pub fn contains(&self, val: &T) -> bool {
+    fn contains(&self, val: &T) -> bool {
         let n = self.find(val);
         &self.get(n).value == val
     }
 
-    pub fn insert(&mut self, val: T) {
+    fn insert(&mut self, val: T) {
         if let Some(_root) = self.root {
             let n = self.find(&val);
             let node = self.get(n);
@@ -81,7 +125,7 @@ where
         self.size += 1;
     }
 
-    pub fn delete(&mut self, val: T) -> bool {
+    fn delete(&mut self, val: T) -> bool {
         if !self.contains(&val) {
             false
         } else {
@@ -95,7 +139,7 @@ where
     }
 
     // child is the new node in the location, n is being deleted
-    pub fn fix_del_color(&mut self, n: usize, child: usize) {
+    fn fix_del_color(&mut self, n: usize, child: usize) {
         dbg!("Fix_del_color");
         if !self.get(n).is_red() {
             if self.get(child).is_red() {
@@ -245,7 +289,7 @@ where
         }
     }
 
-    pub fn get_size(&self) -> usize {
+    fn get_size(&self) -> usize {
         return self.size;
     }
 
@@ -263,7 +307,7 @@ where
         }
     }
 
-    pub fn to_string(&self) -> String {
+    fn to_string(&self) -> String {
         if let Some(root) = self.root {
             self.get(root).to_string()
         } else {
@@ -271,7 +315,7 @@ where
         }
     }
 
-    pub fn to_pretty_string(&self) -> String {
+    fn to_pretty_string(&self) -> String {
         if let Some(root) = self.root {
             self.get(root).to_pretty_string(0)
         } else {
@@ -365,7 +409,7 @@ where
         self.attach_child(n, p, side);
     }
 
-    pub fn get_size_recursive(&self) -> usize {
+    fn get_size_recursive(&self) -> usize {
         if let Some(root) = self.root {
             self.get(root).get_size()
         } else {
@@ -373,7 +417,7 @@ where
         }
     }
 
-    pub fn get_height(&self) -> usize {
+    fn get_height(&self) -> usize {
         if let Some(root) = self.root {
             self.get(root).get_height()
         } else {
@@ -393,7 +437,7 @@ where
             n
         } else {
             let loc = self.data.borrow().len();
-            self.data.borrow_mut().push(Node::new(val, loc, self.data.clone()));
+            self.data.borrow_mut().push(ColorNode::new(val, loc, self.data.clone()));
             loc
         }
     }
@@ -423,8 +467,8 @@ mod tests {
                 ([P:Some(6) C:Black V:80])
                 ([P:Some(6) C:Black V:100])])])])
     */
-    fn make_fake_tree_node_no_balance() -> Tree<i32> {
-        let mut tree = Tree::new();
+    fn make_fake_tree_node_no_balance() -> RBTree<i32> {
+        let mut tree = RBTree::new();
         for x in vec![50, 25, 75, 15, 35, 65, 85, 0, 20, 30, 40, 60, 70, 80, 100] {
             tree.insert(x);
         }
@@ -436,7 +480,7 @@ mod tests {
     fn test_tree_print() {
         let tree = make_fake_tree_node_no_balance();
         assert_eq!(tree.to_string(), "([P:None C:Black V:50] ([P:Some(0) C:Red V:25] ([P:Some(1) C:Black V:15] ([P:Some(3) C:Red V:0] () ()) ([P:Some(3) C:Red V:20] () ())) ([P:Some(1) C:Black V:35] ([P:Some(4) C:Red V:30] () ()) ([P:Some(4) C:Red V:40] () ()))) ([P:Some(0) C:Red V:75] ([P:Some(2) C:Black V:65] ([P:Some(5) C:Red V:60] () ()) ([P:Some(5) C:Red V:70] () ())) ([P:Some(2) C:Black V:85] ([P:Some(6) C:Red V:80] () ()) ([P:Some(6) C:Red V:100] () ()))))");
-        let tree_empty = Tree::<i32>::new();
+        let tree_empty = RBTree::<i32>::new();
         assert_eq!(tree_empty.to_string(), "(Empty tree)");
     }
 
@@ -458,7 +502,7 @@ mod tests {
 
     #[test]
     fn test_insert() {
-        let mut tree = Tree::<i32>::new();
+        let mut tree = RBTree::<i32>::new();
         for x in 0..10 {
             double_size_test(&tree, x as usize);
             tree.insert(x);
@@ -469,7 +513,7 @@ mod tests {
     }
 
     fn double_size_test<T: PartialEq + PartialOrd + std::fmt::Debug>(
-        tree: &Tree<T>,
+        tree: &RBTree<T>,
         expect: usize,
     ) {
         assert_eq!(tree.get_size(), expect);
@@ -481,13 +525,13 @@ mod tests {
         let tree = make_fake_tree_node_no_balance();
         assert_eq!(tree.get_height(), 4);
 
-        let mut tree2 = Tree::<i32>::new();
+        let mut tree2 = RBTree::<i32>::new();
         for x in 0..10 {
             tree2.insert(x);
         }
         assert_eq!(tree2.get_height(), 5);
 
-        let tree3 = Tree::<i32>::new();
+        let tree3 = RBTree::<i32>::new();
         assert_eq!(tree3.get_height(), 0);
     }
 
