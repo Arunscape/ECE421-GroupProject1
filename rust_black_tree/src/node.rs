@@ -257,14 +257,16 @@ impl <T: std::fmt::Debug> Node for ColorNode<T> {
     fn get_parent(&self) -> Option<usize> {
         self.parent
     }
-
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn attach_child(data: &mut Vec<ColorNode<i32>>, p: usize, c: usize, side: Side) {
+        let par = &mut data[p];
+        par.set_child(c, side)
+    }
     /*
     ========
     = Data =
@@ -278,34 +280,38 @@ mod tests {
          ([P:Some(0) C:Black V:6]
               ([P:Some(2) C:Black V:7])))
     */
-    fn make_fake_tree_node() -> Vec<ColorNode<i32>> {
+    fn make_fake_tree_node() -> Rc<RefCell<Vec<ColorNode<i32>>>> {
+        let rc = Rc::new(RefCell::new(Vec::new()));
         let mut v = vec![
-            ColorNode::new(5, 0),
-            ColorNode::new(4, 1),
-            ColorNode::new(6, 2),
-            ColorNode::new(0, 3),
-            ColorNode::new(1, 4),
-            ColorNode::new(7, 5),
+            ColorNode::new(5, 0, rc.clone()),
+            ColorNode::new(4, 1, rc.clone()),
+            ColorNode::new(6, 2, rc.clone()),
+            ColorNode::new(0, 3, rc.clone()),
+            ColorNode::new(1, 4, rc.clone()),
+            ColorNode::new(7, 5, rc.clone()),
         ];
-        let ptrs: Vec<usize> = v.iter().map(|v| v.ptr).collect();
-        ColorNode::set_child(&mut v, ptrs[0], ptrs[4], Side::Left);
-        ColorNode::set_child(&mut v, ptrs[0], ptrs[2], Side::Right);
-        ColorNode::set_child(&mut v, ptrs[4], ptrs[3], Side::Left);
-        ColorNode::set_child(&mut v, ptrs[4], ptrs[1], Side::Right);
-        ColorNode::set_child(&mut v, ptrs[2], ptrs[5], Side::Right);
-        v
+        (*rc).replace(v);
+        let ptrs: Vec<usize> = (*rc).borrow_mut().iter().map(|v| v.ptr).collect();
+        attach_child(&mut (*rc).borrow_mut(), ptrs[0], ptrs[4], Side::Left);
+        attach_child(&mut (*rc).borrow_mut(), ptrs[0], ptrs[2], Side::Right);
+        attach_child(&mut (*rc).borrow_mut(), ptrs[4], ptrs[3], Side::Left);
+        attach_child(&mut (*rc).borrow_mut(), ptrs[4], ptrs[1], Side::Right);
+        attach_child(&mut (*rc).borrow_mut(), ptrs[2], ptrs[5], Side::Right);
+        rc
     }
 
     #[test]
     fn print_tree_test() {
-        let data = make_fake_tree_node();
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
         let root = &data[0];
-        assert_eq!(root.to_string(&data), "([P:None C:Black V:5] ([P:Some(0) C:Black V:1] ([P:Some(4) C:Black V:0] () ()) ([P:Some(4) C:Black V:4] () ())) ([P:Some(0) C:Black V:6] () ([P:Some(2) C:Black V:7] () ())))");
+        assert_eq!(root.to_string(), "([P:None C:Black V:5] ([P:Some(0) C:Black V:1] ([P:Some(4) C:Black V:0] () ()) ([P:Some(4) C:Black V:4] () ())) ([P:Some(0) C:Black V:6] () ([P:Some(2) C:Black V:7] () ())))");
     }
 
     #[test]
     fn get_child_test() {
-        let data = make_fake_tree_node();
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
         let root = &data[0];
 
         assert_eq!(root.get_child(Side::Left), Some(4));
@@ -326,48 +332,51 @@ mod tests {
 
     #[test]
     fn get_sibling_test() {
-        let data = make_fake_tree_node();
-        assert_eq!(data[2].get_sibling(&data), Some(4));
-        assert_eq!(data[4].get_sibling(&data), Some(2));
-        assert_eq!(data[0].get_sibling(&data), None);
-        assert_eq!(data[3].get_sibling(&data), Some(1));
-        assert_eq!(data[1].get_sibling(&data), Some(3));
-        assert_eq!(data[5].get_sibling(&data), None);
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        assert_eq!(data[2].get_sibling(), Some(4));
+        assert_eq!(data[4].get_sibling(), Some(2));
+        assert_eq!(data[0].get_sibling(), None);
+        assert_eq!(data[3].get_sibling(), Some(1));
+        assert_eq!(data[1].get_sibling(), Some(3));
+        assert_eq!(data[5].get_sibling(), None);
     }
 
     #[test]
     fn get_uncle_test() {
-        let data = make_fake_tree_node();
-        assert_eq!(data[0].get_uncle(&data), None);
-        assert_eq!(data[1].get_uncle(&data), Some(2));
-        assert_eq!(data[2].get_uncle(&data), None);
-        assert_eq!(data[3].get_uncle(&data), Some(2));
-        assert_eq!(data[4].get_uncle(&data), None);
-        assert_eq!(data[5].get_uncle(&data), Some(4));
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        assert_eq!(data[0].get_uncle(), None);
+        assert_eq!(data[1].get_uncle(), Some(2));
+        assert_eq!(data[2].get_uncle(), None);
+        assert_eq!(data[3].get_uncle(), Some(2));
+        assert_eq!(data[4].get_uncle(), None);
+        assert_eq!(data[5].get_uncle(), Some(4));
     }
 
     #[test]
     fn get_size() {
-        let data = make_fake_tree_node();
-        assert_eq!(data[0].get_size(&data), 6);
-        assert_eq!(data[4].get_size(&data), 3);
-        assert_eq!(data[5].get_size(&data), 1);
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        assert_eq!(data[0].get_size(), 6);
+        assert_eq!(data[4].get_size(), 3);
+        assert_eq!(data[5].get_size(), 1);
     }
 
     #[test]
     fn get_height() {
-        let data = make_fake_tree_node();
-        assert_eq!(data[0].get_height(&data), 3);
-        assert_eq!(data[4].get_height(&data), 2);
-        assert_eq!(data[5].get_height(&data), 1);
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        assert_eq!(data[0].get_height(), 3);
+        assert_eq!(data[4].get_height(), 2);
+        assert_eq!(data[5].get_height(), 1);
     }
 
     #[test]
     fn find_min() {
-        let data = make_fake_tree_node();
-        assert_eq!(ColorNode::get(&data, data[0].find_min(&data)).value, 0);
-        assert_eq!(ColorNode::get(&data, data[2].find_min(&data)).value, 6);
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        assert_eq!(data[(data[0].find_min())].value, 0);
+        assert_eq!(data[(data[2].find_min())].value, 6);
     }
 }
-
-*/

@@ -1,3 +1,4 @@
+/*
 #[cfg(test)]
 mod benchmark {
     use super::*;
@@ -38,3 +39,4 @@ mod benchmark {
         }
     }
 }
+*/
