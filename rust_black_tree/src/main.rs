@@ -9,8 +9,8 @@ use nom::{
     IResult,
 };
 
-use rust_black_trees::rbtree::RBTree;
-use rust_black_trees::tree::{BaseTree, Tree};
+use rust_black_trees::tree::Tree;
+use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
 #[derive(Debug)]
 enum Cmd {
@@ -20,7 +20,7 @@ enum Cmd {
     Quit,
     Clear,
     Help,
-    New(bool),
+    New(TreeSelection),
 }
 
 fn delete(input: &[u8]) -> IResult<&[u8], Cmd> {
@@ -76,8 +76,9 @@ fn new(input: &[u8]) -> IResult<&[u8], Cmd> {
             )
     );
     newparser(input).and_then(|(s, (_a, b))| match std::str::from_utf8(b).unwrap() {
-        "rb" => Ok((s, Cmd::New(false))),
-        "avl" => Ok((s, Cmd::New(true))),
+        "rb" => Ok((s, Cmd::New(TreeSelection::RedBlack))),
+        "avl" => Ok((s, Cmd::New(TreeSelection::AVL))),
+        "bst" => Ok((s, Cmd::New(TreeSelection::BST))),
         _ => Err(nom::Err::Failure((s, nom::error::ErrorKind::NoneOf))),
     })
 }
@@ -122,40 +123,43 @@ fn read_line() -> String {
 
 fn eval(
     cmd: Cmd,
-    mut rb: &mut RBTree<isize>,
-    mut avl: &mut RBTree<isize>,
-    mut tree_type: Option<bool>,
+    rb: &mut RBTree<isize>,
+    avl: &mut AVLTree<isize>,
+    bs: &mut BSTree<isize>,
+    tree_type: &mut TreeSelection,
 ) {
     std::dbg!(&cmd);
     match cmd {
         Cmd::Quit => {
             std::process::exit(0);
         }
-        Cmd::Clear => println!("Clear"),
-        Cmd::Print => println!("Print"),
-        Cmd::Add(v) => {
-            if let Some(t) = tree_type {
-                if t {
-                    avl.insert(v)
-                } else {
-                    rb.insert(v)
-                }
-            } else {
-                eprintln!("Need to create a tree first!")
-            }
+        Cmd::Clear => {
+            print!("\x1B[2J");
         }
-        Cmd::Delete(v) => {
-            if let Some(t) = tree_type {
-                if t {
-                    avl.delete(v);
-                } else {
-                    rb.delete(v);
-                }
-                tree_type = None;
-            } else {
-                eprintln!("Need to create a tree first!")
+        Cmd::Print => match tree_type {
+            TreeSelection::RedBlack => println!("{}", rb.to_pretty_string()),
+            TreeSelection::AVL => println!("{}", avl.to_pretty_string()),
+            TreeSelection::BST => println!("{}", bs.to_pretty_string()),
+            TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+        },
+        Cmd::Add(v) => match tree_type {
+            TreeSelection::RedBlack => rb.insert(v),
+            TreeSelection::AVL => avl.insert(v),
+            TreeSelection::BST => bs.insert(v),
+            TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+        },
+        Cmd::Delete(v) => match tree_type {
+            TreeSelection::RedBlack => {
+                rb.delete(v);
             }
-        }
+            TreeSelection::AVL => {
+                avl.delete(v);
+            }
+            TreeSelection::BST => {
+                bs.delete(v);
+            }
+            TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+        },
         Cmd::Help => {
             println!("Commands:");
             println!("  add [VAL]");
@@ -165,18 +169,20 @@ fn eval(
             println!("  quit");
         }
         Cmd::New(v) => {
-            if v {
-                *rb = RBTree::new();
-            } else {
-                *avl = RBTree::new();
-            }
-            tree_type = Some(v);
+            *tree_type = v;
+            *rb = RBTree::new();
+            *avl = AVLTree::new();
+            *bs = BSTree::new();
         }
     }
 }
 
-fn read_and_eval(mut rb: &mut RBTree<isize>, mut avl: &mut RBTree<isize>, tree_type: Option<bool>) {
-    // TODO make avl an avl tree type
+fn read_and_eval(
+    mut rb: &mut RBTree<isize>,
+    mut avl: &mut AVLTree<isize>,
+    mut bs: &mut BSTree<isize>,
+    tree_type: &mut TreeSelection,
+) {
     print!("> ");
     io::stdout().flush().unwrap();
 
@@ -189,19 +195,27 @@ fn read_and_eval(mut rb: &mut RBTree<isize>, mut avl: &mut RBTree<isize>, tree_t
     let res = command(s.as_bytes());
 
     if let Ok((_s, cmd)) = res {
-        eval(cmd, &mut rb, &mut avl, tree_type);
+        eval(cmd, &mut rb, &mut avl, &mut bs, tree_type);
     } else {
         println!("Invalid Command. Try: help")
     }
 }
 
+#[derive(Debug)]
+enum TreeSelection {
+    RedBlack,
+    AVL,
+    BST,
+    Undefined,
+}
 fn main() {
     println!("Tree Editor CLI v1.0.0");
 
     let mut rbtree = RBTree::new();
-    let mut avltree = Tree::new(); //todo, make it an avltree
-    let mut tree_type: Option<bool> = None;
+    let mut avltree = AVLTree::new();
+    let mut bstree = BSTree::new();
+    let mut tree_type = TreeSelection::Undefined;
     loop {
-        read_and_eval(&mut rbtree, &mut avltree, tree_type);
+        read_and_eval(&mut rbtree, &mut avltree, &mut bstree, &mut tree_type);
     }
 }
