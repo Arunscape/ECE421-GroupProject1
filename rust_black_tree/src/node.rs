@@ -26,17 +26,6 @@ impl Not for Side {
 }
 
 #[derive(Debug)]
-pub struct ColorNode<T> {
-    pub value: T,
-    pub ptr: usize,
-    pub parent: Option<usize>,
-    pub lchild: Option<usize>,
-    pub rchild: Option<usize>,
-    pub color: Color,
-    data: Rc<RefCell<Vec<ColorNode<T>>>>,
-}
-
-#[derive(Debug)]
 pub struct DepthNode<T> {
     pub value: T,
     pub ptr: usize,
@@ -165,132 +154,7 @@ pub trait Node<T> {
     }
 }
 
-pub trait ColoredNode<T>: Node<T> {
-    fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self;
-    fn is_red(&self) -> bool;
-    fn is_child_black(&self, side: Side) -> bool;
-    fn is_parent_black(&self) -> bool;
-    fn is_sibling_black(&self) -> bool;
-}
-
-impl <T> ColoredNode<T> for ColorNode<T>
-where
-    T: std::fmt::Debug,
-    T: std::cmp::PartialOrd,
-{
-    fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
-        Self {
-            value: val,
-            ptr: selfptr,
-            parent: None,
-            lchild: None,
-            rchild: None,
-            color: Color::Black,
-            data: data
-        }
-    }
-
-    fn is_red(&self) -> bool {
-        match self.color {
-            Color::Red => true,
-            Color::Black => false,
-        }
-    }
-
-    // Nil nodes are black children too
-    fn is_child_black(&self, side: Side) -> bool{
-        let child = self.get_child(side);
-        if child.is_some() && self.get(child.unwrap()).is_red() {
-            false
-        } else {
-            true
-        }
-    }
-
-    // this will panic of called on root node
-    fn is_parent_black(&self) -> bool {
-        let p = self.parent.unwrap();
-        !self.get(p).is_red()
-    }
-
-    // Nil nodes are black children too
-    fn is_sibling_black(&self) -> bool {
-        let sib = self.get_sibling();
-        if sib.is_some() && self.get(sib.unwrap()).is_red() {
-            false
-        } else {
-            true
-        }
-    }
-}
-
-impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
-    fn to_self_string(&self) -> String {
-        format!("[P:{:?} C:{:?} V:{:?}]", self.parent, self.color, self.value)
-    }
-
-    fn is(&self, val: &T) -> bool {
-        &self.value == val
-    }
-    fn greater(&self, val: &T) -> bool {
-        &self.value > val
-    }
-    fn lesser(&self, val: &T) -> bool {
-        &self.value < val
-    }
-
-
-    /**
-    * In order to return a reference to a value of a vector contained within a
-    * refcell, a raw pointer is used. The unsafe code could be avoided by
-    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
-    * to self.get_mut(n) with &mut self.data.borrow()[n]
-    */
-    fn get(&self, ptr: usize) -> &ColorNode<T> {
-        unsafe {
-            &(*self.data.as_ptr())[ptr]
-        }
-    }
-
-    fn get_mut(&self, ptr: usize) -> &mut ColorNode<T> {
-        unsafe {
-            &mut (*self.data.as_ptr())[ptr]
-        }
-    }
-
-    fn get_child(&self, side: Side) -> Option<usize> {
-        match side {
-            Side::Left => self.lchild,
-            Side::Right => self.rchild,
-        }
-    }
-
-    fn set_child(&mut self, child: usize, side: Side) {
-        self.set_child_opt(Some(child), side)
-    }
-
-    fn set_child_opt(&mut self, c: Option<usize>, side: Side) {
-        match side {
-            Side::Left => self.lchild = c,
-            Side::Right => self.rchild = c,
-        };
-        if let Some(child) = c {
-            self.get_mut(child).parent = Some(self.location());
-        }
-    }
-    fn set_parent(&mut self, p: Option<usize>) {
-        self.parent = p;
-    }
-
-    fn get_parent(&self) -> Option<usize> {
-        self.parent
-    }
-
-    fn location(&self) -> usize {
-        self.ptr
-    }
-}
-
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -412,3 +276,5 @@ mod tests {
         assert_eq!(data[(data[2].find_min())].value, 6);
     }
 }
+
+*/
