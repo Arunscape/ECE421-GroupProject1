@@ -52,8 +52,10 @@ pub trait Node<T> {
     fn get_mut(&self, i: usize) -> &mut Self;
     fn location(&self) -> usize;
     fn get_parent(&self) -> Option<usize>;
+    fn set_parent(&mut self, p: Option<usize>);
     fn get_child(&self, side: Side) -> Option<usize>;
     fn set_child(&mut self, child: usize, side: Side);
+    fn set_child_opt(&mut self, child: Option<usize>, side: Side);
     fn to_self_string(&self) -> String;
     fn is(&self, val: &T) -> bool;
     fn greater(&self, val: &T) -> bool;
@@ -263,19 +265,28 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
     }
 
     fn set_child(&mut self, child: usize, side: Side) {
-        match side {
-            Side::Left => self.lchild = Some(child),
-            Side::Right => self.rchild = Some(child),
-        };
-        self.get_mut(child).parent = Some(self.location());
+        self.set_child_opt(Some(child), side)
     }
 
-    fn location(&self) -> usize {
-        self.ptr
+    fn set_child_opt(&mut self, c: Option<usize>, side: Side) {
+        match side {
+            Side::Left => self.lchild = c,
+            Side::Right => self.rchild = c,
+        };
+        if let Some(child) = c {
+            self.get_mut(child).parent = Some(self.location());
+        }
+    }
+    fn set_parent(&mut self, p: Option<usize>) {
+        self.parent = p;
     }
 
     fn get_parent(&self) -> Option<usize> {
         self.parent
+    }
+
+    fn location(&self) -> usize {
+        self.ptr
     }
 }
 

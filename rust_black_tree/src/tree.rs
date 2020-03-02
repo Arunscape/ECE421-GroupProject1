@@ -74,7 +74,32 @@ pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
         }
     }
 
-    fn rotate(&mut self, side: Side, n: usize);
+    fn rotate(&mut self, side: Side, n: usize) {
+        let p = self.get(n).get_parent().unwrap();
+
+        if let Some(c) = self.get(n).get_child(side) {
+            self.attach_child(p, c, !side);
+        } else {
+            match !side {
+                Side::Left => self.get_mut(p).set_child_opt(None, Side::Left),
+                Side::Right => self.get_mut(p).set_child_opt(None, Side::Right),
+            }
+        }
+        if let Some(g) = self.get(p).get_parent() {
+            self.get_mut(n).set_parent(Some(g));
+            let pside = if self.get(p).is_child(Side::Left) {
+                Side::Left
+            } else {
+                Side::Right
+            };
+            self.attach_child(g, n, pside);
+        } else {
+            self.set_root(Some(n));
+            self.get_mut(n).set_parent(None);
+        }
+        self.attach_child(n, p, side);
+    }
+
     fn find(&self, val: &T) -> usize {
         let mut n = self.get_root().unwrap();
         loop {
@@ -115,7 +140,7 @@ pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
 
 }
 
-pub trait RTree<T, N: ColoredNode<T>>: Tree<T, N> {
+pub trait RbTree<T, N: ColoredNode<T>>: Tree<T, N> {
     fn fix_ins_color(&mut self, n: usize);
     fn fix_del_color(&mut self, n: usize, child: usize);
 
@@ -142,7 +167,21 @@ pub struct RBTree<T> {
     free: Vec<usize>,
 }
 
-impl<T> RBTree<T>
+/*
+impl<T, N: ColoredNode<T>> Tree<T, N> for RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{}
+impl<T, N: ColoredNode<T>> BaseTree<T, N> for RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{}
+*/
+impl<T, /*N: ColoredNode<T>*/> /*RbTree<T, N> for */ RBTree<T>
 where
     T: PartialOrd,
     T: PartialEq,
@@ -156,7 +195,6 @@ where
             free: Vec::new(),
         }
     }
-
     /**
      * In order to return a reference to a value of a vector contained within a refcell, a raw
      * pointer is used. The unsafe code could be avoided by replacing each call to self.get(n) with
