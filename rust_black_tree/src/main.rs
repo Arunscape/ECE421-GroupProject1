@@ -133,7 +133,9 @@ fn eval(
         Cmd::Quit => {
             std::process::exit(0);
         }
-        Cmd::Clear => println!("Clear"),
+        Cmd::Clear => {
+            print!("\x1B[2J");
+        }
         Cmd::Print => match tree_type {
             TreeSelection::RedBlack => println!("{}", rb.to_pretty_string()),
             TreeSelection::AVL => println!("{}", avl.to_pretty_string()),
@@ -181,7 +183,6 @@ fn read_and_eval(
     mut bs: &mut BSTree<isize>,
     tree_type: &mut TreeSelection,
 ) {
-    // TODO make avl an avl tree type
     print!("> ");
     io::stdout().flush().unwrap();
 
