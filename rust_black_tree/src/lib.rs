@@ -2,6 +2,7 @@ mod node;
 pub mod tree;
 pub mod rbtree;
 pub mod unbalancetree;
+pub mod avltree;
 
 pub fn test() {
     //let mut tree = tree::RBTree::new();
