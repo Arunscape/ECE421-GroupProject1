@@ -218,17 +218,17 @@ where
     }
 
     fn rebalance_del(&mut self, n: usize, child: usize) {
+        /*
         println!("Deleting {} with {}: ", n, child);
         for n in self.data.borrow().iter() {
             print!("({} -> {:?})", &n.ptr, &n.value);
         }
         println!();
         println!("From tree:\n{}", self.to_pretty_string());
+        */
         if self.get(n).ptr == TREE_END || self.get(child).ptr == TREE_END {
-            println!("Long delete");
             self.fix_del_color_long();
         } else {
-            println!("fast delete");
             self.fix_del_color(n, child)
         }
     }
@@ -300,7 +300,6 @@ where
 {
     // child is the new node in the location, n is being deleted
     fn fix_del_color(&mut self, n: usize, child: usize) {
-        dbg!("Fix_del_color", n, child);
         if !self.get(n).is_red() {
             if self.get(child).is_red() {
                 self.get_mut(child).color = Color::Black;
@@ -602,16 +601,7 @@ mod tests {
 
         tree.delete(0);
         double_size_test(&tree, 14);
-        for n in tree.data.borrow().iter() {
-            print!("({} -> {:?})", &n.ptr, &n.value);
-        }
-        println!();
-        println!("{:?}", tree.free);
         tree.insert(0);
-        for n in tree.data.borrow().iter() {
-            print!("({} -> {:?})", &n.ptr, &n.value);
-        }
-        println!();
         double_size_test(&tree, 15);
 
         tree.delete(50);
