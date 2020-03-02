@@ -46,7 +46,7 @@ pub struct DepthNode<T> {
     pub height: usize,
 }
 
-pub trait Node {
+pub trait Node<T> {
     // Base methods
     fn get(&self, i: usize) -> &Self;
     fn get_mut(&self, i: usize) -> &mut Self;
@@ -55,6 +55,9 @@ pub trait Node {
     fn get_child(&self, side: Side) -> Option<usize>;
     fn set_child(&mut self, child: usize, side: Side);
     fn to_self_string(&self) -> String;
+    fn is(&self, val: &T) -> bool;
+    fn greater(&self, val: &T) -> bool;
+    fn lesser(&self, val: &T) -> bool;
 
     fn to_string(&self) -> String {
         let mut m_str = format!("({}", self.to_self_string());
@@ -160,7 +163,7 @@ pub trait Node {
     }
 }
 
-pub trait ColoredNode<T>: Node {
+pub trait ColoredNode<T>: Node<T> {
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self;
     fn is_red(&self) -> bool;
     fn is_child_black(&self, side: Side) -> bool;
@@ -170,6 +173,7 @@ pub trait ColoredNode<T>: Node {
 impl <T> ColoredNode<T> for ColorNode<T>
 where
     T: std::fmt::Debug,
+    T: std::cmp::PartialOrd,
 {
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
         Self {
@@ -217,9 +221,19 @@ where
     }
 }
 
-impl <T: std::fmt::Debug> Node for ColorNode<T> {
+impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
     fn to_self_string(&self) -> String {
         format!("[P:{:?} C:{:?} V:{:?}]", self.parent, self.color, self.value)
+    }
+
+    fn is(&self, val: &T) -> bool {
+        &self.value == val
+    }
+    fn greater(&self, val: &T) -> bool {
+        &self.value > val
+    }
+    fn lesser(&self, val: &T) -> bool {
+        &self.value < val
     }
 
 
