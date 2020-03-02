@@ -247,7 +247,8 @@ where
 {
 	fn retrace(&mut self, z: usize) {
 		loop {
-		//for (X = parent(Z); X != null; X = parent(Z)) { // Loop (possibly up to the root)
+			//println!("Z= {:?}", self.get(z).value);
+			//println!("X= {:?}", self.get(x).value);
 			// get the parent of current node
 			let x = self.get(z).parent;
 			if !x.is_some() {
@@ -263,7 +264,11 @@ where
 						self.rotate(Side::Right, z);
 						self.rotate(Side::Left, x);
 					} else {
-						self.rotate(Side::Left, x);
+						// TODO: rotates panic rn
+						// wiki has a differnet definiton of
+						// rotate than we do I think
+						//self.rotate(Side::Left, x);
+						self.rotate(Side::Left, z);
 					}
 				} else {
 					if self.is_heavy_on_side(Side::Left, x) {
@@ -272,7 +277,9 @@ where
 					}
 					self.set_balance_factor(x, 1);
 					//Z = X; // Height(Z) increases by 1
-					continue;
+					//z = x;
+					self.retrace(x);
+					//continue;
 				}
 			} else {
 				if self.is_heavy_on_side(Side::Left, x) {
@@ -289,7 +296,9 @@ where
 					}
 					self.set_balance_factor(x, -1);
 					//Z = X; // Height(Z) increases by 1
-					continue;
+					//z = x;
+					self.retrace(x);
+					//continue;
 				}
 			}
 			break;
@@ -355,13 +364,37 @@ mod tests {
 	}
 
 	#[test]
-	fn insert_two() {
+	fn insert_3_r() {
+		// balance
+		// 1
+		// -> 2
+		//    -> 3
 		let mut tree = AVLTree::<i32>::new();
 		tree.insert(1);
 		tree.insert(2);
-		println!("{}", tree.to_string());
 		let root = tree.root.expect("tree root");
-		//assert!(tree.get_balance_factor(root) == 0);
 		assert!(tree.is_heavy_on_side(Side::Right, root));
+
+		// insert in a balanced way
+		tree.insert(3);
+
+		// assert that tree is balanced
+		assert_eq!(tree.to_string(), "([P:None V:2] ([P:Some(1) V:1] () ()) ([P:Some(1) V:3] () ()))");
+		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
+		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
+	}
+
+
+	#[test]
+	fn insert_3_rl (){
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(3);
+		tree.insert(2);
+		let root = tree.root.expect("tree root");
+		println!("3rl tree: {}\n", tree.to_string());
+		assert_eq!(tree.to_string(), "([P:None V:2] ([P:Some(1) V:1] () ()) ([P:Some(1) V:3] () ()))");
+		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
+		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
 	}
 }
