@@ -257,6 +257,22 @@ where
 		*/
 	}
 
+	fn get_balance_factor(&self, n: usize) -> isize {
+		self.get(n).balance_factor
+	}
+
+	fn set_balance_factor(&mut self, n: usize, bf: isize) {
+		self.get_mut(n).balance_factor = bf;
+	}
+
+	fn is_heavy_on_side(&self, side: Side, n: usize) -> bool {
+		// check the balance factor on side of node n
+		match side {
+			Side::Right => self.get_balance_factor(n) > 0,
+			Side::Left => self.get_balance_factor(n) < 0,
+		}
+	}
+
 	fn get_size_recursive(&self) -> usize {
 		if let Some(root) = self.root {
 			self.get(root).get_size()
@@ -281,12 +297,30 @@ mod tests {
 	fn insert_one() {
 		let mut tree = AVLTree::<i32>::new();
 		tree.insert(1);
+		let root = tree.root.expect("tree root");
+		assert_eq!(tree.get_balance_factor(root), 0);
+		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
+		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
 	}
+
 	#[test]
-	#[should_panic]
+	fn balance_factor_helpers() {
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		let root = tree.root.expect("tree root");
+		tree.set_balance_factor(root, 1);
+		assert!(tree.is_heavy_on_side(Side::Right, root));
+		tree.set_balance_factor(root, -1);
+		assert!(tree.is_heavy_on_side(Side::Left, root));
+	}
+
+	#[test]
 	fn insert_two() {
 		let mut tree = AVLTree::<i32>::new();
 		tree.insert(1);
 		tree.insert(2);
+		let root = tree.root.expect("tree root");
+		//assert!(tree.get_balance_factor(root) == 0);
+		assert!(tree.is_heavy_on_side(Side::Right, root));
 	}
 }
