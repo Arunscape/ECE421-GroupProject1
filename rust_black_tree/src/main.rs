@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-use rust_black_trees::tree::{BaseTree, Tree};
+use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
 #[derive(Debug)]
@@ -123,10 +123,10 @@ fn read_line() -> String {
 
 fn eval(
     cmd: Cmd,
-    mut rb: &mut RBTree<isize>,
-    mut avl: &mut AVLTree<isize>,
-    mut bs: &mut BSTree<isize>,
-    mut tree_type: &mut TreeSelection,
+    rb: &mut RBTree<isize>,
+    avl: &mut AVLTree<isize>,
+    bs: &mut BSTree<isize>,
+    tree_type: &mut TreeSelection,
 ) {
     std::dbg!(&cmd);
     match cmd {
