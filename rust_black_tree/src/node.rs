@@ -1,7 +1,5 @@
 use std::cmp::max;
 use std::ops::Not;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
