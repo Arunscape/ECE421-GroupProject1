@@ -7,9 +7,10 @@ use super::node::ColoredNode;
 use super::node::*;
 
 
-pub trait BaseTree<T, N: Node<T>> {
-    fn get(&self, val: usize) -> &N;
-    fn get_mut(&self, val: usize) -> &mut N;
+pub trait BaseTree<T> {
+    type MNode: Node<T>;
+    fn get(&self, val: usize) -> &Self::MNode;
+    fn get_mut(&self, val: usize) -> &mut Self::MNode;
 
     fn delete_node(&mut self, index: usize);
     fn create_node(&mut self, val: T) -> usize;
@@ -23,13 +24,13 @@ pub trait BaseTree<T, N: Node<T>> {
     fn attach_child(&self, p: usize, c: usize, side: Side);
 
     fn get_root(&self) -> Option<usize>;
-    fn set_root(&self, new_root: Option<usize>);
+    fn set_root(&mut self, new_root: Option<usize>);
 
     fn get_size(&self) -> usize;
-    fn crement_size(&self, val: isize);
+    fn crement_size(&mut self, val: isize);
 }
 
-pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
+pub trait Tree<T>: BaseTree<T> {
     fn new() -> Self;
 
     fn contains(&self, val: &T) -> bool {
@@ -140,6 +141,7 @@ pub trait Tree<T, N: Node<T>>: BaseTree<T, N> {
 
 }
 
+/* I dont think I actually want this as a trait
 pub trait RbTree<T, N: ColoredNode<T>>: Tree<T, N> {
     fn fix_ins_color(&mut self, n: usize);
     fn fix_del_color(&mut self, n: usize, child: usize);
@@ -155,6 +157,7 @@ pub trait RbTree<T, N: ColoredNode<T>>: Tree<T, N> {
     fn do_ins_hard_case(&mut self, nn: usize);
     fn do_ins_hard_case2(&mut self, n: usize);
 }
+*/
 
 /**
  * Arena based memory tree structure
@@ -167,21 +170,7 @@ pub struct RBTree<T> {
     free: Vec<usize>,
 }
 
-/*
-impl<T, N: ColoredNode<T>> Tree<T, N> for RBTree<T>
-where
-    T: PartialOrd,
-    T: PartialEq,
-    T: std::fmt::Debug,
-{}
-impl<T, N: ColoredNode<T>> BaseTree<T, N> for RBTree<T>
-where
-    T: PartialOrd,
-    T: PartialEq,
-    T: std::fmt::Debug,
-{}
-*/
-impl<T, /*N: ColoredNode<T>*/> /*RbTree<T, N> for */ RBTree<T>
+impl<T> Tree<T> for RBTree<T>
 where
     T: PartialOrd,
     T: PartialEq,
@@ -195,6 +184,15 @@ where
             free: Vec::new(),
         }
     }
+}
+
+impl<T> BaseTree<T> for RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{
+    type MNode = ColorNode<T>;
     /**
      * In order to return a reference to a value of a vector contained within a refcell, a raw
      * pointer is used. The unsafe code could be avoided by replacing each call to self.get(n) with
@@ -204,59 +202,107 @@ where
      * structure anyways, since re-balancing can require that most of the tree be locked to one
      * thread during an insertion or deletion
      */
-    fn get(&self, val: usize) -> &ColorNode<T> {
+    fn get(&self, val: usize) -> &Self::MNode {
         unsafe { &(*self.data.as_ptr())[val] }
     }
 
-    fn get_mut(&self, val: usize) -> &mut ColorNode<T> {
+    fn get_mut(&self, val: usize) -> &mut Self::MNode {
         unsafe { &mut (*self.data.as_ptr())[val] }
+    }
+
+    fn get_root(&self) -> Option<usize> {
+        self.root
+    }
+
+    fn set_root(&mut self, new_root: Option<usize>) {
+        self.root = new_root
+    }
+
+    fn crement_size(&mut self, amount: isize) {
+        self.size = (self.size as isize + amount) as usize;
     }
 
     fn attach_child(&self, p: usize, c: usize, side: Side) {
         self.get_mut(p).set_child(c, side)
     }
 
-    fn contains(&self, val: &T) -> bool {
-        let n = self.find(val);
-        &self.get(n).value == val
+    fn rebalance_ins(&mut self, n: usize) {
+        self.fix_ins_color(n)
     }
 
-    fn insert(&mut self, val: T) {
-        if let Some(_root) = self.root {
-            let n = self.find(&val);
-            let node = self.get(n);
-            if node.value == val {
-                // value already in tree
-                self.size -= 1;
+    fn rebalance_del(&mut self, n: usize, child: usize) {
+        self.fix_del_color(n, child)
+    }
+
+    fn delete_replace(&mut self, n: usize) -> usize {
+        let node = self.get(n);
+        match (node.lchild, node.rchild) {
+            (Some(lc), Some(rc)) => {
+                let p = node.parent;
+                let successor = self.get(rc).find_min();
+                self.delete_replace(successor);
+                self.data.borrow_mut().swap(successor, n);
+
+                self.get_mut(n).lchild = Some(lc);
+                self.get_mut(n).rchild = Some(rc);
+                self.get_mut(n).parent = p;
+                self.get_mut(n).ptr = n;
+                return successor;
+            }
+            (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
+            (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
+            (None, None) => self.replace_node(n, None),
+        };
+        n
+    }
+
+    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
+        let node = self.get(to_delete);
+        if let Some(p) = node.parent {
+            if node.is_child(Side::Left) {
+                self.get_mut(p).lchild = to_attach;
             } else {
-                let side = if node.value < val {
-                    Side::Right
-                } else {
-                    Side::Left
-                };
-                let node = self.create_node(val);
-                self.attach_child(n, node, side);
-                self.fix_ins_color(node);
+                self.get_mut(p).rchild = to_attach;
             }
         } else {
-            self.root = Some(self.create_node(val));
+            self.root = to_attach;
         }
-        self.size += 1;
     }
 
-    fn delete(&mut self, val: T) -> bool {
-        if !self.contains(&val) {
-            false
+    fn get_size(&self) -> usize {
+        return self.size;
+    }
+
+    fn create_node(&mut self, val: T) -> usize {
+        // update this so it reuses deleted slots
+        if self.free.len() > 0 {
+            let n = self.free.pop().expect("pop should not fail if len > 0");
+            let mut d = self.get_mut(n);
+            d.ptr = n;
+            d.lchild = None;
+            d.rchild = None;
+            d.parent = None;
+            n
         } else {
-            let n = self.find(&val);
-            let del = self.delete_replace(n);
-            self.delete_node(del);
-            self.size -= 1;
-            self.fix_del_color(del, n);
-            true
+            let loc = self.data.borrow().len();
+            self.data
+                .borrow_mut()
+                .push(ColorNode::new(val, loc, self.data.clone()));
+            loc
         }
     }
 
+    fn delete_node(&mut self, index: usize) {
+        self.free.push(index);
+    }
+}
+
+impl<T> RBTree<T>
+where
+    T: PartialOrd,
+    T: PartialEq,
+    T: std::fmt::Debug,
+{
     // child is the new node in the location, n is being deleted
     fn fix_del_color(&mut self, n: usize, child: usize) {
         dbg!("Fix_del_color");
@@ -373,75 +419,6 @@ where
         }
     }
 
-    fn delete_replace(&mut self, n: usize) -> usize {
-        let node = self.get(n);
-        match (node.lchild, node.rchild) {
-            (Some(lc), Some(rc)) => {
-                let p = node.parent;
-                let successor = self.get(rc).find_min();
-                self.delete_replace(successor);
-                self.data.borrow_mut().swap(successor, n);
-
-                self.get_mut(n).lchild = Some(lc);
-                self.get_mut(n).rchild = Some(rc);
-                self.get_mut(n).parent = p;
-                self.get_mut(n).ptr = n;
-                return successor;
-            }
-            (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
-            (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
-            (None, None) => self.replace_node(n, None),
-        };
-        n
-    }
-
-    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
-        let node = self.get(to_delete);
-        if let Some(p) = node.parent {
-            if node.is_child(Side::Left) {
-                self.get_mut(p).lchild = to_attach;
-            } else {
-                self.get_mut(p).rchild = to_attach;
-            }
-        } else {
-            self.root = to_attach;
-        }
-    }
-
-    fn get_size(&self) -> usize {
-        return self.size;
-    }
-
-    fn find(&self, val: &T) -> usize {
-        let mut n = self.root.unwrap();
-        loop {
-            let node = self.get(n);
-            if &node.value < val && node.rchild.is_some() {
-                n = node.rchild.unwrap();
-            } else if &node.value > val && node.lchild.is_some() {
-                n = node.lchild.unwrap();
-            } else {
-                return n;
-            }
-        }
-    }
-
-    fn to_string(&self) -> String {
-        if let Some(root) = self.root {
-            self.get(root).to_string()
-        } else {
-            String::from("(Empty tree)")
-        }
-    }
-
-    fn to_pretty_string(&self) -> String {
-        if let Some(root) = self.root {
-            self.get(root).to_pretty_string(0)
-        } else {
-            String::from("(Empty tree)")
-        }
-    }
-
     fn fix_ins_color(&mut self, n: usize) {
         self.get_mut(n).color = Color::Red;
         if let Some(p) = self.get(n).parent {
@@ -495,32 +472,6 @@ where
         }
     }
 
-    fn rotate(&mut self, side: Side, n: usize) {
-        let p = self.get(n).parent.unwrap();
-
-        if let Some(c) = self.get(n).get_child(side) {
-            self.attach_child(p, c, !side);
-        } else {
-            match !side {
-                Side::Left => self.get_mut(p).lchild = None,
-                Side::Right => self.get_mut(p).rchild = None,
-            }
-        }
-        if let Some(g) = self.get(p).parent {
-            self.get_mut(n).parent = Some(g);
-            let pside = if self.get(p).is_child(Side::Left) {
-                Side::Left
-            } else {
-                Side::Right
-            };
-            self.attach_child(g, n, pside);
-        } else {
-            self.root = Some(n);
-            self.get_mut(n).parent = None
-        }
-        self.attach_child(n, p, side);
-    }
-
     fn get_size_recursive(&self) -> usize {
         if let Some(root) = self.root {
             self.get(root).get_size()
@@ -529,36 +480,6 @@ where
         }
     }
 
-    fn get_height(&self) -> usize {
-        if let Some(root) = self.root {
-            self.get(root).get_height()
-        } else {
-            0
-        }
-    }
-
-    fn create_node(&mut self, val: T) -> usize {
-        // update this so it reuses deleted slots
-        if self.free.len() > 0 {
-            let n = self.free.pop().expect("pop should not fail if len > 0");
-            let mut d = self.get_mut(n);
-            d.ptr = n;
-            d.lchild = None;
-            d.rchild = None;
-            d.parent = None;
-            n
-        } else {
-            let loc = self.data.borrow().len();
-            self.data
-                .borrow_mut()
-                .push(ColorNode::new(val, loc, self.data.clone()));
-            loc
-        }
-    }
-
-    fn delete_node(&mut self, index: usize) {
-        self.free.push(index);
-    }
 }
 
 #[cfg(test)]
