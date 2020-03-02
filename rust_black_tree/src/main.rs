@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate nom;
-use rust_black_trees::test;
 
 use std::io::{self, BufRead, Write};
 
@@ -9,6 +8,9 @@ use nom::{
     character::{is_alphabetic, is_digit},
     IResult,
 };
+
+use rust_black_trees::rbtree::RBTree;
+use rust_black_trees::tree::{BaseTree, Tree};
 
 #[derive(Debug)]
 enum Cmd {
@@ -118,7 +120,12 @@ fn read_line() -> String {
     line
 }
 
-fn eval(cmd: Cmd) {
+fn eval(
+    cmd: Cmd,
+    mut rb: &mut RBTree<isize>,
+    mut avl: &mut RBTree<isize>,
+    mut tree_type: Option<bool>,
+) {
     std::dbg!(&cmd);
     match cmd {
         Cmd::Quit => {
@@ -126,8 +133,29 @@ fn eval(cmd: Cmd) {
         }
         Cmd::Clear => println!("Clear"),
         Cmd::Print => println!("Print"),
-        Cmd::Add(v) => println!("Add: {}", v),
-        Cmd::Delete(v) => println!("Del: {}", v),
+        Cmd::Add(v) => {
+            if let Some(t) = tree_type {
+                if t {
+                    avl.insert(v)
+                } else {
+                    rb.insert(v)
+                }
+            } else {
+                eprintln!("Need to create a tree first!")
+            }
+        }
+        Cmd::Delete(v) => {
+            if let Some(t) = tree_type {
+                if t {
+                    avl.delete(v);
+                } else {
+                    rb.delete(v);
+                }
+                tree_type = None;
+            } else {
+                eprintln!("Need to create a tree first!")
+            }
+        }
         Cmd::Help => {
             println!("Commands:");
             println!("  add [VAL]");
@@ -136,11 +164,19 @@ fn eval(cmd: Cmd) {
             println!("  clear");
             println!("  quit");
         }
-        Cmd::New(v) => println!("New: {}", v),
+        Cmd::New(v) => {
+            if v {
+                *rb = RBTree::new();
+            } else {
+                *avl = RBTree::new();
+            }
+            tree_type = Some(v);
+        }
     }
 }
 
-fn read_and_eval() {
+fn read_and_eval(mut rb: &mut RBTree<isize>, mut avl: &mut RBTree<isize>, tree_type: Option<bool>) {
+    // TODO make avl an avl tree type
     print!("> ");
     io::stdout().flush().unwrap();
 
@@ -153,7 +189,7 @@ fn read_and_eval() {
     let res = command(s.as_bytes());
 
     if let Ok((_s, cmd)) = res {
-        eval(cmd);
+        eval(cmd, &mut rb, &mut avl, tree_type);
     } else {
         println!("Invalid Command. Try: help")
     }
@@ -162,8 +198,10 @@ fn read_and_eval() {
 fn main() {
     println!("Tree Editor CLI v1.0.0");
 
+    let mut rbtree = RBTree::new();
+    let mut avltree = Tree::new(); //todo, make it an avltree
+    let mut tree_type: Option<bool> = None;
     loop {
-        read_and_eval();
+        read_and_eval(&mut rbtree, &mut avltree, tree_type);
     }
-    // test();
 }
