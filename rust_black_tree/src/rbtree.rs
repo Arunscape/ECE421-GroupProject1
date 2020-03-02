@@ -1,4 +1,8 @@
-use super::node::Node;
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use super::node::Node as NodeTrait;
+use super::node::ColorNode as Node;
 use super::node::*;
 
 /**
@@ -8,7 +12,7 @@ use super::node::*;
 pub struct Tree<T> {
     root: Option<usize>,
     size: usize,
-    data: Vec<Node<T>>,
+    data: Rc<RefCell<Vec<Node<T>>>>,
     free: Vec<usize>,
 }
 
@@ -21,21 +25,43 @@ where
     pub fn new() -> Self {
         Self {
             root: None,
-            data: Vec::new(),
+            data: Rc::new(RefCell::new(Vec::new())),
             size: 0,
             free: Vec::new(),
         }
     }
 
+    /**
+    * In order to return a reference to a value of a vector contained within a
+    * refcell, a raw pointer is used. The unsafe code could be avoided by
+    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
+    * to self.get_mut(n) with &mut self.data.borrow()[n]
+    */
+    fn get(&self, val: usize) -> &Node<T> {
+        unsafe {
+            &(*self.data.as_ptr())[val]
+        }
+    }
+
+    fn get_mut(&self, val: usize) -> &mut Node<T> {
+        unsafe {
+            &mut (*self.data.as_ptr())[val]
+        }
+    }
+
+    fn attach_child(&self, p: usize, c: usize, side: Side) {
+        self.get_mut(p).set_child(c, side)
+    }
+
     pub fn contains(&self, val: &T) -> bool {
         let n = self.find(val);
-        &Node::get(&self.data, n).value == val
+        &self.get(n).value == val
     }
 
     pub fn insert(&mut self, val: T) {
         if let Some(_root) = self.root {
             let n = self.find(&val);
-            let node = Node::get(&self.data, n);
+            let node = self.get(n);
             if node.value == val {
                 // value already in tree
                 self.size -= 1;
@@ -46,7 +72,7 @@ where
                     Side::Left
                 };
                 let node = self.create_node(val);
-                Node::set_child(&mut self.data, n, node, side);
+                self.attach_child(n, node, side);
                 self.fix_ins_color(node);
             }
         } else {
@@ -71,9 +97,9 @@ where
     // child is the new node in the location, n is being deleted
     pub fn fix_del_color(&mut self, n: usize, child: usize) {
         dbg!("Fix_del_color");
-        if !Node::get(&self.data, n).is_red() {
-            if Node::get(&self.data, child).is_red() {
-                Node::get_mut(&mut self.data, child).color = Color::Black;
+        if !self.get(n).is_red() {
+            if self.get(child).is_red() {
+                self.get_mut(child).color = Color::Black;
             } else {
                 self.delete_case_1(child);
             }
@@ -84,37 +110,37 @@ where
     // nodes that don't exist are by definition black anyways
     fn set_maybe_black (&mut self, no: Option<usize>) {
         if let Some(n) = no {
-            Node::get_mut(&mut self.data, n).color = Color::Black;
+            self.get_mut(n).color = Color::Black;
         }
     }
 
     fn delete_case_1(&mut self, n: usize) {
         dbg!("delete case 1");
-        if Node::get(&self.data, n).parent.is_some() {
+        if self.get(n).parent.is_some() {
             self.delete_case_2(n);
         }
     }
 
     fn delete_case_2(&mut self, n: usize) {
         dbg!("delete case 2");
-        let s = Node::get(&self.data, n).get_sibling(&self.data);
-        if Node::get(&self.data, n).is_sibling_black(&self.data) {
-            let p = Node::get(&self.data, n).parent.expect("D2 P");
+        let s = self.get(n).get_sibling();
+        if self.get(n).is_sibling_black() {
+            let p = self.get(n).parent.expect("D2 P");
             self.set_maybe_black(s);
-            Node::get_mut(&mut self.data, p).color = Color::Red;
-            self.rotate(Node::get(&self.data, n).side(&self.data), p);
+            self.get_mut(p).color = Color::Red;
+            self.rotate(self.get(n).side(), p);
         }
         self.delete_case_3(n);
     }
 
     fn delete_case_3(&mut self, n: usize) {
         dbg!("delete case 3");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D3 S");
-        let p = Node::get(&self.data, n).parent.expect("D3 P");
-        if Node::get(&self.data, n).is_parent_black(&self.data)
-            && !Node::get(&self.data, s).is_red()
-            && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
-            && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+        let s = self.get(n).get_sibling().expect("D3 S");
+        let p = self.get(n).parent.expect("D3 P");
+        if self.get(n).is_parent_black()
+            && !self.get(s).is_red()
+            && self.get(s).is_child_black(Side::Left)
+            && self.get(s).is_child_black(Side::Right)
         {
             self.delete_case_1(p);
         } else {
@@ -124,17 +150,17 @@ where
 
     fn delete_case_4(&mut self, n: usize) {
         dbg!("delete case 4");
-        let node = Node::get(&self.data, n);
-        let s = node.get_sibling(&self.data).expect("D4 S");
+        let node = self.get(n);
+        let s = node.get_sibling().expect("D4 S");
         let p = node.parent.expect("D4 P");
 
-        if !node.is_parent_black(&self.data)
-            && node.is_sibling_black(&self.data)
-            && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
-            && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+        if !node.is_parent_black()
+            && node.is_sibling_black()
+            && self.get(s).is_child_black(Side::Left)
+            && self.get(s).is_child_black(Side::Right)
         {
-            Node::get_mut(&mut self.data, s).color = Color::Red;
-            Node::get_mut(&mut self.data, p).color = Color::Black;
+            self.get_mut(s).color = Color::Red;
+            self.get_mut(p).color = Color::Black;
         } else {
             self.delete_case_5(n)
         }
@@ -142,22 +168,22 @@ where
 
     fn delete_case_5(&mut self, n: usize) {
         dbg!("delete case 5");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D5 S");
-        if !Node::get(&self.data, s).is_red() {
-            if Node::get(&self.data, n).is_child(&self.data, Side::Left)
-                && Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
-                && !Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
+        let s = self.get(n).get_sibling().expect("D5 S");
+        if !self.get(s).is_red() {
+            if self.get(n).is_child(Side::Left)
+                && self.get(s).is_child_black(Side::Right)
+                && !self.get(s).is_child_black(Side::Left)
             {
-                let scl = Node::get(&self.data, s).get_child(Side::Left);
-                Node::get_mut(&mut self.data, s).color = Color::Red;
+                let scl = self.get(s).get_child(Side::Left);
+                self.get_mut(s).color = Color::Red;
                 self.set_maybe_black(scl);
                 self.rotate(Side::Right, s);
-            } else if Node::get(&self.data, n).is_child(&self.data, Side::Right)
-                && Node::get(&self.data, s).is_child_black(&self.data, Side::Left)
-                && !Node::get(&self.data, s).is_child_black(&self.data, Side::Right)
+            } else if self.get(n).is_child(Side::Right)
+                && self.get(s).is_child_black(Side::Left)
+                && !self.get(s).is_child_black(Side::Right)
             {
-                let scr = Node::get(&self.data, s).get_child(Side::Right);
-                Node::get_mut(&mut self.data, s).color = Color::Red;
+                let scr = self.get(s).get_child(Side::Right);
+                self.get_mut(s).color = Color::Red;
                 self.set_maybe_black(scr);
                 self.rotate(Side::Left, s);
             }
@@ -167,52 +193,52 @@ where
 
     fn delete_case_6(&mut self, n: usize) {
         dbg!("delete case 6");
-        let s = Node::get(&self.data, n).get_sibling(&self.data).expect("D6 S");
-        let p = Node::get(&self.data, n).parent.expect("D6 P");
-        let pc = Node::get(&self.data, p).color;
-        Node::get_mut(&mut self.data, s).color = pc;
-        Node::get_mut(&mut self.data, p).color = Color::Black;
+        let s = self.get(n).get_sibling().expect("D6 S");
+        let p = self.get(n).parent.expect("D6 P");
+        let pc = self.get(p).color;
+        self.get_mut(s).color = pc;
+        self.get_mut(p).color = Color::Black;
 
-        if Node::get(&self.data, n).is_child(&self.data, Side::Left) {
-            let scr = Node::get(&self.data, s).get_child(Side::Right);
+        if self.get(n).is_child(Side::Left) {
+            let scr = self.get(s).get_child(Side::Right);
             self.set_maybe_black(scr);
             self.rotate(Side::Left, p);
         } else {
-            let scl = Node::get(&self.data, s).get_child(Side::Left);
+            let scl = self.get(s).get_child(Side::Left);
             self.set_maybe_black(scl);
             self.rotate(Side::Right, p);
         }
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
-        let node = Node::get(&self.data, n);
+        let node = self.get(n);
         match (node.lchild, node.rchild) {
             (Some(lc), Some(rc)) => {
                 let p = node.parent;
-                let successor = Node::get(&self.data, rc).find_min(&self.data);
+                let successor = self.get(rc).find_min();
                 self.delete_replace(successor);
-                self.data.swap(successor, n);
+                self.data.borrow_mut().swap(successor, n);
 
-                Node::get_mut(&mut self.data, n).lchild = Some(lc);
-                Node::get_mut(&mut self.data, n).rchild = Some(rc);
-                Node::get_mut(&mut self.data, n).parent = p;
-                Node::get_mut(&mut self.data, n).ptr = n;
+                self.get_mut(n).lchild = Some(lc);
+                self.get_mut(n).rchild = Some(rc);
+                self.get_mut(n).parent = p;
+                self.get_mut(n).ptr = n;
                 return successor;
             }
-            (None, Some(_rc)) => self.replace_node(n, Node::get(&self.data, n).rchild),
-            (Some(_lc), None) => self.replace_node(n, Node::get(&self.data, n).lchild),
+            (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
+            (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
             (None, None) => self.replace_node(n, None),
         };
         n
     }
 
     fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
-        let node = Node::get(&self.data, to_delete);
+        let node = self.get(to_delete);
         if let Some(p) = node.parent {
-            if node.is_child(&self.data, Side::Left) {
-                Node::get_mut(&mut self.data, p).lchild = to_attach;
+            if node.is_child(Side::Left) {
+                self.get_mut(p).lchild = to_attach;
             } else {
-                Node::get_mut(&mut self.data, p).rchild = to_attach;
+                self.get_mut(p).rchild = to_attach;
             }
         } else {
             self.root = to_attach;
@@ -226,7 +252,7 @@ where
     fn find(&self, val: &T) -> usize {
         let mut n = self.root.unwrap();
         loop {
-            let node = Node::get(&self.data, n);
+            let node = self.get(n);
             if &node.value < val && node.rchild.is_some() {
                 n = node.rchild.unwrap();
             } else if &node.value > val && node.lchild.is_some() {
@@ -239,7 +265,7 @@ where
 
     pub fn to_string(&self) -> String {
         if let Some(root) = self.root {
-            Node::get(&self.data, root).to_string(&self.data)
+            self.get(root).to_string()
         } else {
             String::from("(Empty tree)")
         }
@@ -247,102 +273,101 @@ where
 
     pub fn to_pretty_string(&self) -> String {
         if let Some(root) = self.root {
-            Node::get(&self.data, root).to_pretty_string(&self.data, 0)
+            self.get(root).to_pretty_string(0)
         } else {
             String::from("(Empty tree)")
         }
     }
 
     fn fix_ins_color(&mut self, n: usize) {
-        Node::get_mut(&mut self.data, n).color = Color::Red;
-        if let Some(p) = Node::get(&self.data, n).parent {
-            if !Node::get(&self.data, p).is_red() {
+        self.get_mut(n).color = Color::Red;
+        if let Some(p) = self.get(n).parent {
+            if !self.get(p).is_red() {
                 // parent is black
                 // do nothing
-            } else if Node::get(&self.data, n).get_uncle(&self.data).is_some()
-                && Node::get(
-                    &self.data,
-                    Node::get(&self.data, n).get_uncle(&self.data).unwrap(),
+            } else if self.get(n).get_uncle().is_some()
+                && self.get(
+                    self.get(n).get_uncle().unwrap(),
                 )
                 .is_red()
             {
                 // uncle exists and is red
-                let p = Node::get(&self.data, n).parent.unwrap();
-                let u = Node::get(&self.data, n).get_uncle(&self.data).unwrap();
-                Node::get_mut(&mut self.data, p).color = Color::Black;
-                Node::get_mut(&mut self.data, u).color = Color::Black;
-                self.fix_ins_color(Node::get(&self.data, p).parent.unwrap());
+                let p = self.get(n).parent.unwrap();
+                let u = self.get(n).get_uncle().unwrap();
+                self.get_mut(p).color = Color::Black;
+                self.get_mut(u).color = Color::Black;
+                self.fix_ins_color(self.get(p).parent.unwrap());
             } else {
                 // uncle is black
                 self.do_ins_hard_case(n);
             }
         } else {
         }
-        Node::get_mut(&mut self.data, self.root.unwrap()).color = Color::Black;
+        self.get_mut(self.root.unwrap()).color = Color::Black;
     }
 
     fn do_ins_hard_case(&mut self, nn: usize) {
         let mut n = nn;
-        let mut p = Node::get(&self.data, n).parent.unwrap();
-        if Node::get(&self.data, p).is_child(&self.data, Side::Left)
-            && Node::get(&self.data, n).is_child(&self.data, Side::Right)
+        let mut p = self.get(n).parent.unwrap();
+        if self.get(p).is_child(Side::Left)
+            && self.get(n).is_child(Side::Right)
         {
             self.rotate(Side::Left, n);
-            n = Node::get(&self.data, n).get_child(Side::Left).unwrap();
+            n = self.get(n).get_child(Side::Left).unwrap();
         }
 
-        p = Node::get(&self.data, n).parent.unwrap();
-        if Node::get(&self.data, p).is_child(&self.data, Side::Right)
-            && Node::get(&self.data, n).is_child(&self.data, Side::Left)
+        p = self.get(n).parent.unwrap();
+        if self.get(p).is_child(Side::Right)
+            && self.get(n).is_child(Side::Left)
         {
             self.rotate(Side::Right, n);
-            n = Node::get(&self.data, n).get_child(Side::Right).unwrap();
+            n = self.get(n).get_child(Side::Right).unwrap();
         }
         self.do_ins_hard_case2(n);
     }
 
     fn do_ins_hard_case2(&mut self, n: usize) {
-        let p = Node::get(&self.data, n).parent.unwrap();
-        let g = Node::get(&self.data, p).parent.unwrap();
+        let p = self.get(n).parent.unwrap();
+        let g = self.get(p).parent.unwrap();
 
-        Node::get_mut(&mut self.data, p).color = Color::Black;
-        Node::get_mut(&mut self.data, g).color = Color::Red;
-        if Node::get(&self.data, p).is_child(&self.data, Side::Right) {
+        self.get_mut(p).color = Color::Black;
+        self.get_mut(g).color = Color::Red;
+        if self.get(p).is_child(Side::Right) {
             self.rotate(Side::Left, p);
-        } else if Node::get(&self.data, p).is_child(&self.data, Side::Right) {
+        } else if self.get(p).is_child(Side::Right) {
             self.rotate(Side::Right, p);
         }
     }
 
     fn rotate(&mut self, side: Side, n: usize) {
-        let p = Node::get(&self.data, n).parent.unwrap();
+        let p = self.get(n).parent.unwrap();
 
-        if let Some(c) = Node::get(&self.data, n).get_child(side) {
-            Node::set_child(&mut self.data, p, c, !side);
+        if let Some(c) = self.get(n).get_child(side) {
+            self.attach_child(p, c, !side);
         } else {
             match !side {
-                Side::Left => Node::get_mut(&mut self.data, p).lchild = None,
-                Side::Right => Node::get_mut(&mut self.data, p).rchild = None,
+                Side::Left => self.get_mut(p).lchild = None,
+                Side::Right => self.get_mut(p).rchild = None,
             }
         }
-        if let Some(g) = Node::get(&self.data, p).parent {
-            Node::get_mut(&mut self.data, n).parent = Some(g);
-            let pside = if Node::get(&self.data, p).is_child(&self.data, Side::Left) {
+        if let Some(g) = self.get(p).parent {
+            self.get_mut(n).parent = Some(g);
+            let pside = if self.get(p).is_child(Side::Left) {
                 Side::Left
             } else {
                 Side::Right
             };
-            Node::set_child(&mut self.data, g, n, pside);
+            self.attach_child(g, n, pside);
         } else {
             self.root = Some(n);
-            Node::get_mut(&mut self.data, n).parent = None
+            self.get_mut(n).parent = None
         }
-        Node::set_child(&mut self.data, n, p, side);
+        self.attach_child(n, p, side);
     }
 
     pub fn get_size_recursive(&self) -> usize {
         if let Some(root) = self.root {
-            Node::get(&self.data, root).get_size(&self.data)
+            self.get(root).get_size()
         } else {
             0
         }
@@ -350,7 +375,7 @@ where
 
     pub fn get_height(&self) -> usize {
         if let Some(root) = self.root {
-            Node::get(&self.data, root).get_height(&self.data)
+            self.get(root).get_height()
         } else {
             0
         }
@@ -360,14 +385,15 @@ where
         // update this so it reuses deleted slots
         if self.free.len() > 0 {
             let n = self.free.pop().expect("pop should not fail if len > 0");
-            self.data[n].ptr = n;
-            self.data[n].lchild = None;
-            self.data[n].rchild = None;
-            self.data[n].parent = None;
+            let mut d = self.get_mut(n);
+            d.ptr = n;
+            d.lchild = None;
+            d.rchild = None;
+            d.parent = None;
             n
         } else {
-            let loc = self.data.len();
-            self.data.push(Node::new(val, loc));
+            let loc = self.data.borrow().len();
+            self.data.borrow_mut().push(Node::new(val, loc, self.data.clone()));
             loc
         }
     }
@@ -475,16 +501,16 @@ mod tests {
 
         tree.delete(0);
         double_size_test(&tree, 14);
-        assert_eq!(tree.data.len(), 15);
+        assert_eq!(tree.data.borrow().len(), 15);
         tree.insert(0);
-        assert_eq!(tree.data.len(), 15);
+        assert_eq!(tree.data.borrow().len(), 15);
         double_size_test(&tree, 15);
 
         tree.delete(50);
         double_size_test(&tree, 14);
-        assert_eq!(tree.data.len(), 15);
+        assert_eq!(tree.data.borrow().len(), 15);
         tree.insert(50);
-        assert_eq!(tree.data.len(), 15);
+        assert_eq!(tree.data.borrow().len(), 15);
         double_size_test(&tree, 15);
     }
 

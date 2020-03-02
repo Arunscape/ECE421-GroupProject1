@@ -1,5 +1,7 @@
 use std::cmp::max;
 use std::ops::Not;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
@@ -25,27 +27,153 @@ impl Not for Side {
 }
 
 #[derive(Debug)]
-pub struct Node<T> {
+pub struct ColorNode<T> {
     pub value: T,
     pub ptr: usize,
     pub parent: Option<usize>,
     pub lchild: Option<usize>,
     pub rchild: Option<usize>,
     pub color: Color,
+    data: Rc<RefCell<Vec<ColorNode<T>>>>,
 }
 
-impl<T> Node<T>
+#[derive(Debug)]
+pub struct DepthNode<T> {
+    pub value: T,
+    pub ptr: usize,
+    pub parent: Option<usize>,
+    pub lchild: Option<usize>,
+    pub rchild: Option<usize>,
+    pub height: usize,
+}
+
+pub trait Node {
+    // Base methods
+    fn get(&self, i: usize) -> &Self;
+    fn get_mut(&self, i: usize) -> &mut Self;
+    fn location(&self) -> usize;
+    fn get_parent(&self) -> Option<usize>;
+    fn get_child(&self, side: Side) -> Option<usize>;
+    fn set_child(&mut self, child: usize, side: Side);
+    fn to_self_string(&self) -> String;
+
+    fn to_string(&self) -> String {
+        let mut m_str = format!("({}", self.to_self_string());
+        m_str = m_str
+            + " "
+            + &(if let Some(child) = self.get_child(Side::Left) {
+                self.get(child).to_string()
+            } else {
+                String::from("()")
+            });
+        m_str = m_str
+            + " "
+            + &(if let Some(child) = self.get_child(Side::Right) {
+                self.get(child).to_string()
+            } else {
+                String::from("()")
+            });
+        m_str + ")"
+    }
+
+    fn to_pretty_string(&self, indent: usize) -> String {
+        let i = indent * 2;
+        let mut m_str = format!("({}", self.to_self_string());
+        m_str = m_str
+            + "\n"
+            + &" ".repeat(i)
+            + &(if let Some(child) = self.get_child(Side::Left) {
+                self.get(child).to_pretty_string(indent + 1)
+            } else {
+                String::from("()")
+            });
+        m_str = m_str
+            + "\n"
+            + &" ".repeat(i)
+            + &(if let Some(child) = self.get_child(Side::Right) {
+                self.get(child).to_pretty_string(indent + 1)
+            } else {
+                String::from("()")
+            });
+        m_str + ")"
+    }
+
+    fn get_height(&self) -> usize {
+        let f = |c| Some(1 + self.get(c).get_height());
+        max(
+            self.get_child(Side::Left).and_then(f).unwrap_or(1),
+            self.get_child(Side::Right).and_then(f).unwrap_or(1),
+        )
+    }
+
+    fn get_size(&self) -> usize {
+        let f = |c| Some(self.get(c).get_size());
+
+        1 + self.get_child(Side::Left).and_then(f).unwrap_or(0)
+          + self.get_child(Side::Right).and_then(f).unwrap_or(0)
+    }
+
+    fn find_min(&self) -> usize {
+        if let Some(l) = self.get_child(Side::Left) {
+            self.get(l).find_min()
+        } else {
+            self.location()
+        }
+    }
+
+    fn side(&self) -> Side {
+        if self.is_child(Side::Left) {
+            Side::Left
+        } else {
+            Side::Right
+        }
+    }
+
+    fn get_sibling(&self) -> Option<usize> {
+        if let Some(p) = self.get_parent() {
+            let parent = self.get(p);
+            if self.is_child(Side::Left) {
+                parent.get_child(Side::Right)
+            } else if self.is_child(Side::Right) {
+                parent.get_child(Side::Left)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    fn get_uncle(&self) -> Option<usize> {
+        self.get_parent()
+            .and_then(|p| Some(self.get(p)))
+            .and_then(|p| p.get_sibling())
+    }
+
+    fn is_child(&self, side: Side) -> bool {
+        if let Some(p) = self.get_parent() {
+            let parent = self.get(p);
+            parent.get_child(side).is_some()
+                && parent.get_child(side).unwrap() == self.location()
+        } else {
+            false
+        }
+    }
+}
+
+impl<T> ColorNode<T>
 where
     T: std::fmt::Debug,
 {
-    pub fn new(val: T, selfptr: usize) -> Self {
-        Node::<T> {
+    pub fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
+        Self {
             value: val,
             ptr: selfptr,
             parent: None,
             lchild: None,
             rchild: None,
             color: Color::Black,
+            data: data
         }
     }
 
@@ -56,35 +184,10 @@ where
         }
     }
 
-    pub fn get_child(&self, side: Side) -> Option<usize> {
-        match side {
-            Side::Left => self.lchild,
-            Side::Right => self.rchild,
-        }
-    }
-
-    pub fn set_child(data: &mut Vec<Node<T>>, selfptr: usize, child: usize, side: Side) {
-        match side {
-            Side::Left => data[selfptr].lchild = Some(child),
-            Side::Right => data[selfptr].rchild = Some(child),
-        };
-        data[child].parent = Some(selfptr);
-    }
-
-    pub fn is_child(&self, data: &Vec<Node<T>>, side: Side) -> bool {
-        if let Some(p) = self.parent {
-            let parent = Node::get(data, p);
-            parent.get_child(side).is_some()
-                && parent.get_child(side).unwrap() == self.ptr
-        } else {
-            false
-        }
-    }
-
     // Nil nodes are black children too
-    pub fn is_child_black(&self, data: &Vec<Node<T>>, side: Side) -> bool{
+    pub fn is_child_black(&self, side: Side) -> bool{
         let child = self.get_child(side);
-        if child.is_some() && Node::get(data, child.unwrap()).is_red() {
+        if child.is_some() && self.get(child.unwrap()).is_red() {
             false
         } else {
             true
@@ -92,128 +195,72 @@ where
     }
 
     // this will panic of called on root node
-    pub fn is_parent_black(&self, data: &Vec<Node<T>>) -> bool {
+    pub fn is_parent_black(&self) -> bool {
         let p = self.parent.unwrap();
-        !Node::get(data, p).is_red()
+        !self.get(p).is_red()
     }
 
     // Nil nodes are black children too
-    pub fn is_sibling_black(&self, data: &Vec<Node<T>>) -> bool {
-        let sib = self.get_sibling(data);
-        if sib.is_some() && Node::get(data, sib.unwrap()).is_red() {
+    pub fn is_sibling_black(&self) -> bool {
+        let sib = self.get_sibling();
+        if sib.is_some() && self.get(sib.unwrap()).is_red() {
             false
         } else {
             true
         }
     }
-
-    pub fn side(&self, data: &Vec<Node<T>>) -> Side {
-        if self.is_child(data, Side::Left) {
-            Side::Left
-        } else {
-            Side::Right
-        }
-    }
-
-    pub fn get_sibling(&self, data: &Vec<Node<T>>) -> Option<usize> {
-        if let Some(p) = self.parent {
-            let parent = Node::get(data, p);
-            if self.is_child(data, Side::Left) {
-                parent.rchild
-            } else if self.is_child(data, Side::Right) {
-                parent.lchild
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
-
-    pub fn get_uncle(&self, data: &Vec<Node<T>>) -> Option<usize> {
-        self.parent
-            .and_then(|p| Some(Node::get(data, p)))
-            .and_then(|p| p.get_sibling(data))
-    }
-
-    pub fn to_string(&self, data: &Vec<Node<T>>) -> String {
-        let mut m_str = format!(
-            "([P:{:?} C:{:?} V:{:?}]",
-            self.parent, self.color, self.value
-        );
-        m_str = m_str
-            + " "
-            + &(if let Some(child) = self.get_child(Side::Left) {
-                data[child].to_string(data)
-            } else {
-                String::from("()")
-            });
-        m_str = m_str
-            + " "
-            + &(if let Some(child) = self.get_child(Side::Right) {
-                data[child].to_string(data)
-            } else {
-                String::from("()")
-            });
-        m_str + ")"
-    }
-
-    pub fn to_pretty_string(&self, data: &Vec<Node<T>>, indent: usize) -> String {
-        let i = indent * 2;
-        let mut m_str = format!(
-            "([P:{:?} C:{:?} V:{:?}]",
-            self.parent, self.color, self.value
-        );
-        m_str = m_str
-            + "\n"
-            + &" ".repeat(i)
-            + &(if let Some(child) = self.get_child(Side::Left) {
-                data[child].to_pretty_string(data, indent + 1)
-            } else {
-                String::from("()")
-            });
-        m_str = m_str
-            + "\n"
-            + &" ".repeat(i)
-            + &(if let Some(child) = self.get_child(Side::Right) {
-                data[child].to_pretty_string(data, indent + 1)
-            } else {
-                String::from("()")
-            });
-        m_str + ")"
-    }
-
-    pub fn get(data: &Vec<Node<T>>, ptr: usize) -> &Node<T> {
-        &data[ptr]
-    }
-
-    pub fn get_mut(data: &mut Vec<Node<T>>, ptr: usize) -> &mut Node<T> {
-        &mut data[ptr]
-    }
-
-    pub fn get_height(&self, data: &Vec<Node<T>>) -> usize {
-        let f = |c| Some(1 + Node::get(data, c).get_height(data));
-        max(
-            self.lchild.and_then(f).unwrap_or(1),
-            self.rchild.and_then(f).unwrap_or(1),
-        )
-    }
-
-    pub fn get_size(&self, data: &Vec<Node<T>>) -> usize {
-        let f = |c| Some(Node::get(data, c).get_size(data));
-
-        1 + self.lchild.and_then(f).unwrap_or(0) + self.rchild.and_then(f).unwrap_or(0)
-    }
-
-    pub fn find_min(&self, data: &Vec<Node<T>>) -> usize {
-        if let Some(l) = self.lchild {
-            Node::get(data, l).find_min(data)
-        } else {
-            self.ptr
-        }
-    }
 }
 
+impl <T: std::fmt::Debug> Node for ColorNode<T> {
+    fn to_self_string(&self) -> String {
+        format!("[P:{:?} C:{:?} V:{:?}]", self.parent, self.color, self.value)
+    }
+
+
+    /**
+    * In order to return a reference to a value of a vector contained within a
+    * refcell, a raw pointer is used. The unsafe code could be avoided by
+    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
+    * to self.get_mut(n) with &mut self.data.borrow()[n]
+    */
+    fn get(&self, ptr: usize) -> &ColorNode<T> {
+        unsafe {
+            &(*self.data.as_ptr())[ptr]
+        }
+    }
+
+    fn get_mut(&self, ptr: usize) -> &mut ColorNode<T> {
+        unsafe {
+            &mut (*self.data.as_ptr())[ptr]
+        }
+    }
+
+    fn get_child(&self, side: Side) -> Option<usize> {
+        match side {
+            Side::Left => self.lchild,
+            Side::Right => self.rchild,
+        }
+    }
+
+    fn set_child(&mut self, child: usize, side: Side) {
+        match side {
+            Side::Left => self.lchild = Some(child),
+            Side::Right => self.rchild = Some(child),
+        };
+        self.get_mut(child).parent = Some(self.location());
+    }
+
+    fn location(&self) -> usize {
+        self.ptr
+    }
+
+    fn get_parent(&self) -> Option<usize> {
+        self.parent
+    }
+
+}
+
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,21 +278,21 @@ mod tests {
          ([P:Some(0) C:Black V:6]
               ([P:Some(2) C:Black V:7])))
     */
-    fn make_fake_tree_node() -> Vec<Node<i32>> {
+    fn make_fake_tree_node() -> Vec<ColorNode<i32>> {
         let mut v = vec![
-            Node::new(5, 0),
-            Node::new(4, 1),
-            Node::new(6, 2),
-            Node::new(0, 3),
-            Node::new(1, 4),
-            Node::new(7, 5),
+            ColorNode::new(5, 0),
+            ColorNode::new(4, 1),
+            ColorNode::new(6, 2),
+            ColorNode::new(0, 3),
+            ColorNode::new(1, 4),
+            ColorNode::new(7, 5),
         ];
         let ptrs: Vec<usize> = v.iter().map(|v| v.ptr).collect();
-        Node::set_child(&mut v, ptrs[0], ptrs[4], Side::Left);
-        Node::set_child(&mut v, ptrs[0], ptrs[2], Side::Right);
-        Node::set_child(&mut v, ptrs[4], ptrs[3], Side::Left);
-        Node::set_child(&mut v, ptrs[4], ptrs[1], Side::Right);
-        Node::set_child(&mut v, ptrs[2], ptrs[5], Side::Right);
+        ColorNode::set_child(&mut v, ptrs[0], ptrs[4], Side::Left);
+        ColorNode::set_child(&mut v, ptrs[0], ptrs[2], Side::Right);
+        ColorNode::set_child(&mut v, ptrs[4], ptrs[3], Side::Left);
+        ColorNode::set_child(&mut v, ptrs[4], ptrs[1], Side::Right);
+        ColorNode::set_child(&mut v, ptrs[2], ptrs[5], Side::Right);
         v
     }
 
@@ -318,7 +365,9 @@ mod tests {
     #[test]
     fn find_min() {
         let data = make_fake_tree_node();
-        assert_eq!(Node::get(&data, data[0].find_min(&data)).value, 0);
-        assert_eq!(Node::get(&data, data[2].find_min(&data)).value, 6);
+        assert_eq!(ColorNode::get(&data, data[0].find_min(&data)).value, 0);
+        assert_eq!(ColorNode::get(&data, data[2].find_min(&data)).value, 6);
     }
 }
+
+*/
