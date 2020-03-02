@@ -21,6 +21,7 @@ enum Cmd {
     Clear,
     Help,
     New(TreeSelection),
+    NumberError,
 }
 
 fn delete(input: &[u8]) -> IResult<&[u8], Cmd> {
@@ -36,10 +37,12 @@ fn delete(input: &[u8]) -> IResult<&[u8], Cmd> {
             )
     );
     delparser(input).map(|(s, (_a, b))| {
-        (
-            s,
-            Cmd::Delete(std::str::from_utf8(b).unwrap().parse().unwrap()),
-        )
+        let x = std::str::from_utf8(b).unwrap().parse();
+        if let Ok(val) = x {
+            (s, Cmd::Delete(val))
+        } else {
+            (s, Cmd::NumberError)
+        }
     })
 }
 
@@ -56,10 +59,12 @@ fn add(input: &[u8]) -> IResult<&[u8], Cmd> {
             )
     );
     addparser(input).map(|(s, (_a, b))| {
-        (
-            s,
-            Cmd::Add(std::str::from_utf8(b).unwrap().parse().unwrap()),
-        )
+        let x = std::str::from_utf8(b).unwrap().parse();
+        if let Ok(val) = x {
+            (s, Cmd::Add(val))
+        } else {
+            (s, Cmd::NumberError)
+        }
     })
 }
 
@@ -128,7 +133,6 @@ fn eval(
     bs: &mut BSTree<isize>,
     tree_type: &mut TreeSelection,
 ) {
-    std::dbg!(&cmd);
     match cmd {
         Cmd::Quit => {
             std::process::exit(0);
@@ -162,17 +166,21 @@ fn eval(
         },
         Cmd::Help => {
             println!("Commands:");
+            println!("  new [avl | rb | bst]");
             println!("  add [VAL]");
             println!("  delete [VAL]");
             println!("  print");
             println!("  clear");
             println!("  quit");
-        }
+        },
         Cmd::New(v) => {
             *tree_type = v;
             *rb = RBTree::new();
             *avl = AVLTree::new();
             *bs = BSTree::new();
+        },
+        Cmd::NumberError => {
+            println!("Only numbers are supported in the demo. Other datatypes can be purchased for $5.99.");
         }
     }
 }
