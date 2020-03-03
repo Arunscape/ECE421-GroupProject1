@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use super::tree::BaseTree;
 use super::tree::Tree;
@@ -179,8 +179,7 @@ where
         self.retrace(n);
     }
 
-    fn rebalance_del(&mut self, n: usize, child: usize) {
-    }
+    fn rebalance_del(&mut self, _n: usize, _child: usize) {}
 
     fn delete_replace(&mut self, n: usize) -> usize {
         let node = self.get(n);
@@ -317,10 +316,8 @@ where
         // algorithm off wiki than implemented in tree...
         self.rotate(
             side,
-            self.get(n).get_child(!side)
-            .expect("avl rotate unwrap kid")
+            self.get(n).get_child(!side).expect("avl rotate unwrap kid"),
         );
-
     }
 
     fn get_balance_factor(&self, n: usize) -> isize {
@@ -339,16 +336,14 @@ where
         }
     }
 
-
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn new(){
+    fn new() {
         let tree = AVLTree::<i32>::new();
     }
 

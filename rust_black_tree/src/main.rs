@@ -8,12 +8,9 @@ use nom::{
     character::{is_alphabetic, is_digit},
     IResult,
 };
-use rust_black_trees::node::Node;
 use rust_black_trees::tree::BaseTree;
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
-
-use rust_black_trees::redblack;
 
 #[derive(Debug)]
 enum Cmd {
@@ -145,27 +142,27 @@ fn eval(
         }
         Cmd::Print => match tree_type {
             TreeSelection::RedBlack => {
-                if let Some(s) =
-                    rust_black_trees::prettynodeprinter::printprettyrb(rb.get(rb.get_root().unwrap()))
-                {
+                if let Some(s) = rust_black_trees::prettynodeprinter::printprettyrb(
+                    rb.get(rb.get_root().unwrap()),
+                ) {
                     println!("{}", s)
                 } else {
                     println!("{}", rb.to_pretty_string())
                 }
             }
             TreeSelection::AVL => {
-                if let Some(s) =
-                    rust_black_trees::prettynodeprinter::printprettyavl(avl.get(avl.get_root().unwrap()))
-                {
+                if let Some(s) = rust_black_trees::prettynodeprinter::printprettyavl(
+                    avl.get(avl.get_root().unwrap()),
+                ) {
                     println!("{}", s)
                 } else {
                     println!("{}", avl.to_pretty_string())
                 }
             }
             TreeSelection::BST => {
-                if let Some(s) =
-                    rust_black_trees::prettynodeprinter::printprettybst(bs.get(bs.get_root().unwrap()))
-                {
+                if let Some(s) = rust_black_trees::prettynodeprinter::printprettybst(
+                    bs.get(bs.get_root().unwrap()),
+                ) {
                     println!("{}", s)
                 } else {
                     println!("{}", avl.to_pretty_string())
