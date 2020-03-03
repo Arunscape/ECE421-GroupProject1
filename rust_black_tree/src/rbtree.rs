@@ -1,11 +1,27 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use super::tree::BaseTree;
 use super::tree::Tree;
 
 use super::node::Node;
 use super::node::*;
+
+/// a nice convenient macro which allows a user to initialize a tree with
+/// a number of elements
+/// usage: redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+#[macro_export]
+macro_rules! redblack {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_tree = RBTree::new();
+            $(
+                temp_tree.insert($x);
+            )*
+            temp_tree
+        }
+    };
+}
 
 #[derive(Debug)]
 pub struct ColorNode<T> {
@@ -26,7 +42,7 @@ pub trait ColoredNode<T>: Node<T> {
     fn is_sibling_black(&self) -> bool;
 }
 
-impl <T> ColoredNode<T> for ColorNode<T>
+impl<T> ColoredNode<T> for ColorNode<T>
 where
     T: std::fmt::Debug,
     T: std::cmp::PartialOrd,
@@ -39,7 +55,7 @@ where
             lchild: None,
             rchild: None,
             color: Color::Black,
-            data: data
+            data: data,
         }
     }
 
@@ -51,7 +67,7 @@ where
     }
 
     // Nil nodes are black children too
-    fn is_child_black(&self, side: Side) -> bool{
+    fn is_child_black(&self, side: Side) -> bool {
         let child = self.get_child(side);
         if child.is_some() && self.get(child.unwrap()).is_red() {
             false
@@ -77,9 +93,12 @@ where
     }
 }
 
-impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
+impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for ColorNode<T> {
     fn to_self_string(&self) -> String {
-        format!("[P:{:?} C:{:?} V:{:?}]", self.parent, self.color, self.value)
+        format!(
+            "[P:{:?} C:{:?} V:{:?}]",
+            self.parent, self.color, self.value
+        )
     }
 
     fn is(&self, val: &T) -> bool {
@@ -92,23 +111,18 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
         &self.value < val
     }
 
-
     /**
-    * In order to return a reference to a value of a vector contained within a
-    * refcell, a raw pointer is used. The unsafe code could be avoided by
-    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
-    * to self.get_mut(n) with &mut self.data.borrow()[n]
-    */
+     * In order to return a reference to a value of a vector contained within a
+     * refcell, a raw pointer is used. The unsafe code could be avoided by
+     * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
+     * to self.get_mut(n) with &mut self.data.borrow()[n]
+     */
     fn get(&self, ptr: usize) -> &ColorNode<T> {
-        unsafe {
-            &(*self.data.as_ptr())[ptr]
-        }
+        unsafe { &(*self.data.as_ptr())[ptr] }
     }
 
     fn get_mut(&self, ptr: usize) -> &mut ColorNode<T> {
-        unsafe {
-            &mut (*self.data.as_ptr())[ptr]
-        }
+        unsafe { &mut (*self.data.as_ptr())[ptr] }
     }
 
     fn get_child(&self, side: Side) -> Option<usize> {
@@ -143,8 +157,6 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
         self.ptr
     }
 }
-
-
 
 /**
  * Arena based memory tree structure
@@ -356,7 +368,8 @@ where
         if !node.is_parent_black()
             && node.is_sibling_black()
             && self.get(s).is_child_black(Side::Left)
-            && self.get(s).is_child_black(Side::Right) {
+            && self.get(s).is_child_black(Side::Right)
+        {
             self.get_mut(s).color = Color::Red;
             self.get_mut(p).color = Color::Black;
         } else {
@@ -487,9 +500,7 @@ where
             0
         }
     }
-
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -566,7 +577,6 @@ mod tests {
 
         assert_eq!(tree.to_string(), "([P:None C:Black V:11] ([P:Some(3) C:Red V:7] ([P:Some(7) C:Black V:5] ([P:Some(9) C:Red V:3] ([P:Some(11) C:Black V:1] ([P:Some(13) C:Red V:0] () ()) ([P:Some(13) C:Red V:2] () ())) ([P:Some(11) C:Black V:4] () ())) ([P:Some(9) C:Black V:6] () ())) ([P:Some(7) C:Black V:9] ([P:Some(5) C:Black V:8] () ()) ([P:Some(5) C:Black V:10] () ()))) ([P:Some(3) C:Black V:13] ([P:Some(1) C:Black V:12] () ()) ([P:Some(1) C:Black V:14] () ())))");
     }
-
 
     fn double_size_test<T: PartialEq + PartialOrd + std::fmt::Debug>(
         tree: &RBTree<T>,

@@ -1,11 +1,27 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use super::tree::BaseTree;
 use super::tree::Tree;
 
 use super::node::Node;
 use super::node::*;
+
+/// a nice convenient macro which allows a user to initialize a tree with
+/// a number of elements
+/// usage: bst!{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+#[macro_export]
+macro_rules! bst {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_tree = BSTree::new();
+            $(
+                temp_tree.insert($x);
+            )*
+            temp_tree
+        }
+    };
+}
 
 #[derive(Debug)]
 pub struct RegularNode<T> {
@@ -17,7 +33,7 @@ pub struct RegularNode<T> {
     data: Rc<RefCell<Vec<RegularNode<T>>>>,
 }
 
-impl <T> RegularNode<T> {
+impl<T> RegularNode<T> {
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<RegularNode<T>>>>) -> Self {
         Self {
             value: val,
@@ -25,12 +41,12 @@ impl <T> RegularNode<T> {
             parent: None,
             lchild: None,
             rchild: None,
-            data: data
+            data: data,
         }
     }
 }
 
-impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for RegularNode<T> {
+impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for RegularNode<T> {
     fn to_self_string(&self) -> String {
         format!("[P:{:?} V:{:?}]", self.parent, self.value)
     }
@@ -45,23 +61,18 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for RegularNode<T> {
         &self.value < val
     }
 
-
     /**
-    * In order to return a reference to a value of a vector contained within a
-    * refcell, a raw pointer is used. The unsafe code could be avoided by
-    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
-    * to self.get_mut(n) with &mut self.data.borrow()[n]
-    */
+     * In order to return a reference to a value of a vector contained within a
+     * refcell, a raw pointer is used. The unsafe code could be avoided by
+     * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
+     * to self.get_mut(n) with &mut self.data.borrow()[n]
+     */
     fn get(&self, ptr: usize) -> &RegularNode<T> {
-        unsafe {
-            &(*self.data.as_ptr())[ptr]
-        }
+        unsafe { &(*self.data.as_ptr())[ptr] }
     }
 
     fn get_mut(&self, ptr: usize) -> &mut RegularNode<T> {
-        unsafe {
-            &mut (*self.data.as_ptr())[ptr]
-        }
+        unsafe { &mut (*self.data.as_ptr())[ptr] }
     }
 
     fn get_child(&self, side: Side) -> Option<usize> {
@@ -164,11 +175,9 @@ where
         self.get_mut(p).set_child(c, side)
     }
 
-    fn rebalance_ins(&mut self, n: usize) {
-    }
+    fn rebalance_ins(&mut self, n: usize) {}
 
-    fn rebalance_del(&mut self, n: usize, child: usize) {
-    }
+    fn rebalance_del(&mut self, n: usize, child: usize) {}
 
     fn delete_replace(&mut self, n: usize) -> usize {
         let node = self.get(n);
@@ -246,9 +255,7 @@ where
             0
         }
     }
-
 }
-
 
 #[cfg(test)]
 mod tests {

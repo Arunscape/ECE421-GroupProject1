@@ -12,6 +12,8 @@ use nom::{
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
+use rust_black_trees::redblack;
+
 #[derive(Debug)]
 enum Cmd {
     Add(isize),
@@ -172,13 +174,13 @@ fn eval(
             println!("  print");
             println!("  clear");
             println!("  quit");
-        },
+        }
         Cmd::New(v) => {
             *tree_type = v;
             *rb = RBTree::new();
             *avl = AVLTree::new();
             *bs = BSTree::new();
-        },
+        }
         Cmd::NumberError => {
             println!("Only signed word sized numbers are supported in the demo. Other datatypes can be purchased for $5.99.");
         }
@@ -223,6 +225,7 @@ fn main() {
     let mut avltree = AVLTree::new();
     let mut bstree = BSTree::new();
     let mut tree_type = TreeSelection::Undefined;
+
     loop {
         read_and_eval(&mut rbtree, &mut avltree, &mut bstree, &mut tree_type);
     }
