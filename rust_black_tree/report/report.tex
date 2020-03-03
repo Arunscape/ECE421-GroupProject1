@@ -252,11 +252,12 @@ following macros:
 
 \subsection{Pretty tree printing}
 We decided to go above and beyond, and have the tree displayed in a pretty
-fashion. If the terminal width allows for it, a pretty ASCII tree will be
-printed. If the user resizes their terminal window, the CLI will also adjust
-accordingly.  For Red Black trees, the colour of the node will also be printed
-to the terminal! A black node has a black background colour, while the red nodes
-have a red background colour.
+fashion. If the terminal width or height allows for it, a pretty ASCII tree will
+be printed. If the user resizes their terminal window, the CLI will also adjust
+accordingly.  If there is not enough space to print a pretty tree, the CLI will
+fall back to a normal text representation of the tree For Red Black trees, the
+colour of the node will also be printed to the terminal! A black node has a
+black background colour, while the red nodes have a red background colour.
 \begin{figure}[H]
       \centering
       \includegraphics[width=.8\textwidth]{rbtree.png}
@@ -265,9 +266,16 @@ have a red background colour.
       nodes}
 \end{figure}
 
-For the AVL tree, coloring has be chosen to indicate the balance
+For the AVL tree, colouring has be chosen to indicate the balance
 factor, with green being a neutral balance factor, yellow being right
 heavy, and blue being left heavy.
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{avl.png}
+      \caption{Pretty visualization for a tree in the CLI.\@ This shows an AVL
+      tree, which also has coloured outputs for the different balance factors}
+\end{figure}
 
 %% TODO: insert AVL tree graphic
 %% \begin{figure}[H]
@@ -284,6 +292,10 @@ the following characters would be displayed instead of the previous command that
 the user entered, which is not as user-friendly:
 \verb|^[[A|
 
+
+\subsection{Output redirection}
+The CLI also supports I/O redirection. If the CLI is invoked and the output is
+piped, it will omit unnessesary information, and only output the pretty 
 
 \section{Answers to questions}
 

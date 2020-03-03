@@ -55,6 +55,8 @@ Delete a value from the tree
     d 9
     r 10
 
+Note: non-existent values in the tree passed to the delete command will be ignored
+
 #### print/p
 
 Print the current tree
