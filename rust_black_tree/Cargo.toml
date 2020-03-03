@@ -1,16 +1,16 @@
 [package]
 name = "rust_black_tree"
 version = "0.1.0"
-authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>", "Alexander Rostron"]
+authors = ["Jacob R", "Arun Woosaree <arun@woosaree.xyz>", "Alexander Rostron"]
 edition = "2018"
 exclude = [
     "report/*",
     "*.pdf",
 ]
 description = "Please don't use this in something serious lol"
-documentation = ""
-homepage = ""
-repository = ""
+#documentation = ""
+#homepage = ""
+repository = "https://github.com/Arunscape/ECE421-GroupProject1/tree/master/rust_black_tree"
 maintenance = { status = "as-is" }
 license = "GPL-3.0-or-later"
 readme = "README.md"

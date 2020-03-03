@@ -28,17 +28,13 @@ pub fn printprettyavl<T: std::fmt::Debug + std::cmp::PartialOrd>(
 }
 
 fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String> {
-    let (grid_width, grid_height) = if let Some((w, h)) = term_size::dimensions() {
-        (w, h)
-    } else {
-        (150, 100)
-    };
+    let (grid_width, grid_height) = term_size::dimensions().unwrap_or((150, 100));
     let mut grid: Vec<Vec<String>> = Vec::with_capacity(grid_height);
     let mut used_depth = 0;
     // make grid
-    for row in 0..grid_height {
+    for row in 0..grid_height*20 {
         grid.push(Vec::with_capacity(grid_width));
-        for _ in 0..grid_width {
+        for _ in 0..grid_width*20 {
             grid[row].push(" ".to_string());
         }
     }
@@ -70,6 +66,9 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         if x < mw {
             return false;
         }
+        if x < cw / 2 {
+            return false;
+        }
         if x + cw/2 > grid[0].len() {
             return false;
         }
@@ -78,9 +77,9 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         }
 
         // write node
-        grid[depth][x  - cw / 2] = val_str;
+        grid[depth][x - cw / 2] = val_str;
         for i in 1..cw {
-            grid[depth][x  - cw / 2 + i] = ZWSP.to_string();
+            grid[depth][x - cw / 2 + i] = ZWSP.to_string();
         }
         *ud = std::cmp::max(*ud, depth) + 1;
         if let Some(c) = n.get_child(Side::Left) {
