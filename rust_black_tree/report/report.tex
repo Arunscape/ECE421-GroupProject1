@@ -106,13 +106,14 @@ functionality defined by the different trees.
 The tree trait defines the following project requirements:
 
 \begin{itemize}
-  \item inserting a node 
-  \item deleting a node
-  \item counting the number of leaves in a tree
-  \item getting the height of the tree
-  \item printing the in-order traversal of the tree (using the to\_string()
+  \item inserting a node (insert)
+  \item deleting a node (delete)
+  \item counting the number of leaves in a tree (get\_leaf\_count)
+  \item getting the height of the tree (get\_height)
+  \item printing the in-order traversal of the tree (to\_string()
     function)
-  \item checking if the tree is empty
+  \item checking if the tree is empty (is\_empty)
+  \item checking if the tree contains an element (contains)
 \end{itemize}
 
 \subsection{Arena based allocation}
@@ -123,13 +124,16 @@ a vector in the tree which contains all the nodes, and each node stores its
 parent child relationships as an \texttt{Option<usize>}. This also allowed us to
 deal with less headaches dealing with lifetimes and ownership.
 
+This did, however impose upon us some additional design considerations
+to make sure that the tree operations remained \(O(\log n\))
+
 \subsection{Unsafe}
 In order to return a reference to a value of a vector contained within a
-refcell, a raw pointer is used. The unsafe code could be avoided by replacing
+RefCell, a raw pointer is used. The unsafe code could be avoided by replacing
 each call to self.get(n) with \texttt{\&self.data.borrow()[n]} and each call to
 \texttt{self.get\_mut(n)} with \texttt{\&mut self.data.borrow()[n]}. This allows
 us to do the same thing with less keystrokes. It does make the program not
-thread-safe, but self-balancing trees are a pretty questionable choice for a
+thread-safe, but self-balancing trees are a non-ideal choice for a
 multi-threaded data structure anyways, since re-balancing can require that most
 of the tree be locked to one thread during an insertion or deletion
 
@@ -144,6 +148,9 @@ For both the Red Black tree, and the AVL tree, there are tests to verify:
   \item printing a string representation of the tree
   \item verifying the tree's height is correct
   \item deletion
+  \item testing the balance factor for the AVL tree
+  \item finding the leaf count
+  \item checking the contains function
 \end{enumerate}
 
 Furthermore, tests were created for the \texttt{Node} class. These tests verify
@@ -157,6 +164,9 @@ the following functionality:
   \item finding the min value
   \item printing a string representation of the node
 \end{enumerate}
+
+Since the tree is implemented as a tree set, adding duplicate values or
+attempting to delete non-existent values will do nothing, as intended.
 
 \section{Defects}
 
@@ -376,13 +386,18 @@ effectively extended”? For example. Could your code be reused to build a 2-3-4
 tree or B tree?}
 
 Actually, with the way we implemented the trees, it would be very easy to re-use
-some code to create a 2-3-4 tree, a B tree, or some other type of tree. To
-begin, one would have to create a node struct which implements our Node trait,
-and then make a tree which implements out Tree trait. From there, the programmer
-would simply need to implement the methods without a default implementation.
-To make the new tree compatible with out command-line interface, they would need
-to add a new tree type to the enum defined in \texttt{main.rs}, and pass it
-as an additional argument to the parsing functions in \texttt{main.rs}.
+some code to implement any sort of binary tree.  To begin, one would have to
+create a node struct which implements our Node trait, and then make a tree which
+implements out Tree trait. From there, the programmer would simply need to
+implement the methods without a default implementation.  To make the new tree
+compatible with out command-line interface, they would need to add a new tree
+type to the enum defined in \texttt{main.rs}, and pass it as an additional
+argument to the parsing functions in \texttt{main.rs}.
+
+Our code could be used to implement a
+2-3-4 tree, a B tree, or some other type of tree,
+however, it would be non-trivial to do so.
+
 
 
 \markdownInput{../README.md}

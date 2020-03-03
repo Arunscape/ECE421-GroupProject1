@@ -1,11 +1,12 @@
 [package]
 name = "rust_black_tree"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Jacob R", "Arun Woosaree <arun@woosaree.xyz>", "Alexander Rostron"]
 edition = "2018"
 exclude = [
     "report/*",
     "*.pdf",
+    "*.mp4",
 ]
 description = "Please don't use this in something serious lol"
 #documentation = ""
