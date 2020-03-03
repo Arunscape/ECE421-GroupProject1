@@ -385,9 +385,14 @@ where
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
         if let Some(z) = self.get(n).get_child(!side) {
+            println!("Before rotate:");
+            println!("{}", self.to_pretty_string());
             self.rotate(side, z);
             match self.get_balance_factor(z) {
                 0 => {
+                    // TODO
+                    // we get into this case too often
+                    // which is a bug
                     self.set_balance_factor(n, 1);
                     self.set_balance_factor(z, -1);
                 }
@@ -396,6 +401,8 @@ where
                     self.set_balance_factor(z, 0);
                 }
             }
+            println!("After rotate:");
+            println!("{}", self.to_pretty_string());
         } else {
             panic!("avl rotate unwrap");
         }
@@ -472,6 +479,7 @@ mod tests {
         tree.insert(1);
         tree.insert(2);
         tree.insert(3);
+        println!("123");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -481,6 +489,7 @@ mod tests {
         tree.insert(1);
         tree.insert(3);
         tree.insert(2);
+        println!("132");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -490,6 +499,7 @@ mod tests {
         tree.insert(3);
         tree.insert(2);
         tree.insert(1);
+        println!("321");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -499,6 +509,7 @@ mod tests {
         tree.insert(3);
         tree.insert(1);
         tree.insert(2);
+        println!("312");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
