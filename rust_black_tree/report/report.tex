@@ -103,6 +103,18 @@ approach allowed us to re-use common functionality between the
 different types of trees, while still allowing for new, separate
 functionality defined by the different trees.
 
+The tree trait defines the following project requirements:
+
+\begin{itemize}
+  \item inserting a node 
+  \item deleting a node
+  \item counting the number of leaves in a tree
+  \item getting the height of the tree
+  \item printing the in-order traversal of the tree (using the to\_string()
+    function)
+  \item checking if the tree is empty
+\end{itemize}
+
 \subsection{Arena based allocation}
 The way the memory is allocated for the nodes is a little unusual, in that the
 nodes are actually stored in a vector. This allows us to deal with indices,
