@@ -406,7 +406,7 @@ where
         // ALSO adjust the balance factors
         if let Some(z) = self.get(n).get_child(!side) {
             self.rotate(side, z);
-            match self.get_balance_factor(z) {
+            match self.calc_bal_fac(z) {
                 0 => {
                     self.set_balance_factor(n, 1);
                     self.set_balance_factor(z, -1);
@@ -427,6 +427,20 @@ where
 
     fn set_balance_factor(&mut self, n: usize, bf: isize) {
         self.get_mut(n).balance_factor = bf;
+    }
+
+    fn calc_bal_fac(&self, n: usize) -> isize {
+        let rc = self.get(n).get_child(Side::Right);
+        let lc = self.get(n).get_child(Side::Left);
+        let safe_get_bf = |x| {
+            match x {
+                Some(y) => self.get_balance_factor(y),
+                None => 0,
+            }
+        };
+        let bf_rc = safe_get_bf(rc);
+        let bf_lc = safe_get_bf(lc);
+        bf_rc - bf_lc
     }
 
     fn is_heavy_on_side(&self, side: Side, n: usize) -> bool {
@@ -492,6 +506,7 @@ mod tests {
         tree.insert(1);
         tree.insert(2);
         tree.insert(3);
+        println!("123");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -501,6 +516,7 @@ mod tests {
         tree.insert(1);
         tree.insert(3);
         tree.insert(2);
+        println!("132");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -510,6 +526,7 @@ mod tests {
         tree.insert(3);
         tree.insert(2);
         tree.insert(1);
+        println!("321");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
@@ -519,6 +536,7 @@ mod tests {
         tree.insert(3);
         tree.insert(1);
         tree.insert(2);
+        println!("312");
         assert_eq!(
             tree.to_string(),
             "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
