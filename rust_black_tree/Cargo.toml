@@ -12,8 +12,7 @@ documentation = ""
 homepage = ""
 repository = ""
 maintenance = { status = "as-is" }
-license = ""
-license-file = ""
+license = "GPL-3.0-or-later"
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
