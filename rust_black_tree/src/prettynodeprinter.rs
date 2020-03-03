@@ -53,6 +53,8 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         ud: &mut usize,
     ) -> bool {
         let (val_str, cw) = n.to_self_string_display();
+        let cw = cw+1;
+        let val_str = " ".to_string() + &val_str;
         let lw = n
             .get_child(Side::Left)
             .map(|x| node.get(x).get_size())
@@ -115,6 +117,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
 #[cfg(test)]
 mod tests {
     use super::super::rbtree::RBTree;
+    use super::super::avltree::AVLTree;
     use super::super::tree::{BaseTree, Tree};
     use super::*;
 
@@ -154,6 +157,30 @@ mod tests {
             t.insert(x);
         }
         if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
+            println!("{}", s);
+        }
+        // assert!(false);
+    }
+
+    #[test]
+    fn test_4() {
+        let mut t = RBTree::new();
+        for x in &[0, 20, -2, 30, -1, -3, 10, 40, -4] {
+            t.insert(x);
+        }
+        if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
+            println!("{}", s);
+        }
+        // assert!(false);
+    }
+
+    #[test]
+    fn test_avl() {
+        let mut t = AVLTree::new();
+        for x in &[0, 20, -2, 30, -1, -3, 10, 40, -4] {
+            t.insert(x);
+        }
+        if let Some(s) = printprettyavl(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
         // assert!(false);

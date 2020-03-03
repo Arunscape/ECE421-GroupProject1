@@ -1,10 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 use std::cmp::max;
 use std::ops::Not;
-
-use super::rbtree::ColoredNode;
-use super::rbtree::ColorNode;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
