@@ -88,14 +88,19 @@ defined by the different nodes.
 %method, for example.
 %\todo{are we sharing the trait?}
 
-Both the Red Black tree and the AVL tree share a Tree trait, with default
-implementations for insert, delete, rotate, find, get\_height, and making a
-string representation of the tree. Then, the functionality which is specific to
-either the Red Black tree or the AVL tree is implemented in the Red Black tree
-struct, and the AVL tree struct, respectively.  (For example, re-balancing the
-tree after insertion/deletion).  This approach allowed us to re-use common
-functionality between the different types of trees, while still allowing for
-new, separate functionality defined by the different trees.
+Both the Red Black tree and the AVL tree share a Tree trait, with
+default implementations for insert, delete, rotate, find, get\_height,
+and making a string representation of the tree. This prevents us from
+having to write and maintain multiple versions of these non trivial
+functions. These more complex operations are defined in terms of
+simpler operations, and each tree only has to implement these simpler
+operations to take advantage of this. Finally, the functionality which is
+specific to either the Red Black tree or the AVL tree is implemented
+in the Red Black tree struct, and the AVL tree struct, respectively.
+(For example, re-balancing the tree after insertion/deletion).  This
+approach allowed us to re-use common functionality between the
+different types of trees, while still allowing for new, separate
+functionality defined by the different trees.
 
 \subsection{Arena based allocation}
 The way the memory is allocated for the nodes is a little unusual, in that the
@@ -117,7 +122,7 @@ of the tree be locked to one thread during an insertion or deletion
 
 \section{Testing}
 Several unit tests were created to verify the functionality of the Red Black
-tree and the AVL trees. 
+tree and the AVL trees.
 
 For both the Red Black tree, and the AVL tree, there are tests to verify:
 \begin{enumerate}
@@ -307,7 +312,13 @@ Here's a preview of the CLI!
 \textit{Do you need to apply any kind of error handling in your system (e.g.,
 panic macro,}
 \verb|Option<T>|, \verb|Result<T, E>| \textit{etc..)}
-\todo{I DON'T KNOW}
+
+The result and option types are used frequently throughout our
+codebase. As part of the parsing for the command line application, the
+result type is passed around to account for invalid input. The Option
+type is used liberally throughout our tree code, as it's used for
+storing both children and parent nodes as there are cases where they
+do not exist.
 
 \textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
 Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
