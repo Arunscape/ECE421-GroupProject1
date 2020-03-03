@@ -1,4 +1,7 @@
 *.pdf
+_markdown_report/
+report.markdown.err
+report.markdown.lua
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

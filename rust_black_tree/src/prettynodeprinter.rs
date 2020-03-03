@@ -62,16 +62,16 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
             .map(|x| node.get(x).get_size())
             .unwrap_or(0);
         let mw = std::cmp::max(lw, rw) * cw;
-        if depth >= grid.len() {
-            return false;
-        }
         if x + mw >= grid[0].len() {
             return false;
         }
-        if x  < mw {
+        if x < mw {
             return false;
         }
         if x + cw/2 > grid[0].len() {
+            return false;
+        }
+        if depth + mw >= grid.len() {
             return false;
         }
 
