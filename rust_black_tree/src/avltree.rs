@@ -179,7 +179,9 @@ where
         self.retrace(n);
     }
 
-    fn rebalance_del(&mut self, _n: usize, _child: usize) {}
+    fn rebalance_del(&mut self, n: usize, _child: usize) {
+        self.del_retrace(n)
+    }
 
     fn delete_replace(&mut self, n: usize) -> usize {
         let node = self.get(n);
@@ -250,6 +252,56 @@ where
     T: PartialEq,
     T: std::fmt::Debug,
 {
+    fn del_retrace(&mut self, n:usize) {
+
+        loop {
+            let x = self.get(n).parent;
+            if !x.is_some() {return;}
+            let x: usize = x.expect("Deletion retrace get z parent");
+            if self.get(n).is_child(Side::Left) {
+                if self.is_heavy_on_side(Side::Right, x) {
+                    // Sibling of N (higher by 2)
+                    let z = self.get(n).get_sibling().expect("del z");
+                    if self.is_heavy_on_side(Side::Left, z) {
+                        self.avl_rotate(Side::Right, z);
+                        self.avl_rotate(Side::Left, x);
+                    } else {
+                        self.avl_rotate(Side::Left, x);
+                    }
+                } else {
+                    if self.get_balance_factor(x) == 0 {
+                        self.set_balance_factor(x, 1);
+                        break;
+                    }
+                    self.set_balance_factor(n, 0);
+                    //N = X; //
+                    self.del_retrace(x);
+                }
+            } else {
+                if self.is_heavy_on_side(Side::Left, x) {
+                    // Sibling of N (higher by 2)
+                    let z = self.get(n).get_sibling().expect("del z");
+                    if self.is_heavy_on_side(Side::Right, z) {
+                        self.avl_rotate(Side::Left, z);
+                        self.avl_rotate(Side::Right, x);
+                    } else {
+                        self.avl_rotate(Side::Right, x);
+                    }
+                } else {
+                    if self.get_balance_factor(x) == 0 {
+                        self.set_balance_factor(x, -1);
+                        break; // Leave the loop
+                    }
+                    self.set_balance_factor(n, 0);
+                    //N = X;
+                    self.del_retrace(x);
+                }
+            }
+            break;
+        }
+
+    }
+
     fn retrace(&mut self, z: usize) {
         loop {
             //println!("Z= {:?}", self.get(z).value);
@@ -428,14 +480,16 @@ mod tests {
         assert!(true);
     }
 
-    //    #[test]
-    //    fn insert_many() {
-    //        let mut tree = AVLTree::<i32>::new();
-    //        for i in 1..10 {
-    //            tree.insert(i);
-    //        }
-    //        println!("{}", tree.to_pretty_string());
-    //        assert_eq!("A BALANCED REEE", tree.to_pretty_string());
-    //
-    //    }
+    #[test]
+    fn avl_del() {
+        let mut tree = AVLTree::<i32>::new();
+        for i in 1..10 {
+        tree.insert(i);
+        }
+        tree.delete(5);
+        tree.delete(7);
+        tree.insert(7);
+        println!("{}", tree.to_pretty_string());
+        assert!(false);
+    }
 }
