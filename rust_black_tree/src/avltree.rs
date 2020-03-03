@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::node::{paint, endpaint};
+use super::node::{endpaint, paint};
 use super::tree::BaseTree;
 use super::tree::Tree;
 
@@ -302,12 +302,12 @@ where
                 if self.is_heavy_on_side(Side::Right, x) {
                     // Sibling of N (higher by 2)
                     if let Some(z) = self.get(n).get_sibling() {
-	                    if self.is_heavy_on_side(Side::Left, z) {
-	                        self.avl_rotate(Side::Right, z);
-	                        self.avl_rotate(Side::Left, x);
-	                    } else {
-	                        self.avl_rotate(Side::Left, x);
-	                    }
+                        if self.is_heavy_on_side(Side::Left, z) {
+                            self.avl_rotate(Side::Right, z);
+                            self.avl_rotate(Side::Left, x);
+                        } else {
+                            self.avl_rotate(Side::Left, x);
+                        }
                     } else {
                         //println!("THIS IS SKETCHY");
                         //self.del_retrace(x);
@@ -325,13 +325,13 @@ where
             } else {
                 if self.is_heavy_on_side(Side::Left, x) {
                     // Sibling of N (higher by 2)
-                    if let Some(z) = self.get(n).get_sibling(){
-	                    if self.is_heavy_on_side(Side::Right, z) {
-	                        self.avl_rotate(Side::Left, z);
-	                        self.avl_rotate(Side::Right, x);
-	                    } else {
-	                        self.avl_rotate(Side::Right, x);
-	                    }
+                    if let Some(z) = self.get(n).get_sibling() {
+                        if self.is_heavy_on_side(Side::Right, z) {
+                            self.avl_rotate(Side::Left, z);
+                            self.avl_rotate(Side::Right, x);
+                        } else {
+                            self.avl_rotate(Side::Right, x);
+                        }
                     } else {
                         //println!("THIS IS SKETCHY");
                         //self.del_retrace(x);
@@ -352,65 +352,65 @@ where
     }
 
     fn retrace(&mut self, z: usize) {
-            //println!("Z= {:?}", self.get(z).value);
-            //println!("X= {:?}", self.get(x).value);
-            // get the parent of current node
-            let x = self.get(z).parent;
-            if !x.is_some() {
-                // current node z is the root of the tree
-                // nothing to do, return?
-                return;
-            }
-            let x: usize = x.expect("Retrace get z parent");
+        //println!("Z= {:?}", self.get(z).value);
+        //println!("X= {:?}", self.get(x).value);
+        // get the parent of current node
+        let x = self.get(z).parent;
+        if !x.is_some() {
+            // current node z is the root of the tree
+            // nothing to do, return?
+            return;
+        }
+        let x: usize = x.expect("Retrace get z parent");
 
-            if self.get(z).is_child(Side::Right) {
-                // The right subtree increases
-                if self.is_heavy_on_side(Side::Right, x) {
-                    if self.is_heavy_on_side(Side::Left, z) {
-               println!("THERE GO THE COLORS");
-                        self.avl_rotate(Side::Right, z);
-                        self.avl_rotate(Side::Left, x);
-                    } else {
-                        // TODO: rotates panic rn
-                        // wiki has a differnet definiton of
-                        // rotate than we do I think
-                        self.avl_rotate(Side::Left, x);
-                        //self.rotate(Side::Left, z);
-                    }
+        if self.get(z).is_child(Side::Right) {
+            // The right subtree increases
+            if self.is_heavy_on_side(Side::Right, x) {
+                if self.is_heavy_on_side(Side::Left, z) {
+                    println!("THERE GO THE COLORS");
+                    self.avl_rotate(Side::Right, z);
+                    self.avl_rotate(Side::Left, x);
                 } else {
-                    if self.is_heavy_on_side(Side::Left, x) {
-                        self.set_balance_factor(x, 0);
-                        return;
-                    }
-                    self.set_balance_factor(x, 1);
-                    //Z = X; // Height(Z) increases by 1
-                    //z = x;
-                    self.retrace(x);
-                    //continue;
+                    // TODO: rotates panic rn
+                    // wiki has a differnet definiton of
+                    // rotate than we do I think
+                    self.avl_rotate(Side::Left, x);
+                    //self.rotate(Side::Left, z);
                 }
             } else {
                 if self.is_heavy_on_side(Side::Left, x) {
-                    if self.is_heavy_on_side(Side::Right, z) {
-               println!("THERE GO THE COLORS");
-                        self.avl_rotate(Side::Left, z);
-                        self.avl_rotate(Side::Right, x);
-                    } else {
-                        self.avl_rotate(Side::Right, x);
-                    }
-                } else {
-                    if self.is_heavy_on_side(Side::Right, x) {
-                        self.set_balance_factor(x, 0);
-                        return; // Leave the loop
-                    }
-                    self.set_balance_factor(x, -1);
-                    //Z = X; // Height(Z) increases by 1
-                    //z = x;
-                    self.retrace(x);
-                    //continue;
+                    self.set_balance_factor(x, 0);
+                    return;
                 }
+                self.set_balance_factor(x, 1);
+                //Z = X; // Height(Z) increases by 1
+                //z = x;
+                self.retrace(x);
+                //continue;
             }
-            //self.retrace(x);
-            return;
+        } else {
+            if self.is_heavy_on_side(Side::Left, x) {
+                if self.is_heavy_on_side(Side::Right, z) {
+                    println!("THERE GO THE COLORS");
+                    self.avl_rotate(Side::Left, z);
+                    self.avl_rotate(Side::Right, x);
+                } else {
+                    self.avl_rotate(Side::Right, x);
+                }
+            } else {
+                if self.is_heavy_on_side(Side::Right, x) {
+                    self.set_balance_factor(x, 0);
+                    return; // Leave the loop
+                }
+                self.set_balance_factor(x, -1);
+                //Z = X; // Height(Z) increases by 1
+                //z = x;
+                self.retrace(x);
+                //continue;
+            }
+        }
+        //self.retrace(x);
+        return;
         // Unless loop is left via break, the height of the total tree increases by 1.
     }
 
@@ -418,23 +418,23 @@ where
         // make an adjustment to account for differnt rotate
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
-//        println!("Pre-rotate on n={:?} for\n {}",
-//            self.get(n).value,
-//            self.to_pretty_string());
+        //        println!("Pre-rotate on n={:?} for\n {}",
+        //            self.get(n).value,
+        //            self.to_pretty_string());
         if let Some(z) = self.get(n).get_child(!side) {
             self.rotate(side, z);
             //self.traverse_to_fix(self.root.unwrap());
             self.traverse_to_fix(z);
-//            match self.calc_bal_fac(z) {
-//                0 => {
-//                    self.set_balance_factor(n, 1);
-//                    self.set_balance_factor(z, -1);
-//                }
-//                _ => {
-//                    self.set_balance_factor(n, 0);
-//                    self.set_balance_factor(z, 0);
-//                }
-//            }
+        //            match self.calc_bal_fac(z) {
+        //                0 => {
+        //                    self.set_balance_factor(n, 1);
+        //                    self.set_balance_factor(z, -1);
+        //                }
+        //                _ => {
+        //                    self.set_balance_factor(n, 0);
+        //                    self.set_balance_factor(z, 0);
+        //                }
+        //            }
         } else {
             panic!("avl rotate unwrap");
         }
@@ -451,11 +451,9 @@ where
     fn calc_bal_fac(&self, n: usize) -> isize {
         let rc = self.get(n).get_child(Side::Right);
         let lc = self.get(n).get_child(Side::Left);
-        let safe_get_bf = |x| {
-            match x {
-                Some(y) => self.get_balance_factor(y),
-                None => 0,
-            }
+        let safe_get_bf = |x| match x {
+            Some(y) => self.get_balance_factor(y),
+            None => 0,
         };
         let bf_rc = safe_get_bf(rc);
         let bf_lc = safe_get_bf(lc);
@@ -470,20 +468,19 @@ where
         }
     }
 
-
-    fn fix_bf(&mut self, n:usize) {
+    fn fix_bf(&mut self, n: usize) {
         let rc = self.get(n).get_child(Side::Right);
         let lc = self.get(n).get_child(Side::Left);
         // get height and BF of each child
 
-//        let rcbf = match rc {
-//            Some(c) =>  self.get_balance_factor(c),
-//            None => 0,
-//        };
-//        let lcbf = match lc {
-//            Some(c) => self.get_balance_factor(c),
-//            None => 0,
-//        };
+        //        let rcbf = match rc {
+        //            Some(c) =>  self.get_balance_factor(c),
+        //            None => 0,
+        //        };
+        //        let lcbf = match lc {
+        //            Some(c) => self.get_balance_factor(c),
+        //            None => 0,
+        //        };
         let rch = match rc {
             Some(c) => self.get(c).height,
             None => 0,
@@ -492,12 +489,11 @@ where
             Some(c) => self.get(c).height,
             None => 0,
         };
-        self.get_mut(n).height = std::cmp::max(lch,rch) + 1;
-        self.set_balance_factor(n, rch as isize -  lch as isize);
+        self.get_mut(n).height = std::cmp::max(lch, rch) + 1;
+        self.set_balance_factor(n, rch as isize - lch as isize);
     }
 
-    fn traverse_to_fix(&mut self, n:usize) {
-
+    fn traverse_to_fix(&mut self, n: usize) {
         /*if !self.get(n).is_some() {
             return;
         }*/
@@ -510,7 +506,6 @@ where
         }
         self.fix_bf(n);
     }
-
 }
 
 #[cfg(test)]
@@ -588,21 +583,21 @@ mod tests {
         );
     }
 
-//    #[test]
-//    fn avl_del() {
-//        let mut tree = AVLTree::<i32>::new();
-//        tree.insert(2);
-//        tree.insert(4);
-//        tree.insert(6);
-//
-//        for i in vec![1,3,5,7] {
-//            println!("Adding and removing leaf v={}", i);
-//	        tree.insert(i);
-//	        tree.delete(i);
-//	        assert_eq!(
-//	            tree.to_string(),
-//	            "([V:4 H:2 BF:0] ([V:2 H:1 BF:0] () ()) ([V:6 H:1 BF:0] () ()))"
-//	        );
-//        }
-//    }
+    //    #[test]
+    //    fn avl_del() {
+    //        let mut tree = AVLTree::<i32>::new();
+    //        tree.insert(2);
+    //        tree.insert(4);
+    //        tree.insert(6);
+    //
+    //        for i in vec![1,3,5,7] {
+    //            println!("Adding and removing leaf v={}", i);
+    //	        tree.insert(i);
+    //	        tree.delete(i);
+    //	        assert_eq!(
+    //	            tree.to_string(),
+    //	            "([V:4 H:2 BF:0] ([V:2 H:1 BF:0] () ()) ([V:6 H:1 BF:0] () ()))"
+    //	        );
+    //        }
+    //    }
 }
