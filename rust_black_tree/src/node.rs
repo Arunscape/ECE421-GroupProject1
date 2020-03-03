@@ -72,17 +72,13 @@ pub trait Node<T> {
         let mut m_str = format!("({}", self.to_self_string());
         m_str = m_str
             + &(if let Some(child) = self.get_child(Side::Left) {
-                "\n".to_owned()
-                + &" ".repeat(i)
-                + &self.get(child).to_pretty_string(indent + 1)
+                "\n".to_owned() + &" ".repeat(i) + &self.get(child).to_pretty_string(indent + 1)
             } else {
                 String::from(" ()")
             });
         m_str = m_str
             + &(if let Some(child) = self.get_child(Side::Right) {
-                "\n".to_owned()
-                + &" ".repeat(i)
-                + &self.get(child).to_pretty_string(indent + 1)
+                "\n".to_owned() + &" ".repeat(i) + &self.get(child).to_pretty_string(indent + 1)
             } else {
                 String::from(" ()")
             });
@@ -101,7 +97,7 @@ pub trait Node<T> {
         let f = |c| Some(self.get(c).get_size());
 
         1 + self.get_child(Side::Left).and_then(f).unwrap_or(0)
-          + self.get_child(Side::Right).and_then(f).unwrap_or(0)
+            + self.get_child(Side::Right).and_then(f).unwrap_or(0)
     }
 
     fn find_min(&self) -> usize {
@@ -144,8 +140,7 @@ pub trait Node<T> {
     fn is_child(&self, side: Side) -> bool {
         if let Some(p) = self.get_parent() {
             let parent = self.get(p);
-            parent.get_child(side).is_some()
-                && parent.get_child(side).unwrap() == self.location()
+            parent.get_child(side).is_some() && parent.get_child(side).unwrap() == self.location()
         } else {
             false
         }
