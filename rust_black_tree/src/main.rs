@@ -5,7 +5,6 @@ extern crate rustyline;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use std::io::{self, BufRead, Write};
 
 use nom::{
     branch::alt,
@@ -123,13 +122,6 @@ fn command(input: &[u8]) -> IResult<&[u8], Cmd> {
     x
 }
 
-fn read_line() -> String {
-    let mut line = String::new();
-    let stdin = io::stdin();
-    stdin.lock().read_line(&mut line).unwrap();
-    line
-}
-
 fn eval(
     cmd: Cmd,
     rb: &mut RBTree<isize>,
@@ -151,7 +143,7 @@ fn eval(
             TreeSelection::RedBlack => {
                 if let Some(root) = rb.get_root() {
                     if let Some(s) = rust_black_trees::prettynodeprinter::printprettyrb(
-                        rb.get(rb.get_root().unwrap()),
+                        rb.get(root),
                     ) {
                         println!("{}", s)
                     } else {
@@ -164,7 +156,7 @@ fn eval(
             TreeSelection::AVL => {
                 if let Some(root) = avl.get_root() {
                     if let Some(s) = rust_black_trees::prettynodeprinter::printprettyavl(
-                        avl.get(avl.get_root().unwrap()),
+                        avl.get(root),
                     ) {
                         println!("{}", s)
                     } else {
@@ -177,7 +169,7 @@ fn eval(
             TreeSelection::BST => {
                 if let Some(root) = bs.get_root() {
                     if let Some(s) = rust_black_trees::prettynodeprinter::printprettybst(
-                        bs.get(bs.get_root().unwrap()),
+                        bs.get(root),
                     ) {
                         println!("{}", s)
                     } else {
@@ -239,7 +231,7 @@ fn read_and_eval(
     match readline {
         Ok(line) => {
             rl.add_history_entry(line.as_str());
-            let ss = (line.as_str().to_string() + " ");
+            let ss = line.as_str().to_string() + " ";
             let res = command(ss.as_bytes());
             if let Ok((_s, cmd)) = res {
                 eval(cmd, &mut rb, &mut avl, &mut bs, tree_type);
