@@ -33,7 +33,7 @@ pub struct AVLNode<T> {
     pub rchild: Option<usize>,
     data: Rc<RefCell<Vec<AVLNode<T>>>>,
     // For AVL nodes...
-    pub height: isize,
+    pub height: usize,
     pub balance_factor: isize,
 }
 
@@ -422,19 +422,18 @@ where
 //            self.to_pretty_string());
         if let Some(z) = self.get(n).get_child(!side) {
             self.rotate(side, z);
-            match self.calc_bal_fac(z) {
-                0 => {
-                    self.set_balance_factor(n, 1);
-                    self.set_balance_factor(z, -1);
-                }
-                _ => {
-                    self.set_balance_factor(n, 0);
-                    self.set_balance_factor(z, 0);
-                }
-            }
-//        println!("post-rotate on n={:?} for\n {}",
-//            self.get(n).value,
-//            self.to_pretty_string());
+            //self.traverse_to_fix(self.root.unwrap());
+            self.traverse_to_fix(z);
+//            match self.calc_bal_fac(z) {
+//                0 => {
+//                    self.set_balance_factor(n, 1);
+//                    self.set_balance_factor(z, -1);
+//                }
+//                _ => {
+//                    self.set_balance_factor(n, 0);
+//                    self.set_balance_factor(z, 0);
+//                }
+//            }
         } else {
             panic!("avl rotate unwrap");
         }
@@ -469,6 +468,52 @@ where
             Side::Left => self.get_balance_factor(n) < 0,
         }
     }
+
+
+    fn fix_bf(&mut self, n:usize) {
+        let rc = self.get(n).get_child(Side::Right);
+        let lc = self.get(n).get_child(Side::Left);
+        // get height and BF of each child
+
+//        let rcbf = match rc {
+//            Some(c) =>  self.get_balance_factor(c),
+//            None => 0,
+//        };
+//        let lcbf = match lc {
+//            Some(c) => self.get_balance_factor(c),
+//            None => 0,
+//        };
+        let rch = match rc {
+            Some(c) => self.get(c).height,
+            None => 0,
+        };
+        let lch = match lc {
+            Some(c) => self.get(c).height,
+            None => 0,
+        };
+        println!("Fixing node: {}", self.get(n).to_self_string());
+        self.get_mut(n).height = std::cmp::max(lch,rch) + 1;
+        self.set_balance_factor(n, rch as isize -  lch as isize);
+    }
+
+    fn traverse_to_fix(&mut self, n:usize) {
+
+        /*if !self.get(n).is_some() {
+            return;
+        }*/
+        println!("traversie to fix n= {}", self.get(n).to_self_string());
+        if let Some(c) = self.get(n).get_child(Side::Left) {
+            println!("This isnt going to print");
+            self.traverse_to_fix(c);
+        }
+
+        if let Some(c) = self.get(n).get_child(Side::Right) {
+            self.traverse_to_fix(c);
+            println!("This isnt going to print");
+        }
+        self.fix_bf(n);
+    }
+
 }
 
 #[cfg(test)]
@@ -546,21 +591,21 @@ mod tests {
         );
     }
 
-//    #[test]
-//    fn avl_del() {
-//        let mut tree = AVLTree::<i32>::new();
-//        tree.insert(2);
-//        tree.insert(4);
-//        tree.insert(6);
-//
-//        for i in vec![1,3,5,7] {
-//            println!("Adding and removing leaf v={}", i);
-//	        tree.insert(i);
-//	        tree.delete(i);
-//	        assert_eq!(
-//	            tree.to_string(),
-//	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
-//	        );
-//        }
-//    }
+    #[test]
+    fn avl_del() {
+        let mut tree = AVLTree::<i32>::new();
+        tree.insert(2);
+        tree.insert(4);
+        tree.insert(6);
+
+        for i in vec![1,3,5,7] {
+            println!("Adding and removing leaf v={}", i);
+	        tree.insert(i);
+	        tree.delete(i);
+	        assert_eq!(
+	            tree.to_string(),
+	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+	        );
+        }
+    }
 }
