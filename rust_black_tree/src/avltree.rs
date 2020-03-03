@@ -385,14 +385,9 @@ where
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
         if let Some(z) = self.get(n).get_child(!side) {
-            println!("Before rotate:");
-            println!("{}", self.to_pretty_string());
             self.rotate(side, z);
-            match self.get_balance_factor(z) {
+            match self.calc_bal_fac(z) {
                 0 => {
-                    // TODO
-                    // we get into this case too often
-                    // which is a bug
                     self.set_balance_factor(n, 1);
                     self.set_balance_factor(z, -1);
                 }
@@ -401,8 +396,6 @@ where
                     self.set_balance_factor(z, 0);
                 }
             }
-            println!("After rotate:");
-            println!("{}", self.to_pretty_string());
         } else {
             panic!("avl rotate unwrap");
         }
@@ -414,6 +407,20 @@ where
 
     fn set_balance_factor(&mut self, n: usize, bf: isize) {
         self.get_mut(n).balance_factor = bf;
+    }
+
+    fn calc_bal_fac(&self, n: usize) -> isize {
+        let rc = self.get(n).get_child(Side::Right);
+        let lc = self.get(n).get_child(Side::Left);
+        let safe_get_bf = |x| {
+            match x {
+                Some(y) => self.get_balance_factor(y),
+                None => 0,
+            }
+        };
+        let bf_rc = safe_get_bf(rc);
+        let bf_lc = safe_get_bf(lc);
+        bf_rc - bf_lc
     }
 
     fn is_heavy_on_side(&self, side: Side, n: usize) -> bool {
