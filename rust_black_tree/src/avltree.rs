@@ -377,7 +377,6 @@ where
             // The right subtree increases
             if self.is_heavy_on_side(Side::Right, x) {
                 if self.is_heavy_on_side(Side::Left, z) {
-                    println!("THERE GO THE COLORS");
                     self.avl_rotate(Side::Right, z);
                     self.avl_rotate(Side::Left, x);
                 } else {
@@ -401,7 +400,6 @@ where
         } else {
             if self.is_heavy_on_side(Side::Left, x) {
                 if self.is_heavy_on_side(Side::Right, z) {
-                    println!("THERE GO THE COLORS");
                     self.avl_rotate(Side::Left, z);
                     self.avl_rotate(Side::Right, x);
                 } else {
