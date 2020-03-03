@@ -1,36 +1,37 @@
 use super::node::Node;
 use super::node::Side;
-use super::tree::BaseTree;
-use super::tree::Tree;
 
-use super::rbtree::ColorNode;
 use super::avltree::AVLNode;
+use super::rbtree::ColorNode;
 use super::unbalancetree::RegularNode;
-use super::rbtree::RBTree;
 
 const LEFT: char = '╱';
 const RIGHT: char = '╲';
 
-pub fn printprettybst<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &RegularNode<T>) -> Option<String> {
+pub fn printprettybst<T: std::fmt::Debug + std::cmp::PartialOrd>(
+    node: &RegularNode<T>,
+) -> Option<String> {
     print_node_pretty(node)
 }
 
-pub fn printprettyrb<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &ColorNode<T>) -> Option<String> {
+pub fn printprettyrb<T: std::fmt::Debug + std::cmp::PartialOrd>(
+    node: &ColorNode<T>,
+) -> Option<String> {
     print_node_pretty(node)
 }
 
-pub fn printprettyavl<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &AVLNode<T>) -> Option<String> {
+pub fn printprettyavl<T: std::fmt::Debug + std::cmp::PartialOrd>(
+    node: &AVLNode<T>,
+) -> Option<String> {
     print_node_pretty(node)
 }
-
 
 fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String> {
-    let (grid_width, grid_height) =
-        if let Some((w, h)) = term_size::dimensions() {
-            (w, h)
-        } else {
-            (150, 100)
-        };
+    let (grid_width, grid_height) = if let Some((w, h)) = term_size::dimensions() {
+        (w, h)
+    } else {
+        (150, 100)
+    };
     let mut grid: Vec<Vec<char>> = Vec::with_capacity(grid_height);
     let mut used_depth = 0;
     // make grid
@@ -70,7 +71,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         // write node
         let mut i = 0;
         for c in val_str.chars() {
-            grid[depth][x + i - cw/2] = c;
+            grid[depth][x + i - cw / 2] = c;
             i += 1;
         }
         *ud = std::cmp::max(*ud, depth) + 1;
@@ -104,10 +105,11 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
     Some(res)
 }
 
-
 // visual tests for node
 #[cfg(test)]
 mod tests {
+    use super::super::rbtree::RBTree;
+    use super::super::tree::{BaseTree, Tree};
     use super::*;
 
     #[test]

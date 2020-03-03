@@ -184,9 +184,9 @@ where
         self.get_mut(p).set_child(c, side)
     }
 
-    fn rebalance_ins(&mut self, n: usize) {}
+    fn rebalance_ins(&mut self, _n: usize) {}
 
-    fn rebalance_del(&mut self, n: usize, child: usize) {}
+    fn rebalance_del(&mut self, _n: usize, _child: usize) {}
 
     fn delete_replace(&mut self, n: usize) -> usize {
         let node = self.get(n);
@@ -257,6 +257,7 @@ where
     T: PartialEq,
     T: std::fmt::Debug,
 {
+    #[allow(dead_code)]
     fn get_size_recursive(&self) -> usize {
         if let Some(root) = self.root {
             self.get(root).get_size()
