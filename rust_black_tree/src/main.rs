@@ -13,6 +13,8 @@ use rust_black_trees::tree::BaseTree;
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
+use rust_black_trees::redblack;
+
 #[derive(Debug)]
 enum Cmd {
     Add(isize),
@@ -248,6 +250,7 @@ fn main() {
     let mut avltree = AVLTree::new();
     let mut bstree = BSTree::new();
     let mut tree_type = TreeSelection::Undefined;
+
     loop {
         read_and_eval(&mut rbtree, &mut avltree, &mut bstree, &mut tree_type);
     }

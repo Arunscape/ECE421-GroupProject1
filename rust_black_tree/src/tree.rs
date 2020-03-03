@@ -70,7 +70,7 @@ pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
     }
 
     fn rotate(&mut self, side: Side, n: usize) {
-        let p = self.get(n).get_parent().unwrap();
+        let p = self.get(n).get_parent().expect("P rotate");
 
         if let Some(c) = self.get(n).get_child(side) {
             self.attach_child(p, c, !side);
@@ -96,13 +96,13 @@ pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
     }
 
     fn find(&self, val: &T) -> usize {
-        let mut n = self.get_root().unwrap();
+        let mut n = self.get_root().expect("n find");
         loop {
             let node = self.get(n);
             if node.lesser(val) && node.get_child(Side::Right).is_some() {
-                n = node.get_child(Side::Right).unwrap();
+                n = node.get_child(Side::Right).expect("find n right child");
             } else if node.greater(val) && node.get_child(Side::Left).is_some() {
-                n = node.get_child(Side::Left).unwrap();
+                n = node.get_child(Side::Left).expect("find n left child");
             } else {
                 return n;
             }

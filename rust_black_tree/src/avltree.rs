@@ -249,15 +249,75 @@ where
 	T: std::fmt::Debug,
 {
 	fn retrace(&mut self, z: usize) {
-		loop{
+		loop {
+			//println!("Z= {:?}", self.get(z).value);
+			//println!("X= {:?}", self.get(x).value);
+			// get the parent of current node
 			let x = self.get(z).parent;
-			if !x.is_some() {return}
-			let x = x.expect("Retrace get z parent");
-			panic!("RETRACE ISNT'T IMPLEMENTED YET");
+			if !x.is_some() {
+				// current node z is the root of the tree
+				// nothing to do, return?
+				return
+			}
+			let x:usize = x.expect("Retrace get z parent");
+
+			if self.get(z).is_child(Side::Right) { // The right subtree increases
+				if self.is_heavy_on_side(Side::Right, x) {
+					if self.is_heavy_on_side(Side::Left, z) {
+						self.avl_rotate(Side::Right, z);
+						self.avl_rotate(Side::Left, x);
+					} else {
+						// TODO: rotates panic rn
+						// wiki has a differnet definiton of
+						// rotate than we do I think
+						self.avl_rotate(Side::Left, x);
+						//self.rotate(Side::Left, z);
+					}
+				} else {
+					if self.is_heavy_on_side(Side::Left, x) {
+						self.set_balance_factor(x, 0);
+						break;
+					}
+					self.set_balance_factor(x, 1);
+					//Z = X; // Height(Z) increases by 1
+					//z = x;
+					self.retrace(x);
+					//continue;
+				}
+			} else {
+				if self.is_heavy_on_side(Side::Left, x) {
+					if self.is_heavy_on_side(Side::Right, z) {
+						self.avl_rotate(Side::Left, z);
+						self.avl_rotate(Side::Right, x);
+					} else {
+						self.avl_rotate(Side::Right, x);
+					}
+				} else {
+					if self.is_heavy_on_side(Side::Right, x) {
+						self.set_balance_factor(x, 0);
+						break; // Leave the loop
+					}
+					self.set_balance_factor(x, -1);
+					//Z = X; // Height(Z) increases by 1
+					//z = x;
+					self.retrace(x);
+					//continue;
+				}
+			}
+			break;
 		}
-		/* retrace source code from AVL wiki:
-			https://en.wikipedia.org/wiki/AVL_tree
-		*/
+	// Unless loop is left via break, the height of the total tree increases by 1.
+	}
+
+	fn avl_rotate(&mut self, side:Side, n:usize){
+		// make an adjustment to account for differnt rotate
+		// algorithm off wiki than implemented in tree...
+		self.rotate(
+			side,
+			self.get(n).get_child(!side)
+			.expect("avl rotate unwrap kid")
+		);
+
 	}
 
 	fn get_balance_factor(&self, n: usize) -> isize {
@@ -318,12 +378,62 @@ mod tests {
 	}
 
 	#[test]
-	fn insert_two() {
+	fn insert_3_r() {
+		// balance
+		// 1
+		// -> 2
+		//    -> 3
 		let mut tree = AVLTree::<i32>::new();
 		tree.insert(1);
 		tree.insert(2);
 		let root = tree.root.expect("tree root");
-		//assert!(tree.get_balance_factor(root) == 0);
 		assert!(tree.is_heavy_on_side(Side::Right, root));
+
+		// insert in a balanced way
+		tree.insert(3);
+
+		// assert that tree is balanced
+		assert_eq!(tree.to_string(), "([P:None V:2] ([P:Some(1) V:1] () ()) ([P:Some(1) V:3] () ()))");
+		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
+		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
+	}
+
+
+	#[test]
+	fn insert_3_rl (){
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(3);
+		tree.insert(2);
+		let root = tree.root.expect("tree root");
+		println!("3rl tree: {}\n", tree.to_string());
+		assert_eq!(tree.to_string(), "([P:None V:2] ([P:Some(1) V:1] () ()) ([P:Some(1) V:3] () ()))");
+		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
+		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
+	}
+	#[test]
+	fn rotate_crash_test() {
+		// puts the smallest tree through all the combos
+		// of rebalance rotations
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(2);
+		tree.insert(3);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(3);
+		tree.insert(2);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(3);
+		tree.insert(2);
+		tree.insert(1);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(3);
+		tree.insert(1);
+		tree.insert(2);
+		assert!(true);
 	}
 }
