@@ -133,4 +133,3 @@ pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
         }
     }
 }
-

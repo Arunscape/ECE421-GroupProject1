@@ -115,9 +115,25 @@ impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for ColorNode<T> {
         const FG: usize = 30;
         const BG: usize = 40;
         if self.is_red() {
-            (format!("{}{:?}{}", paint(FG + BLK, BG + RED), self.value, endpaint()), format!("{:?}", self.value).len())
+            (
+                format!(
+                    "{}{:?}{}",
+                    paint(FG + BLK, BG + RED),
+                    self.value,
+                    endpaint()
+                ),
+                format!("{:?}", self.value).len(),
+            )
         } else {
-            (format!("{}{:?}{}", paint(FG + RED, BG + BLK), self.value, endpaint()), format!("{:?}", self.value).len())
+            (
+                format!(
+                    "{}{:?}{}",
+                    paint(FG + RED, BG + BLK),
+                    self.value,
+                    endpaint()
+                ),
+                format!("{:?}", self.value).len(),
+            )
         }
     }
 

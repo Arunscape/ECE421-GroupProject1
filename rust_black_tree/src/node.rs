@@ -1,7 +1,6 @@
 use std::cmp::max;
 use std::ops::Not;
 
-
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
     Red,
