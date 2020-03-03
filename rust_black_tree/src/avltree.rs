@@ -298,15 +298,18 @@ where
             if self.get(n).is_child(Side::Left) {
                 if self.is_heavy_on_side(Side::Right, x) {
                     // Sibling of N (higher by 2)
-                    let z = self.get(n).get_sibling().expect("del z");
-                    if self.is_heavy_on_side(Side::Left, z) {
-                        self.avl_rotate(Side::Right, z);
-                        self.avl_rotate(Side::Left, x);
+                    if let Some(z) = self.get(n).get_sibling() {
+	                    if self.is_heavy_on_side(Side::Left, z) {
+	                        self.avl_rotate(Side::Right, z);
+	                        self.avl_rotate(Side::Left, x);
+	                    } else {
+	                        self.avl_rotate(Side::Left, x);
+	                    }
                     } else {
                         self.avl_rotate(Side::Left, x);
                     }
                 } else {
-                    if self.get_balance_factor(x) == 0 {
+                    if self.calc_bal_fac(x) == 0 {
                         self.set_balance_factor(x, 1);
                         break;
                     }
@@ -317,15 +320,18 @@ where
             } else {
                 if self.is_heavy_on_side(Side::Left, x) {
                     // Sibling of N (higher by 2)
-                    let z = self.get(n).get_sibling().expect("del z");
-                    if self.is_heavy_on_side(Side::Right, z) {
-                        self.avl_rotate(Side::Left, z);
-                        self.avl_rotate(Side::Right, x);
+                    if let Some(z) = self.get(n).get_sibling(){
+	                    if self.is_heavy_on_side(Side::Right, z) {
+	                        self.avl_rotate(Side::Left, z);
+	                        self.avl_rotate(Side::Right, x);
+	                    } else {
+	                        self.avl_rotate(Side::Right, x);
+	                    }
                     } else {
                         self.avl_rotate(Side::Right, x);
                     }
                 } else {
-                    if self.get_balance_factor(x) == 0 {
+                    if self.calc_bal_fac(x) == 0 {
                         self.set_balance_factor(x, -1);
                         break; // Leave the loop
                     }
@@ -417,6 +423,9 @@ where
                 }
             }
         } else {
+            println!("Rotate on v={:?} for tree:\n {}",
+                self.get(n).value,
+                self.to_pretty_string());
             panic!("avl rotate unwrap");
         }
     }
@@ -546,13 +555,18 @@ mod tests {
     #[test]
     fn avl_del() {
         let mut tree = AVLTree::<i32>::new();
-        for i in 1..10 {
-            tree.insert(i);
+        tree.insert(2);
+        tree.insert(4);
+        tree.insert(6);
+
+        for i in vec![1,3,5,7] {
+            println!("Adding and removing leaf v={}", i);
+	        tree.insert(i);
+	        tree.delete(i);
+	        assert_eq!(
+	            tree.to_string(),
+	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+	        );
         }
-        tree.delete(5);
-        tree.delete(7);
-        tree.insert(7);
-        println!("{}", tree.to_pretty_string());
-        assert!(false);
     }
 }
