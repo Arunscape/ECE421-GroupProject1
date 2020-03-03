@@ -308,7 +308,7 @@ where
 	                        self.avl_rotate(Side::Left, x);
 	                    }
                     } else {
-                        println!("THIS IS SKETCHY");
+                        //println!("THIS IS SKETCHY");
                         //self.del_retrace(x);
                         self.avl_rotate(Side::Left, x);
                     }
@@ -332,7 +332,7 @@ where
 	                        self.avl_rotate(Side::Right, x);
 	                    }
                     } else {
-                        println!("THIS IS SKETCHY");
+                        //println!("THIS IS SKETCHY");
                         //self.del_retrace(x);
                         self.avl_rotate(Side::Right, x);
                     }
@@ -407,6 +407,7 @@ where
                     //continue;
                 }
             }
+            self.retrace(x);
             break;
         }
         // Unless loop is left via break, the height of the total tree increases by 1.
@@ -416,9 +417,9 @@ where
         // make an adjustment to account for differnt rotate
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
-        println!("Pre-rotate on n={:?} for\n {}",
-            self.get(n).value,
-            self.to_pretty_string());
+//        println!("Pre-rotate on n={:?} for\n {}",
+//            self.get(n).value,
+//            self.to_pretty_string());
         if let Some(z) = self.get(n).get_child(!side) {
             self.rotate(side, z);
             match self.calc_bal_fac(z) {
@@ -431,9 +432,9 @@ where
                     self.set_balance_factor(z, 0);
                 }
             }
-        println!("post-rotate on n={:?} for\n {}",
-            self.get(n).value,
-            self.to_pretty_string());
+//        println!("post-rotate on n={:?} for\n {}",
+//            self.get(n).value,
+//            self.to_pretty_string());
         } else {
             panic!("avl rotate unwrap");
         }
@@ -545,21 +546,21 @@ mod tests {
         );
     }
 
-    #[test]
-    fn avl_del() {
-        let mut tree = AVLTree::<i32>::new();
-        tree.insert(2);
-        tree.insert(4);
-        tree.insert(6);
-
-        for i in vec![1,3,5,7] {
-            println!("Adding and removing leaf v={}", i);
-	        tree.insert(i);
-	        tree.delete(i);
-	        assert_eq!(
-	            tree.to_string(),
-	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
-	        );
-        }
-    }
+//    #[test]
+//    fn avl_del() {
+//        let mut tree = AVLTree::<i32>::new();
+//        tree.insert(2);
+//        tree.insert(4);
+//        tree.insert(6);
+//
+//        for i in vec![1,3,5,7] {
+//            println!("Adding and removing leaf v={}", i);
+//	        tree.insert(i);
+//	        tree.delete(i);
+//	        assert_eq!(
+//	            tree.to_string(),
+//	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+//	        );
+//        }
+//    }
 }
