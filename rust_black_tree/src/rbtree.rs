@@ -47,7 +47,6 @@ where
     T: std::fmt::Debug,
     T: std::cmp::PartialOrd,
 {
-
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
         Self {
             value: val,
@@ -497,6 +496,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     fn get_size_recursive(&self) -> usize {
         if let Some(root) = self.root {
             self.get(root).get_size()
