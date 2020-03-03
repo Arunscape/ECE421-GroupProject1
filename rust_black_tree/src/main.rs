@@ -211,7 +211,7 @@ fn eval(
             *bs = BSTree::new();
         }
         Cmd::NumberError => {
-            println!("Only signed word sized numbers are supported in the demo. Other datatypes can be purchased for $5.99.");
+            println!("Only unsigned word sized numbers are supported in the demo. Other datatypes can be purchased for $5.99.");
         }
     }
 }
