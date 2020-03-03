@@ -79,7 +79,7 @@ default implementations. Then, the functionality which is specific to either
 ColorNode, or the DepthNode is found in the structs' respective implementation
 blocks. This approach allowed us to re-use common functionality between the
 different types of nodes, while still allowing for new, separate functionality
-defined by the different nodes. 
+defined by the different nodes.
 
 \subsection{The Tree Trait}
 %For the Tree structs for the Red Black tree and AVL trees, we decided to not go
@@ -233,7 +233,7 @@ So-called ``Major innovations''- Additional to the project specification.
 \subsection{Helpful macros!}
 We decided to create some macros for instantiating the trees.  This will make it
 easier for programmers who decide to use our library for some reason to fill
-trees with initial values in a nice, convenient, and concise manner.  
+trees with initial values in a nice, convenient, and concise manner.
 Similar to how vectors in Rust have a macro \texttt{vec!}, a Red Black tree,
 AVL tree, or unbalanced binary tree can be created using the
 following macros:
@@ -309,7 +309,7 @@ This is ideal for running commands like this to allow for having trees
 as part of a script.
 
 \subsection{crates.io}
-Our tree library is available on crates.io 
+Our tree library is available on crates.io
 
 \url{https://crates.io/crates/rust_black_tree}
 
@@ -318,15 +318,15 @@ Our tree library is available on crates.io
 \textit{What does a red-black tree provide that cannot be accomplished with
 ordinary binary search trees?}
 
-Red Black trees, unlike ordinary Binary Search trees, allow for efficient
-in-order traversal (the order Left–Root–Right) of their elements.
-Because  height of a Red Black tree remains \(O(\log n)\) after every
-insertion and deletion, we can then guarantee that the
-upper bound for searching, inserting, deleting, etc is also \(O(\log n)\)
-In comparison, an unbalanced Binary Search tree might have a worst-case scenario
-of a traversal of size \(O(n)\), for example if every single element was
-inserted in ascending or descending order such that each child in the tree is
-either all on the left side or all on the right side.
+Red Black trees, unlike ordinary Binary Search trees, ensure the tree
+remains balanced. Because height of a Red Black tree remains \(O(\log
+n)\) after every insertion and deletion, we can then guarantee that
+the upper bound for searching, inserting, deleting, etc is also
+\(O(\log n)\) In comparison, an unbalanced Binary Search tree might
+have a worst-case scenario of an operation of size \(O(n)\), for
+example if every single element was inserted in ascending or
+descending order such that each child in the tree is either all on the
+left side or all on the right side.
 
 \textit{Please add a command-line interface (function main) to your crate to
 allow users to test it.}

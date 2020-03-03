@@ -32,9 +32,9 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
     let mut grid: Vec<Vec<String>> = Vec::with_capacity(grid_height);
     let mut used_depth = 0;
     // make grid
-    for row in 0..grid_height*20 {
+    for row in 0..grid_height*5 {
         grid.push(Vec::with_capacity(grid_width));
-        for _ in 0..grid_width*20 {
+        for _ in 0..grid_width*5 {
             grid[row].push(" ".to_string());
         }
     }
