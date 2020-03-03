@@ -117,6 +117,16 @@ pub trait Node<T> {
             + self.get_child(Side::Right).and_then(f).unwrap_or(0)
     }
 
+    fn get_leaf_count(&self) -> usize {
+        let f = |c| Some(self.get(c).get_leaf_count());
+        let val = self.get_child(Side::Left).and_then(f).unwrap_or(0) + self.get_child(Side::Right).and_then(f).unwrap_or(0);
+        if val == 0 {
+            1
+        } else {
+            val
+        }
+    }
+
     fn find_min(&self) -> usize {
         if let Some(l) = self.get_child(Side::Left) {
             self.get(l).find_min()
@@ -167,6 +177,7 @@ pub trait Node<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::Node;
     use crate::rbtree::ColorNode;
     use crate::rbtree::ColoredNode;
     use std::rc::Rc;
@@ -287,6 +298,14 @@ mod tests {
         let data = rc.borrow_mut();
         assert_eq!(data[(data[0].find_min())].value, 0);
         assert_eq!(data[(data[2].find_min())].value, 6);
+    }
+
+    #[test]
+    fn find_leaf_count() {
+        let rc = make_fake_tree_node();
+        let data = rc.borrow_mut();
+        println!("{}", data[0].to_pretty_string(1));
+        assert_eq!(data[0].get_leaf_count(), 3);
     }
 }
 

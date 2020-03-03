@@ -664,4 +664,29 @@ mod tests {
         tree.delete(13);
         assert_eq!(tree.to_string(), "([P:None C:Black V:3] ([P:Some(3) C:Black V:1] ([P:Some(1) C:Black V:0] () ()) ([P:Some(1) C:Black V:2] () ())) ([P:Some(3) C:Black V:7] ([P:Some(7) C:Red V:5] ([P:Some(5) C:Black V:4] () ()) ([P:Some(5) C:Black V:6] () ())) ([P:Some(7) C:Red V:9] ([P:Some(9) C:Black V:8] () ()) ([P:Some(9) C:Black V:11] ([P:Some(11) C:Red V:10] () ()) ([P:Some(11) C:Red V:12] () ())))))");
     }
+
+    #[test]
+    fn find_leaf_count() {
+        let mut tree = RBTree::new();
+        for x in 0..15 {
+            tree.insert(x);
+        }
+        assert_eq!(tree.get_leaf_count(), 8);
+
+        let mut tree = RBTree::new();
+        for x in 0..100 {
+            tree.insert(x);
+        }
+        assert_eq!(tree.get_leaf_count(), 50);
+    }
+
+    #[test]
+    fn is_empty() {
+        let mut tree = RBTree::new();
+        assert!(tree.is_empty());
+        tree.insert(1);
+        assert!(!tree.is_empty());
+        tree.delete(1);
+        assert!(tree.is_empty());
+    }
 }
