@@ -8,6 +8,8 @@ use super::tree::Tree;
 use super::node::Node;
 use super::node::*;
 
+const TREE_END: usize = 0xFFFFFFFF;
+
 /// a nice convenient macro which allows a user to initialize a tree with
 /// a number of elements
 /// usage: redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
@@ -221,25 +223,30 @@ where
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
-        let node = self.get(n);
-        match (node.lchild, node.rchild) {
-            (Some(lc), Some(rc)) => {
-                let p = node.parent;
-                let successor = self.get(rc).find_min();
-                self.delete_replace(successor);
-                self.data.borrow_mut().swap(successor, n);
+        let mut delete_replace_recursive = |n: usize| {
+            let node = self.get(n);
+            match (node.lchild, node.rchild) {
+                (Some(lc), Some(rc)) => {
+                    let p = node.parent;
+                    let successor = self.get(rc).find_min();
+                    self.delete_replace(successor);
+                    self.data.borrow_mut().swap(successor, n);
 
-                self.get_mut(n).lchild = Some(lc);
-                self.get_mut(n).rchild = Some(rc);
-                self.get_mut(n).parent = p;
-                self.get_mut(n).ptr = n;
-                return successor;
-            }
-            (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
-            (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
-            (None, None) => self.replace_node(n, None),
+                    self.get_mut(n).lchild = Some(lc);
+                    self.get_mut(n).rchild = Some(rc);
+                    self.get_mut(n).parent = p;
+                    self.get_mut(n).ptr = n;
+                    return successor;
+                }
+                (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
+                (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
+                (None, None) => self.replace_node(n, None),
+            };
+            n
         };
-        n
+        let val = delete_replace_recursive(n);
+        self.get_mut(n).ptr = TREE_END;
+        val
     }
 
     fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
@@ -265,6 +272,7 @@ where
             let n = self.free.pop().expect("pop should not fail if len > 0");
             let mut d = self.get_mut(n);
             d.ptr = n;
+            d.value = val;
             d.lchild = None;
             d.rchild = None;
             d.parent = None;
@@ -436,7 +444,8 @@ where
         //                }
         //            }
         } else {
-            panic!("avl rotate unwrap");
+            //panic!("avl rotate unwrap");
+            println!("tried to rotate on None");
         }
     }
 
@@ -583,21 +592,21 @@ mod tests {
         );
     }
 
-    //    #[test]
-    //    fn avl_del() {
-    //        let mut tree = AVLTree::<i32>::new();
-    //        tree.insert(2);
-    //        tree.insert(4);
-    //        tree.insert(6);
-    //
-    //        for i in vec![1,3,5,7] {
-    //            println!("Adding and removing leaf v={}", i);
-    //	        tree.insert(i);
-    //	        tree.delete(i);
-    //	        assert_eq!(
-    //	            tree.to_string(),
-    //	            "([V:4 H:2 BF:0] ([V:2 H:1 BF:0] () ()) ([V:6 H:1 BF:0] () ()))"
-    //	        );
-    //        }
-    //    }
+    #[test]
+    fn avl_del() {
+        let mut tree = AVLTree::<i32>::new();
+        tree.insert(2);
+        tree.insert(4);
+        tree.insert(6);
+
+        for i in vec![1, 3, 5, 7] {
+            println!("Adding and removing leaf v={}", i);
+            tree.insert(i);
+            tree.delete(i);
+            assert_eq!(
+                tree.to_string(),
+                "([V:4 H:2 BF:0] ([V:2 H:1 BF:0] () ()) ([V:6 H:1 BF:0] () ()))"
+            );
+        }
+    }
 }
