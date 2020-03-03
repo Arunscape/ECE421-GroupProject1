@@ -7,6 +7,22 @@ use super::tree::Tree;
 use super::node::Node;
 use super::node::*;
 
+/// a nice convenient macro which allows a user to initialize a tree with
+/// a number of elements
+/// usage: redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+#[macro_export]
+macro_rules! avl {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_tree = AVLTree::new();
+            $(
+                temp_tree.insert($x);
+            )*
+            temp_tree
+        }
+    };
+}
+
 #[derive(Debug)]
 pub struct AVLNode<T> {
     pub value: T,
@@ -252,11 +268,12 @@ where
     T: PartialEq,
     T: std::fmt::Debug,
 {
-    fn del_retrace(&mut self, n:usize) {
-
+    fn del_retrace(&mut self, n: usize) {
         loop {
             let x = self.get(n).parent;
-            if !x.is_some() {return;}
+            if !x.is_some() {
+                return;
+            }
             let x: usize = x.expect("Deletion retrace get z parent");
             if self.get(n).is_child(Side::Left) {
                 if self.is_heavy_on_side(Side::Right, x) {
@@ -299,7 +316,6 @@ where
             }
             break;
         }
-
     }
 
     fn retrace(&mut self, z: usize) {
@@ -369,26 +385,20 @@ where
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
         if let Some(z) = self.get(n).get_child(!side) {
-	        self.rotate(
-	            side,
-	            z
-	        );
-            match self.get_balance_factor(z)  {
-                0 =>
-                    {
-                    self.set_balance_factor(n,1);
-                    self.set_balance_factor(z,-1);
-                    },
-                _ =>
-                    {
-                    self.set_balance_factor(n,0);
+            self.rotate(side, z);
+            match self.get_balance_factor(z) {
+                0 => {
+                    self.set_balance_factor(n, 1);
+                    self.set_balance_factor(z, -1);
+                }
+                _ => {
+                    self.set_balance_factor(n, 0);
                     self.set_balance_factor(z, 0);
-                    },
+                }
             }
         } else {
             panic!("avl rotate unwrap");
         }
-
     }
 
     fn get_balance_factor(&self, n: usize) -> isize {
@@ -484,7 +494,7 @@ mod tests {
     fn avl_del() {
         let mut tree = AVLTree::<i32>::new();
         for i in 1..10 {
-        tree.insert(i);
+            tree.insert(i);
         }
         tree.delete(5);
         tree.delete(7);
