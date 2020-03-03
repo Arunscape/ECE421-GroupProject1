@@ -241,23 +241,11 @@ where
     }
 
     fn create_node(&mut self, val: T) -> usize {
-        // update this so it reuses deleted slots
-        if self.free.len() > 0 {
-            let n = self.free.pop().expect("pop should not fail if len > 0");
-            let mut d = self.get_mut(n);
-            d.ptr = n;
-            d.value = val;
-            d.lchild = None;
-            d.rchild = None;
-            d.parent = None;
-            n
-        } else {
-            let loc = self.data.borrow().len();
-            self.data
-                .borrow_mut()
-                .push(AVLNode::new(val, loc, self.data.clone()));
-            loc
-        }
+        let loc = self.data.borrow().len();
+        self.data
+            .borrow_mut()
+            .push(AVLNode::new(val, loc, self.data.clone()));
+        loc
     }
 
     fn delete_node(&mut self, index: usize) {
