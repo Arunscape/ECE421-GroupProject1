@@ -1,6 +1,10 @@
 #[macro_use]
 extern crate nom;
 extern crate term_size;
+extern crate rustyline;
+
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 use std::io::{self, BufRead, Write};
 
 use nom::{
@@ -210,27 +214,37 @@ fn eval(
 }
 
 fn read_and_eval(
+    rl: &mut Editor<()>,
     mut rb: &mut RBTree<isize>,
     mut avl: &mut AVLTree<isize>,
     mut bs: &mut BSTree<isize>,
     tree_type: &mut TreeSelection,
 ) {
-    print!("> ");
-    io::stdout().flush().unwrap();
-
-    let s = read_line();
-    if s == String::from("") {
-        // user hit Ctrl-D
-        println!();
-        std::process::exit(0);
+    let readline = rl.readline("> ");
+    match readline {
+        Ok(line) => {
+            rl.add_history_entry(line.as_str());
+            let ss = (line.as_str().to_string() + " ");
+            let res = command(ss.as_bytes());
+            if let Ok((_s, cmd)) = res {
+                eval(cmd, &mut rb, &mut avl, &mut bs, tree_type);
+            } else {
+                println!("Invalid Command. Try: help")
+            }
+        },
+        Err(ReadlineError::Interrupted) => {
+            println!();
+            std::process::exit(0);
+        },
+        Err(ReadlineError::Eof) => {
+            println!();
+            std::process::exit(0);
+        },
+        Err(err) => {
+            println!("Error: {:?}", err);
+        }
     }
-    let res = command(s.as_bytes());
 
-    if let Ok((_s, cmd)) = res {
-        eval(cmd, &mut rb, &mut avl, &mut bs, tree_type);
-    } else {
-        println!("Invalid Command. Try: help")
-    }
 }
 
 #[derive(Debug)]
@@ -247,8 +261,8 @@ fn main() {
     let mut avltree = AVLTree::new();
     let mut bstree = BSTree::new();
     let mut tree_type = TreeSelection::Undefined;
-
+    let mut rl = Editor::<()>::new();
     loop {
-        read_and_eval(&mut rbtree, &mut avltree, &mut bstree, &mut tree_type);
+        read_and_eval(&mut rl, &mut rbtree, &mut avltree, &mut bstree, &mut tree_type);
     }
 }
