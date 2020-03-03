@@ -219,7 +219,9 @@ where
 
     fn rebalance_del(&mut self, n: usize, _child: usize) {
         self.del_retrace(n);
-        self.traverse_to_fix(self.root.unwrap());
+        if let Some(r) = self.root {
+            self.traverse_to_fix(r);
+        }
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
