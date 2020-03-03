@@ -351,7 +351,6 @@ where
     }
 
     fn retrace(&mut self, z: usize) {
-        loop {
             //println!("Z= {:?}", self.get(z).value);
             //println!("X= {:?}", self.get(x).value);
             // get the parent of current node
@@ -367,6 +366,7 @@ where
                 // The right subtree increases
                 if self.is_heavy_on_side(Side::Right, x) {
                     if self.is_heavy_on_side(Side::Left, z) {
+               println!("THERE GO THE COLORS");
                         self.avl_rotate(Side::Right, z);
                         self.avl_rotate(Side::Left, x);
                     } else {
@@ -379,7 +379,7 @@ where
                 } else {
                     if self.is_heavy_on_side(Side::Left, x) {
                         self.set_balance_factor(x, 0);
-                        break;
+                        return;
                     }
                     self.set_balance_factor(x, 1);
                     //Z = X; // Height(Z) increases by 1
@@ -390,6 +390,7 @@ where
             } else {
                 if self.is_heavy_on_side(Side::Left, x) {
                     if self.is_heavy_on_side(Side::Right, z) {
+               println!("THERE GO THE COLORS");
                         self.avl_rotate(Side::Left, z);
                         self.avl_rotate(Side::Right, x);
                     } else {
@@ -398,7 +399,7 @@ where
                 } else {
                     if self.is_heavy_on_side(Side::Right, x) {
                         self.set_balance_factor(x, 0);
-                        break; // Leave the loop
+                        return; // Leave the loop
                     }
                     self.set_balance_factor(x, -1);
                     //Z = X; // Height(Z) increases by 1
@@ -407,9 +408,8 @@ where
                     //continue;
                 }
             }
-            self.retrace(x);
-            break;
-        }
+            //self.retrace(x);
+            return;
         // Unless loop is left via break, the height of the total tree increases by 1.
     }
 
