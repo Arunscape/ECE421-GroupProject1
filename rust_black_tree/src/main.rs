@@ -149,30 +149,42 @@ fn eval(
         }
         Cmd::Print => match tree_type {
             TreeSelection::RedBlack => {
-                if let Some(s) = rust_black_trees::prettynodeprinter::printprettyrb(
-                    rb.get(rb.get_root().unwrap()),
-                ) {
-                    println!("{}", s)
+                if let Some(root) = rb.get_root() {
+                    if let Some(s) = rust_black_trees::prettynodeprinter::printprettyrb(
+                        rb.get(rb.get_root().unwrap()),
+                    ) {
+                        println!("{}", s)
+                    } else {
+                        println!("{}", rb.to_pretty_string())
+                    }
                 } else {
-                    println!("{}", rb.to_pretty_string())
+                    println!("Empty Red Black Tree")
                 }
             }
             TreeSelection::AVL => {
-                if let Some(s) = rust_black_trees::prettynodeprinter::printprettyavl(
-                    avl.get(avl.get_root().unwrap()),
-                ) {
-                    println!("{}", s)
+                if let Some(root) = avl.get_root() {
+                    if let Some(s) = rust_black_trees::prettynodeprinter::printprettyavl(
+                        avl.get(avl.get_root().unwrap()),
+                    ) {
+                        println!("{}", s)
+                    } else {
+                        println!("{}", avl.to_pretty_string())
+                    }
                 } else {
-                    println!("{}", avl.to_pretty_string())
+                    println!("Empty AVL Tree")
                 }
             }
             TreeSelection::BST => {
-                if let Some(s) = rust_black_trees::prettynodeprinter::printprettybst(
-                    bs.get(bs.get_root().unwrap()),
-                ) {
-                    println!("{}", s)
+                if let Some(root) = bs.get_root() {
+                    if let Some(s) = rust_black_trees::prettynodeprinter::printprettybst(
+                        bs.get(bs.get_root().unwrap()),
+                    ) {
+                        println!("{}", s)
+                    } else {
+                        println!("{}", avl.to_pretty_string())
+                    }
                 } else {
-                    println!("{}", avl.to_pretty_string())
+                    println!("Empty Binary Search Tree")
                 }
             }
             TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
