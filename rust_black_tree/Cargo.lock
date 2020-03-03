@@ -505,7 +505,7 @@ dependencies = [
 
 [[package]]
 name = "rust_black_tree"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "criterion 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "isatty 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
