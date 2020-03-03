@@ -202,7 +202,7 @@ mod tests {
     */
     fn make_fake_tree_node() -> Rc<RefCell<Vec<ColorNode<i32>>>> {
         let rc = Rc::new(RefCell::new(Vec::new()));
-        let mut v = vec![
+        let v = vec![
             ColorNode::new(5, 0, rc.clone()),
             ColorNode::new(4, 1, rc.clone()),
             ColorNode::new(6, 2, rc.clone()),

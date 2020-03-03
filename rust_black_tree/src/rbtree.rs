@@ -277,31 +277,8 @@ where
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
-        let mut delete_replace_recursive = |n: usize| {
-            let node = self.get(n);
-            match (node.lchild, node.rchild) {
-                (Some(lc), Some(rc)) => {
-                    let p = node.parent;
-                    let successor = self.get(rc).find_min();
-                    self.delete_replace(successor);
-                    self.data.borrow_mut().swap(successor, n);
-
-                    self.get_mut(successor).lchild = Some(lc);
-                    self.get_mut(successor).rchild = Some(rc);
-                    self.get_mut(successor).parent = p;
-                    self.get_mut(successor).ptr = n;
-                    return successor;
-                }
-                (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
-                (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
-                (None, None) => self.replace_node(n, None),
-            };
-            n
-        };
-
-        let val = delete_replace_recursive(n);
         self.get_mut(n).ptr = TREE_END;
-        val
+        n
     }
 
     fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
@@ -662,7 +639,7 @@ mod tests {
         tree.delete(14);
         tree.delete(12);
         tree.delete(13);
-        assert_eq!(tree.to_string(), "([P:None C:Black V:3] ([P:Some(3) C:Black V:1] ([P:Some(1) C:Black V:0] () ()) ([P:Some(1) C:Black V:2] () ())) ([P:Some(3) C:Black V:7] ([P:Some(7) C:Red V:5] ([P:Some(5) C:Black V:4] () ()) ([P:Some(5) C:Black V:6] () ())) ([P:Some(7) C:Red V:9] ([P:Some(9) C:Black V:8] () ()) ([P:Some(9) C:Black V:11] ([P:Some(11) C:Red V:10] () ()) ([P:Some(11) C:Red V:12] () ())))))");
+        assert_eq!(tree.to_string(), "([P:None C:Black V:8] ([P:Some(3) C:Black V:4] ([P:Some(7) C:Red V:2] ([P:Some(9) C:Black V:1] ([P:Some(10) C:Red V:0] () ()) ()) ([P:Some(9) C:Black V:3] () ())) ([P:Some(7) C:Red V:6] ([P:Some(5) C:Black V:5] () ()) ([P:Some(5) C:Black V:7] () ()))) ([P:Some(3) C:Black V:10] ([P:Some(1) C:Black V:9] () ()) ([P:Some(1) C:Black V:11] () ())))");
     }
 
     #[test]
