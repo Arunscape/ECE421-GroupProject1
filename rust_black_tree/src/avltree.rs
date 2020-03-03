@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use super::node::{paint, endpaint};
 use super::tree::BaseTree;
 use super::tree::Tree;
 
@@ -43,9 +44,28 @@ impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for AVLNode<T> {
         )
     }
     fn to_self_string_display(&self) -> (String, usize) {
-        let s = format!("{:?}", self.value);
-        let l = s.len();
-        (s, l)
+        const GRN: usize = 2;
+        const YEL: usize = 3;
+        const BLU: usize = 4;
+        const BLK: usize = 0;
+        const WHT: usize = 7;
+        const FG: usize = 30;
+        const BG: usize = 40;
+        let col = match self.balance_factor {
+            -1 => BLU,
+            1 => YEL,
+            0 => GRN,
+            _ => WHT,
+        };
+        (
+            format!(
+                "{}{:?}{}",
+                paint(FG + BLK, BG + col),
+                self.value,
+                endpaint()
+            ),
+            format!("{:?}", self.value).len(),
+        )
     }
     fn get_value(&self) -> &T {
         &self.value

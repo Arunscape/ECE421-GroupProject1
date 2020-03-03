@@ -33,6 +33,16 @@ pub struct DepthNode<T> {
     pub height: usize,
 }
 
+pub fn paint(fg: usize, bg: usize) -> String {
+    let esc = char::from(0x1b);
+    format!("{}[{};{}m", esc, fg, bg)
+}
+pub fn endpaint() -> String {
+    let esc = char::from(0x1b);
+    format!("{}[0m", esc)
+}
+
+
 pub trait Node<T> {
     // Base methods
     fn get_value(&self) -> &T;
