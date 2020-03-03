@@ -491,7 +491,6 @@ where
             Some(c) => self.get(c).height,
             None => 0,
         };
-        println!("Fixing node: {}", self.get(n).to_self_string());
         self.get_mut(n).height = std::cmp::max(lch,rch) + 1;
         self.set_balance_factor(n, rch as isize -  lch as isize);
     }
@@ -501,15 +500,12 @@ where
         /*if !self.get(n).is_some() {
             return;
         }*/
-        println!("traversie to fix n= {}", self.get(n).to_self_string());
         if let Some(c) = self.get(n).get_child(Side::Left) {
-            println!("This isnt going to print");
             self.traverse_to_fix(c);
         }
 
         if let Some(c) = self.get(n).get_child(Side::Right) {
             self.traverse_to_fix(c);
-            println!("This isnt going to print");
         }
         self.fix_bf(n);
     }
@@ -557,7 +553,7 @@ mod tests {
         println!("123");
         assert_eq!(
             tree.to_string(),
-            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+            "([V:2 H:2 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
         );
 
         let mut tree = AVLTree::<i32>::new();
@@ -567,7 +563,7 @@ mod tests {
         println!("132");
         assert_eq!(
             tree.to_string(),
-            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+            "([V:2 H:2 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
         );
 
         let mut tree = AVLTree::<i32>::new();
@@ -577,7 +573,7 @@ mod tests {
         println!("321");
         assert_eq!(
             tree.to_string(),
-            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+            "([V:2 H:2 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
         );
 
         let mut tree = AVLTree::<i32>::new();
@@ -587,7 +583,7 @@ mod tests {
         println!("312");
         assert_eq!(
             tree.to_string(),
-            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+            "([V:2 H:2 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
         );
     }
 
@@ -604,7 +600,7 @@ mod tests {
 	        tree.delete(i);
 	        assert_eq!(
 	            tree.to_string(),
-	            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+	            "([V:2 H:2 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
 	        );
         }
     }
