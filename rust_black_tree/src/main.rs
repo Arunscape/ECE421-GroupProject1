@@ -2,6 +2,9 @@
 extern crate nom;
 extern crate term_size;
 extern crate rustyline;
+extern crate isatty;
+
+use isatty::{stdin_isatty};
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -262,7 +265,9 @@ enum TreeSelection {
     Undefined,
 }
 fn main() {
-    println!("Tree Editor CLI v1.0.0");
+    if stdin_isatty() {
+        println!("Tree Editor CLI v1.0.0");
+    }
 
     let mut rbtree = RBTree::new();
     let mut avltree = AVLTree::new();
