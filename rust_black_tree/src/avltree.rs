@@ -502,22 +502,6 @@ mod tests {
 
     #[test]
     fn insert_few() {
-        let mut tree = AVLTree::<i32>::new();
-        tree.insert(1);
-        tree.insert(2);
-        let root = tree.root.expect("tree root");
-        assert!(tree.is_heavy_on_side(Side::Right, root));
-
-        tree.insert(3);
-
-        // assert that tree is balanced
-        //assert_eq!(tree.to_string(), "UUHH");
-        assert!(tree.is_heavy_on_side(Side::Right, root) == false);
-        assert!(tree.is_heavy_on_side(Side::Left, root) == false);
-    }
-
-    #[test]
-    fn rotate_crash_test() {
         // puts the smallest tree through all the combos
         // of rebalance rotations
         let mut tree = AVLTree::<i32>::new();
