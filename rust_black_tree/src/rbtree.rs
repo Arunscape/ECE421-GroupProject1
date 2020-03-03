@@ -5,6 +5,7 @@ use super::tree::BaseTree;
 use super::tree::Tree;
 
 use super::node::Node;
+use super::node::{paint, endpaint};
 use super::node::*;
 
 /// a nice convenient macro which allows a user to initialize a tree with
@@ -91,15 +92,6 @@ where
             true
         }
     }
-}
-
-fn paint(fg: usize, bg: usize) -> String {
-    let esc = char::from(0x1b);
-    format!("{}[{};{}m", esc, fg, bg)
-}
-fn endpaint() -> String {
-    let esc = char::from(0x1b);
-    format!("{}[0m", esc)
 }
 
 impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for ColorNode<T> {
