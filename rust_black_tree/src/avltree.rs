@@ -218,50 +218,22 @@ where
     }
 
     fn rebalance_del(&mut self, n: usize, _child: usize) {
-        self.del_retrace(n);
-        if let Some(r) = self.root {
-            self.traverse_to_fix(r);
+        if self.get_mut(n).ptr == TREE_END {
+            self.slow_delete();
+        } else {
+            self.del_retrace(n);
+            if let Some(r) = self.root {
+                self.traverse_to_fix(r);
+            }
         }
     }
 
     fn delete_replace(&mut self, n: usize) -> usize {
-        let mut delete_replace_recursive = |n: usize| {
-            let node = self.get(n);
-            match (node.lchild, node.rchild) {
-                (Some(lc), Some(rc)) => {
-                    let p = node.parent;
-                    let successor = self.get(rc).find_min();
-                    self.delete_replace(successor);
-                    self.data.borrow_mut().swap(successor, n);
-
-                    self.get_mut(n).lchild = Some(lc);
-                    self.get_mut(n).rchild = Some(rc);
-                    self.get_mut(n).parent = p;
-                    self.get_mut(n).ptr = n;
-                    return successor;
-                }
-                (None, Some(_rc)) => self.replace_node(n, self.get(n).rchild),
-                (Some(_lc), None) => self.replace_node(n, self.get(n).lchild),
-                (None, None) => self.replace_node(n, None),
-            };
-            n
-        };
-        let val = delete_replace_recursive(n);
         self.get_mut(n).ptr = TREE_END;
-        val
+        n
     }
 
-    fn replace_node(&mut self, to_delete: usize, to_attach: Option<usize>) {
-        let node = self.get(to_delete);
-        if let Some(p) = node.parent {
-            if node.is_child(Side::Left) {
-                self.get_mut(p).lchild = to_attach;
-            } else {
-                self.get_mut(p).rchild = to_attach;
-            }
-        } else {
-            self.root = to_attach;
-        }
+    fn replace_node(&mut self, _to_delete: usize, _to_attach: Option<usize>) {
     }
 
     fn get_size(&self) -> usize {
@@ -475,6 +447,21 @@ where
             Side::Right => self.get_balance_factor(n) > 0,
             Side::Left => self.get_balance_factor(n) < 0,
         }
+    }
+
+    fn slow_delete(&mut self) {
+        let mut t = AVLTree::new();
+        let mut v = self.data.borrow_mut().pop();
+        while v.is_some() {
+            let n = v.unwrap();
+            if n.ptr != TREE_END {
+                t.insert(n.value);
+            }
+            v = self.data.borrow_mut().pop();
+        }
+
+        *self = t;
+        self.size += 1;
     }
 
     fn fix_bf(&mut self, n: usize) {

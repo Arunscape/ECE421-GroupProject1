@@ -27,6 +27,10 @@ pub trait BaseTree<T> {
 pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
     fn new() -> Self;
 
+    fn is_empty(&self) -> bool {
+        return self.get_root().is_none()
+    }
+
     fn contains(&self, val: &T) -> bool {
         let n = self.find(val);
         self.get(n).is(val)
@@ -112,6 +116,14 @@ pub trait Tree<T: std::fmt::Debug>: BaseTree<T> {
     fn get_height(&self) -> usize {
         if let Some(root) = self.get_root() {
             self.get(root).get_height()
+        } else {
+            0
+        }
+    }
+
+    fn get_leaf_count(&self) -> usize {
+        if let Some(root) = self.get_root() {
+            self.get(root).get_leaf_count()
         } else {
             0
         }
