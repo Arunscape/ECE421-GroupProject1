@@ -81,20 +81,21 @@ different types of nodes, while still allowing for new, separate functionality
 defined by the different nodes. 
 
 \subsection{The Tree Trait}
-For the Tree structs for the Red Black tree and AVL trees, we decided to not go
-through the trouble of sharing code. There is a small amount of code
-duplication, but because the tree deals with different types of nodes, we deemed
-it reasonable to have a little bit of code duplication, like the \texttt{find}
-method, for example.
-\todo{are we sharing the trait?}
+%For the Tree structs for the Red Black tree and AVL trees, we decided to not go
+%through the trouble of sharing code. There is a small amount of code
+%duplication, but because the tree deals with different types of nodes, we deemed
+%it reasonable to have a little bit of code duplication, like the \texttt{find}
+%method, for example.
+%\todo{are we sharing the trait?}
 
 Both the Red Black tree and the AVL tree share a Tree trait, with default
-implementations for contains, \dots \todo{}. Then, the functionality which is
-specific to either the Red Black tree or the AVL tree is implemented in the Red
-Black tree struct, and the AVL tree struct, respectively.This approach allowed
-us to re-use common functionality between the
-different types of trees, while still allowing for new, separate functionality
-defined by the different trees.
+implementations for insert, delete, rotate, find, get\_height, and making a
+string representation of the tree. Then, the functionality which is specific to
+either the Red Black tree or the AVL tree is implemented in the Red Black tree
+struct, and the AVL tree struct, respectively.  (For example, re-balancing the
+tree after insertion/deletion).  This approach allowed us to re-use common
+functionality between the different types of trees, while still allowing for
+new, separate functionality defined by the different trees.
 
 \subsection{Arena based allocation}
 The way the memory is allocated for the nodes is a little unusual, in that the
@@ -142,30 +143,129 @@ the following functionality:
 \section{Defects}
 
 There are no known faults in the program.
-(Or we could mention that the CLI will panic if we haven't handled erroneous
-input yet)
+We wrote fairly comprehensive tests, so we feel confident that the trees work as
+intended.
+%(Or we could mention that the CLI will panic if we haven't handled erroneous
+%input yet)
 
 \section{Benchmarking}
 Both the Red Black tree and the AVL tree were benchmarked against each other.
-Overall, the \todo{} tree seemed to be faster.
+Overall, the AVL tree seemed to be faster than the Red Black tree for insertion,
+although the benchmark does not test the deletion speed. AVL trees re-balance
+more often than Red Black trees, so we would expect deletion to be slower
+although this aspect was not benchmarked.  However, it seems like the `manager'
+in this case is only concerned with insertion and searching. For small datasets
+(about 10000 insertions) the performance difference between the Red Black tree
+and the AVL tree seems negligible. However, for this use case we would recommend
+the AVL tree, since it is a bit faster, with larger datasets as seen in the
+benchmarks below. At 130000 insertions, there is about a 3 ms difference between
+the AVL tree and the Red Black tree. This is a big enough difference to prefer
+the AVL tree over the Red Black tree for the faster insertions and searching.
+If deletion speed was a concern, then the Red Black tree would
+likely be a better choice but again, this aspect was not benchmarked since the
+focus was on insertion and searching. We used an unbalanced binary search tree
+as a baseline, however, the benchmark tests were not feasible to run above the
+10000 insertions case for the unbalanced tree since it would take far too long.
+Suffice it to say, both the AVL tree and the Red Black trees are many, many
+times faster than the unbalanced binary tree for this insertion and search
+benchmark.
 
-The results are illustrated below.
-\todo{create charts}
+As such, we decided to include benchmarks for each of the three trees at 10000
+insertions, and then comparisons for the Red Black tree and the AVL tree at
+130000 insertions. Other benchmarks have been omitted for brevity,
+(they would take up way too many pages in this report)
+however more benchmarks can be easily run on your machine by running
+\verb|cargo bench|, and checking the HTML report generated in the
+\texttt{target/} directory.
+
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{bsbench.png}
+      \caption{Unbalanced tree benchmark at 10000 insertions. Out of 100 sample
+      taken from 5050 iterations, the mean time to run the benchmark was
+    191.67 ms with a median of 188.67 ms}
+\end{figure}
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{rbsmol.png}
+      \caption{Red Black tree benchmark at 10000 insertions. Out of 100 samples
+      taken from 5050 iterations, the mean time to run the benchmark was 628.29
+    $\mu s$ with a median of 624.55 $\mu s$}
+\end{figure}
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{avlsmol.png}
+      \caption{AVL tree benchmark at 10000 insertions. Out of 100 samples taken
+        from 5050 iterations,
+      the mean time to run the benchmark was 627.35 $\mu s$ with a median of
+    625.11 $\mu s$}
+\end{figure}
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{rbbeeg.png}
+      \caption{Red Black tree benchmark at 130000 insertions. Out of 100 samples
+      taken from 5050 iterations, the mean time to run the benchmark was 13.486
+      ms with a median of 13.466 ms}
+\end{figure}
+
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{avlbeeg.png}
+      \caption{AVL tree benchmark at 130000 insertions. Out of 100 samples
+      taken from 5050 iterations, the mean time to run the benchmark was 10.384
+    ms with a median of 10.344 ms}
+\end{figure}
 
 \section{Additional features}
-We decided to create a macro for instantiating the trees.  This will make it
+So-called ``Major innovations''- Additional to the project specification.
+
+\subsection{Helpful macros!}
+We decided to create some macros for instantiating the trees.  This will make it
 easier for programmers who decide to use our library for some reason to fill
-trees with initial values conveniently.  Similar to how vectors in Rust have a
-macro \texttt{vec!}, a Red Black tree, or AVL tree can be created using the
+trees with initial values in a nice, convenient, and concise manner.  
+Similar to how vectors in Rust have a macro \texttt{vec!}, a Red Black tree,
+AVL tree, or unbalanced binary tree can be created using the
 following macros:
 
 \begin{texttt}
-  redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9}
+  redblack!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{texttt}
 
 \begin{texttt}
-  avl!{1, 2, 3, 4, 5, 6, 7, 8, 9}
+  avl!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{texttt}
+
+\begin{texttt}
+  bst!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
+\end{texttt}
+
+\subsection{Pretty tree printing}
+We decided to go above and beyond, and have the tree displayed in a pretty
+fashion. If the terminal width allows for it, a pretty ASCII tree will be
+printed . If the user resizes their terminal window, the CLI will also adjust
+accordingly.  For Red Black trees, the colour of the node will also be printed
+to the terminal! A black node has a black background colour, while the red nodes
+have a red background colour.
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{rbtree.png}
+      \caption{Pretty visualization for a tree in the CLI. This shows a Red
+      Black tree, which also has coloured outputs for the different types of
+      nodes}
+\end{figure}
+
+\subsection{Readline buffering}
+We also decided to allow the user to easily access previous commands entered in
+the CLI simply by pressing the up arrow button. Normally, without this feature,
+the following characters would be displayed instead of the previous command that
+the user entered, which is not as user-friendly:
+\verb|^[[A|
+
 
 \section{Answers to questions}
 
@@ -177,7 +277,6 @@ in-order traversal (the order Left–Root–Right) of their elements.
 Because  height of a Red Black tree remains \(O(\log n)\) after every
 insertion and deletion, we can then guarantee that the
 upper bound for searching, inserting, deleting, etc is also \(O(\log n)\)
-
 In comparison, an unbalanced Binary Search tree might have a worst-case scenario
 of a traversal of size \(O(n)\), for example if every single element was
 inserted in ascending or descending order such that each child in the tree is
@@ -185,18 +284,39 @@ either all on the left side or all on the right side.
 
 \textit{Please add a command-line interface (function main) to your crate to
 allow users to test it.}
-\todo{print help output of the CLI}
 
-\textit{Do you need to apply any kind of error handling in your system (e.g., panic macro,
-Option<T>, Result<T, E>, etc..)}
-\todo{i dunno\dots}
+Here's a preview of the CLI!
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{cli.png}
+      \caption{A preview of our command-line interface.}
+\end{figure}
+
+\textit{Do you need to apply any kind of error handling in your system (e.g.,
+panic macro,}
+\verb|Option<T>|, \verb|Result<T, E>| \textit{etc..)}
+\todo{I DON'T KNOW}
 
 \textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
 Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
+
 The Red Black tree and the AVL tree have a ColorNode, and a DepthNode,
 respectively. These nodes share the Node trait, which we have defined.
 Furthermore, the Red Black tree and the AVL tree share a Tree trait, which
 handles common functionality such as determining if the tree contains a certain
 value.
 Please see the design rationale above for more details. \ref{dry}
+
+\textit{How do we construct our design to “allow it to be efficiently and
+effectively extended”? For example. Could your code be reused to build a 2-3-4
+tree or B tree?}
+
+Actually, with the way we implemented the trees, it would be very easy to re-use
+some code to create a 2-3-4 tree, a B tree, or some other type of tree. To
+begin, one would have to create a node struct which implements our Node trait,
+and then make a tree which implements out Tree trait. From there, the programmer
+would simply need to implement the methods without a default implementation.
+To make the new tree compatible with out command-line interface, they would need
+to add a new tree type to the enum defined in \texttt{main.rs}, and pass it
+as an additional argument to the parsing functions in \texttt{main.rs}.
 \end{document}

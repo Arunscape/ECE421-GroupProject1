@@ -8,6 +8,22 @@ use super::tree::Tree;
 use super::node::Node;
 use super::node::*;
 
+/// a nice convenient macro which allows a user to initialize a tree with
+/// a number of elements
+/// usage: redblack!{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+#[macro_export]
+macro_rules! avl {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_tree = AVLTree::new();
+            $(
+                temp_tree.insert($x);
+            )*
+            temp_tree
+        }
+    };
+}
+
 #[derive(Debug)]
 pub struct AVLNode<T> {
     pub value: T,
@@ -199,7 +215,9 @@ where
         self.retrace(n);
     }
 
-    fn rebalance_del(&mut self, _n: usize, _child: usize) {}
+    fn rebalance_del(&mut self, n: usize, _child: usize) {
+        self.del_retrace(n)
+    }
 
     fn delete_replace(&mut self, n: usize) -> usize {
         let node = self.get(n);
@@ -270,6 +288,56 @@ where
     T: PartialEq,
     T: std::fmt::Debug,
 {
+    fn del_retrace(&mut self, n: usize) {
+        loop {
+            let x = self.get(n).parent;
+            if !x.is_some() {
+                return;
+            }
+            let x: usize = x.expect("Deletion retrace get z parent");
+            if self.get(n).is_child(Side::Left) {
+                if self.is_heavy_on_side(Side::Right, x) {
+                    // Sibling of N (higher by 2)
+                    let z = self.get(n).get_sibling().expect("del z");
+                    if self.is_heavy_on_side(Side::Left, z) {
+                        self.avl_rotate(Side::Right, z);
+                        self.avl_rotate(Side::Left, x);
+                    } else {
+                        self.avl_rotate(Side::Left, x);
+                    }
+                } else {
+                    if self.get_balance_factor(x) == 0 {
+                        self.set_balance_factor(x, 1);
+                        break;
+                    }
+                    self.set_balance_factor(n, 0);
+                    //N = X; //
+                    self.del_retrace(x);
+                }
+            } else {
+                if self.is_heavy_on_side(Side::Left, x) {
+                    // Sibling of N (higher by 2)
+                    let z = self.get(n).get_sibling().expect("del z");
+                    if self.is_heavy_on_side(Side::Right, z) {
+                        self.avl_rotate(Side::Left, z);
+                        self.avl_rotate(Side::Right, x);
+                    } else {
+                        self.avl_rotate(Side::Right, x);
+                    }
+                } else {
+                    if self.get_balance_factor(x) == 0 {
+                        self.set_balance_factor(x, -1);
+                        break; // Leave the loop
+                    }
+                    self.set_balance_factor(n, 0);
+                    //N = X;
+                    self.del_retrace(x);
+                }
+            }
+            break;
+        }
+    }
+
     fn retrace(&mut self, z: usize) {
         loop {
             //println!("Z= {:?}", self.get(z).value);
@@ -337,26 +405,20 @@ where
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
         if let Some(z) = self.get(n).get_child(!side) {
-	        self.rotate(
-	            side,
-	            z
-	        );
-            match self.get_balance_factor(z)  {
-                0 =>
-                    {
-                    self.set_balance_factor(n,1);
-                    self.set_balance_factor(z,-1);
-                    },
-                _ =>
-                    {
-                    self.set_balance_factor(n,0);
+            self.rotate(side, z);
+            match self.get_balance_factor(z) {
+                0 => {
+                    self.set_balance_factor(n, 1);
+                    self.set_balance_factor(z, -1);
+                }
+                _ => {
+                    self.set_balance_factor(n, 0);
                     self.set_balance_factor(z, 0);
-                    },
+                }
             }
         } else {
             panic!("avl rotate unwrap");
         }
-
     }
 
     fn get_balance_factor(&self, n: usize) -> isize {
@@ -430,32 +492,49 @@ mod tests {
         tree.insert(1);
         tree.insert(2);
         tree.insert(3);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(1);
         tree.insert(3);
         tree.insert(2);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(3);
         tree.insert(2);
         tree.insert(1);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(3);
         tree.insert(1);
         tree.insert(2);
-        assert!(true);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
     }
 
-    //    #[test]
-    //    fn insert_many() {
-    //        let mut tree = AVLTree::<i32>::new();
-    //        for i in 1..10 {
-    //            tree.insert(i);
-    //        }
-    //        println!("{}", tree.to_pretty_string());
-    //        assert_eq!("A BALANCED REEE", tree.to_pretty_string());
-    //
-    //    }
+    #[test]
+    fn avl_del() {
+        let mut tree = AVLTree::<i32>::new();
+        for i in 1..10 {
+            tree.insert(i);
+        }
+        tree.delete(5);
+        tree.delete(7);
+        tree.insert(7);
+        println!("{}", tree.to_pretty_string());
+        assert!(false);
+    }
 }
