@@ -142,7 +142,10 @@ fn eval(
             std::process::exit(0);
         }
         Cmd::Clear => {
-            print!("\x1B[2J");
+            // print!("\x1B[2J"); // Clear should clear the tree not the screen
+            *rb = RBTree::new();
+            *avl = AVLTree::new();
+            *bs = BSTree::new();
         }
         Cmd::Print => match tree_type {
             TreeSelection::RedBlack => {
