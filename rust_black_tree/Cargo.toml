@@ -6,6 +6,14 @@ edition = "2018"
 exclude = [
     "report/*",
 ]
+description = "Please don't use this in something serious lol"
+documentation = ""
+homepage = ""
+repository = ""
+maintenance = { status = "as-is" }
+license = ""
+license-file = ""
+readme = "https://raw.githubusercontent.com/Arunscape/ECE421-GroupProject1/master/rust_black_tree/README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -28,3 +36,6 @@ path = "src/lib.rs"
 [[bin]]
 name = "demo"
 path = "src/main.rs"
+
+
+[package.metadata.docs.rs]
