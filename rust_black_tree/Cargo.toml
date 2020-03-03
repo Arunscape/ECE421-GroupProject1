@@ -5,6 +5,7 @@ authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woos
 edition = "2018"
 exclude = [
     "report/*",
+    "*.pdf",
 ]
 description = "Please don't use this in something serious lol"
 documentation = ""
@@ -13,7 +14,7 @@ repository = ""
 maintenance = { status = "as-is" }
 license = ""
 license-file = ""
-readme = "https://raw.githubusercontent.com/Arunscape/ECE421-GroupProject1/master/rust_black_tree/README.md"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
