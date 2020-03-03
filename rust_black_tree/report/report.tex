@@ -106,14 +106,14 @@ functionality defined by the different trees.
 The tree trait defines the following project requirements:
 
 \begin{itemize}
-  \item inserting a node (insert)
-  \item deleting a node (delete)
-  \item counting the number of leaves in a tree (get\_leaf\_count)
-  \item getting the height of the tree (get\_height)
-  \item printing the in-order traversal of the tree (to\_string()
-    function)
-  \item checking if the tree is empty (is\_empty)
-  \item checking if the tree contains an element (contains)
+	\item inserting a node (insert)
+	\item deleting a node (delete)
+	\item counting the number of leaves in a tree (get\_leaf\_count)
+	\item getting the height of the tree (get\_height)
+	\item printing the in-order traversal of the tree (to\_string()
+	      function)
+	\item checking if the tree is empty (is\_empty)
+	\item checking if the tree contains an element (contains)
 \end{itemize}
 
 \subsection{Arena based allocation}
@@ -143,26 +143,26 @@ tree and the AVL trees.
 
 For both the Red Black tree, and the AVL tree, there are tests to verify:
 \begin{enumerate}
-  \item the \texttt{contains} function
-  \item insertion
-  \item printing a string representation of the tree
-  \item verifying the tree's height is correct
-  \item deletion
-  \item testing the balance factor for the AVL tree
-  \item finding the leaf count
-  \item checking the contains function
+	\item the \texttt{contains} function
+	\item insertion
+	\item printing a string representation of the tree
+	\item verifying the tree's height is correct
+	\item deletion
+	\item testing the balance factor for the AVL tree
+	\item finding the leaf count
+	\item checking the contains function
 \end{enumerate}
 
 Furthermore, tests were created for the \texttt{Node} class. These tests verify
 the following functionality:
 \begin{enumerate}
-  \item getting a children nodes
-  \item getting the sibling node
-  \item getting uncle nodes
-  \item getting the size of a node
-  \item getting the height of a node
-  \item finding the min value
-  \item printing a string representation of the node
+	\item getting a children nodes
+	\item getting the sibling node
+	\item getting uncle nodes
+	\item getting the size of a node
+	\item getting the height of a node
+	\item finding the min value
+	\item printing a string representation of the node
 \end{enumerate}
 
 Since the tree is implemented as a tree set, adding duplicate values or
@@ -208,45 +208,45 @@ however more benchmarks can be easily run on your machine by running
 
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{bsbench.png}
-      \caption{Unbalanced tree benchmark at 10000 insertions. Out of 100 sample
-      taken from 5050 iterations, the mean time to run the benchmark was
-    191.67 ms with a median of 188.67 ms}
+	\centering
+	\includegraphics[width=.8\textwidth]{bsbench.png}
+	\caption{Unbalanced tree benchmark at 10000 insertions. Out of 100 sample
+		taken from 5050 iterations, the mean time to run the benchmark was
+		191.67 ms with a median of 188.67 ms}
 \end{figure}
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{rbsmol.png}
-      \caption{Red Black tree benchmark at 10000 insertions. Out of 100 samples
-      taken from 5050 iterations, the mean time to run the benchmark was 628.29
-    $\mu s$ with a median of 624.55 $\mu s$}
+	\centering
+	\includegraphics[width=.8\textwidth]{rbsmol.png}
+	\caption{Red Black tree benchmark at 10000 insertions. Out of 100 samples
+		taken from 5050 iterations, the mean time to run the benchmark was 628.29
+		$\mu s$ with a median of 624.55 $\mu s$}
 \end{figure}
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{avlsmol.png}
-      \caption{AVL tree benchmark at 10000 insertions. Out of 100 samples taken
-        from 5050 iterations,
-      the mean time to run the benchmark was 627.35 $\mu s$ with a median of
-    625.11 $\mu s$}
+	\centering
+	\includegraphics[width=.8\textwidth]{avlsmol.png}
+	\caption{AVL tree benchmark at 10000 insertions. Out of 100 samples taken
+		from 5050 iterations,
+		the mean time to run the benchmark was 627.35 $\mu s$ with a median of
+		625.11 $\mu s$}
 \end{figure}
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{rbbeeg.png}
-      \caption{Red Black tree benchmark at 130000 insertions. Out of 100 samples
-      taken from 5050 iterations, the mean time to run the benchmark was 13.486
-      ms with a median of 13.466 ms}
+	\centering
+	\includegraphics[width=.8\textwidth]{rbbeeg.png}
+	\caption{Red Black tree benchmark at 130000 insertions. Out of 100 samples
+		taken from 5050 iterations, the mean time to run the benchmark was 13.486
+		ms with a median of 13.466 ms}
 \end{figure}
 
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{avlbeeg.png}
-      \caption{AVL tree benchmark at 130000 insertions. Out of 100 samples
-      taken from 5050 iterations, the mean time to run the benchmark was 10.384
-    ms with a median of 10.344 ms}
+	\centering
+	\includegraphics[width=.8\textwidth]{avlbeeg.png}
+	\caption{AVL tree benchmark at 130000 insertions. Out of 100 samples
+		taken from 5050 iterations, the mean time to run the benchmark was 10.384
+		ms with a median of 10.344 ms}
 \end{figure}
 
 \section{Additional features}
@@ -261,15 +261,15 @@ AVL tree, or unbalanced binary tree can be created using the
 following macros:
 
 \begin{texttt}
-  redblack!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
+	redblack!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{texttt}
 
 \begin{texttt}
-  avl!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
+	avl!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{texttt}
 
 \begin{texttt}
-  bst!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
+	bst!\{1, 2, 3, 4, 5, 6, 7, 8, 9\}
 \end{texttt}
 
 \subsection{Pretty tree printing}
@@ -281,11 +281,11 @@ fall back to a normal text representation of the tree For Red Black trees, the
 colour of the node will also be printed to the terminal! A black node has a
 black background colour, while the red nodes have a red background colour.
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{rbtree.png}
-      \caption{Pretty visualization for a tree in the CLI.\@ This shows a Red
-      Black tree, which also has coloured outputs for the different types of
-      nodes}
+	\centering
+	\includegraphics[width=.8\textwidth]{rbtree.png}
+	\caption{Pretty visualization for a tree in the CLI.\@ This shows a Red
+		Black tree, which also has coloured outputs for the different types of
+		nodes}
 \end{figure}
 
 For the AVL tree, colouring has be chosen to indicate the balance
@@ -293,10 +293,10 @@ factor, with green being a neutral balance factor, yellow being right
 heavy, and blue being left heavy.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{avl.png}
-      \caption{Pretty visualization for a tree in the CLI.\@ This shows an AVL
-      tree, which also has coloured outputs for the different balance factors}
+	\centering
+	\includegraphics[width=.8\textwidth]{avl.png}
+	\caption{Pretty visualization for a tree in the CLI.\@ This shows an AVL
+		tree, which also has coloured outputs for the different balance factors}
 \end{figure}
 
 %% TODO: insert AVL tree graphic
@@ -338,7 +338,7 @@ Our tree library is available on crates.io
 \section{Answers to questions}
 
 \textit{What does a red-black tree provide that cannot be accomplished with
-ordinary binary search trees?}
+	ordinary binary search trees?}
 
 Red Black trees, unlike ordinary Binary Search trees, ensure the tree
 remains balanced. Because height of a Red Black tree remains \(O(\log
@@ -351,17 +351,17 @@ descending order such that each child in the tree is either all on the
 left side or all on the right side.
 
 \textit{Please add a command-line interface (function main) to your crate to
-allow users to test it.}
+	allow users to test it.}
 
 Here's a preview of the CLI!
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=.8\textwidth]{cli.png}
-      \caption{A preview of our command-line interface.}
+	\centering
+	\includegraphics[width=.8\textwidth]{cli.png}
+	\caption{A preview of our command-line interface.}
 \end{figure}
 
 \textit{Do you need to apply any kind of error handling in your system (e.g.,
-panic macro,}
+	panic macro,}
 \verb|Option<T>|, \verb|Result<T, E>| \textit{etc..)}
 
 The result and option types are used frequently throughout our
@@ -372,7 +372,7 @@ storing both children and parent nodes as there are cases where they
 do not exist.
 
 \textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
-Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
+	Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
 
 The Red Black tree and the AVL tree have a ColorNode, and a DepthNode,
 respectively. These nodes share the Node trait, which we have defined.
@@ -382,8 +382,8 @@ value.
 Please see the design rationale above for more details. \ref{dry}
 
 \textit{How do we construct our design to “allow it to be efficiently and
-effectively extended”? For example. Could your code be reused to build a 2-3-4
-tree or B tree?}
+	effectively extended”? For example. Could your code be reused to build a 2-3-4
+	tree or B tree?}
 
 Actually, with the way we implemented the trees, it would be very easy to re-use
 some code to implement any sort of binary tree.  To begin, one would have to
