@@ -66,7 +66,7 @@ Print the current tree
 
 #### clear/clr
 
-Clear the terminal screen
+Removes everything in the tree
 
     clear
     clr
