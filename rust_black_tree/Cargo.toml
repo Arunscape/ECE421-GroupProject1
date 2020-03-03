@@ -8,9 +8,9 @@ exclude = [
     "*.pdf",
 ]
 description = "Please don't use this in something serious lol"
-documentation = ""
-homepage = ""
-repository = ""
+#documentation = ""
+#homepage = ""
+repository = "https://github.com/Arunscape/ECE421-GroupProject1/tree/master/rust_black_tree"
 maintenance = { status = "as-is" }
 license = "GPL-3.0-or-later"
 readme = "README.md"
