@@ -472,22 +472,37 @@ mod tests {
         tree.insert(1);
         tree.insert(2);
         tree.insert(3);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(1);
         tree.insert(3);
         tree.insert(2);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(3);
         tree.insert(2);
         tree.insert(1);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
 
         let mut tree = AVLTree::<i32>::new();
         tree.insert(3);
         tree.insert(1);
         tree.insert(2);
-        assert!(true);
+        assert_eq!(
+            tree.to_string(),
+            "([V:2 H:1 BF:0] ([V:1 H:1 BF:0] () ()) ([V:3 H:1 BF:0] () ()))"
+        );
     }
 
     #[test]
