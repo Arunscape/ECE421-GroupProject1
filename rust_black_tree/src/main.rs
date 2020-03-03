@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate nom;
-
+extern crate term_size;
 use std::io::{self, BufRead, Write};
 
 use nom::{
@@ -9,6 +9,7 @@ use nom::{
     IResult,
 };
 use rust_black_trees::node::Node;
+use rust_black_trees::tree::BaseTree;
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
@@ -126,21 +127,6 @@ fn read_line() -> String {
     line
 }
 
-fn printTree<Tr: Tree<isize>>(tree: &Tr) {
-    let r = tree.get_root();
-    if let Some(root) = r {
-        let root = tree.get(root);
-        let sTree = if tree.get_height() > 6 {
-            root.to_pretty_string(1)
-        } else {
-            root.to_pretty_string(1)
-        };
-        println!("{}", sTree);
-    } else {
-        println!("Empty Tree");
-    }
-}
-
 fn eval(
     cmd: Cmd,
     rb: &mut RBTree<isize>,
@@ -155,13 +141,36 @@ fn eval(
         Cmd::Clear => {
             print!("\x1B[2J");
         }
-        Cmd::Print =>
-            match tree_type {
-                TreeSelection::RedBlack => printTree(rb),
-                TreeSelection::AVL => printTree(avl),
-                TreeSelection::BST => printTree(bs),
-                TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+        Cmd::Print => match tree_type {
+            TreeSelection::RedBlack => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettyrb(rb.get(rb.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", rb.to_pretty_string())
+                }
             }
+            TreeSelection::AVL => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettyavl(avl.get(avl.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", avl.to_pretty_string())
+                }
+            }
+            TreeSelection::BST => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettybst(bs.get(bs.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", avl.to_pretty_string())
+                }
+            }
+            TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+        },
         Cmd::Add(v) => match tree_type {
             TreeSelection::RedBlack => rb.insert(v),
             TreeSelection::AVL => avl.insert(v),
@@ -188,13 +197,13 @@ fn eval(
             println!("  print");
             println!("  clear");
             println!("  quit");
-        },
+        }
         Cmd::New(v) => {
             *tree_type = v;
             *rb = RBTree::new();
             *avl = AVLTree::new();
             *bs = BSTree::new();
-        },
+        }
         Cmd::NumberError => {
             println!("Only signed word sized numbers are supported in the demo. Other datatypes can be purchased for $5.99.");
         }

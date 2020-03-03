@@ -1,7 +1,6 @@
 use std::cmp::max;
 use std::ops::Not;
 
-use super::prettynodeprinter::printpretty;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Color {

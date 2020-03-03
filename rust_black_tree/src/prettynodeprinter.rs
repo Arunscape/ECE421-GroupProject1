@@ -1,75 +1,112 @@
-use super::node::Side;
 use super::node::Node;
-use super::tree::Tree;
+use super::node::Side;
 use super::tree::BaseTree;
+use super::tree::Tree;
 
 use super::rbtree::ColorNode;
+use super::avltree::AVLNode;
+use super::unbalancetree::RegularNode;
 use super::rbtree::RBTree;
 
-use std::collections::VecDeque;
+const LEFT: char = '╱';
+const RIGHT: char = '╲';
 
-pub fn printpretty<T: std::fmt::Debug+std::cmp::PartialOrd> (node: &ColorNode<T>) -> String {
+pub fn printprettybst<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &RegularNode<T>) -> Option<String> {
     print_node_pretty(node)
-
 }
 
-fn bfs_print_node<T: std::fmt::Debug, N: Node<T>>
-    (depth: &mut usize, x: &mut usize, res: &mut String,
-                  nodes: &mut VecDeque<Option<usize>>, node: &N) {
-    if let Some(n) = nodes.pop_front() {
-        if let Some(n) = n {
-            let n = node.get(n);
-            let d = n.get_depth();
-            let x_new = get_x(n);
-            if d > *depth {
-                *depth = d;
-                *x = 0;
-                *res += "\n";
-            }
-            if x_new > *x {
-                *res += &" ".repeat(x_new - *x);
-                *x = x_new;
-            }
-            *res += &format!("{}", n.location());
-            nodes.push_back(n.get_child(Side::Left));
-            nodes.push_back(n.get_child(Side::Right));
-        }
-        bfs_print_node(depth, x, res, nodes, node);
-    }
+pub fn printprettyrb<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &ColorNode<T>) -> Option<String> {
+    print_node_pretty(node)
 }
 
-fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> String {
-    let mut nodes: VecDeque<Option<usize>> = VecDeque::new();
-    nodes.push_back(Some(node.location()));
-    let mut depth = node.get_depth();
-    let mut x = 0;
-    let mut res = String::new();
-    bfs_print_node(&mut depth, &mut x, &mut res, &mut nodes, node);
-    res
+pub fn printprettyavl<T: std::fmt::Debug + std::cmp::PartialOrd>(node: &AVLNode<T>) -> Option<String> {
+    print_node_pretty(node)
 }
 
-fn get_x<T: std::fmt::Debug, N: Node<T>>(node: &N) -> usize {
-    const NODE_WIDTH: usize = 5;
-    fn inner<T: std::fmt::Debug, N: Node<T>>(n: Option<&N>, node: &N) -> usize {
-        if let Some(n) = n {
-            let cl = inner(n.get_child(Side::Left).map(|x| node.get(x)), node);
-            let cr = inner(n.get_child(Side::Right).map(|x| node.get(x)), node);
-            (if n.greater(node.get_value()) { 0 } else { NODE_WIDTH }) + cl + cr
+
+fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String> {
+    let (grid_width, grid_height) =
+        if let Some((w, h)) = term_size::dimensions() {
+            (w, h)
         } else {
-            0
+            (150, 100)
+        };
+    let mut grid: Vec<Vec<char>> = Vec::with_capacity(grid_height);
+    let mut used_depth = 0;
+    // make grid
+    for row in 0..grid_height {
+        grid.push(Vec::with_capacity(grid_width));
+        for _ in 0..grid_width {
+            grid[row].push(' ');
         }
     }
-    fn rooter<T: std::fmt::Debug, N: Node<T>>(n: &N) -> &N {
-        if let Some(p) = n.get_parent() {
-            rooter(n.get(p))
-        } else {
-            n
+
+    // fill grid
+    fn fill_grid<T: std::fmt::Debug, N: Node<T>>(
+        x: usize,
+        depth: usize,
+        n: &N,
+        node: &N,
+        grid: &mut Vec<Vec<char>>,
+        ud: &mut usize,
+    ) -> bool {
+        let val_str = format!("{:?}", n.get_value());
+        let cw = val_str.len();
+        let lw = n
+            .get_child(Side::Left)
+            .map(|x| node.get(x).get_size())
+            .unwrap_or(0);
+        let rw = n
+            .get_child(Side::Right)
+            .map(|x| node.get(x).get_size())
+            .unwrap_or(0);
+        let mw = std::cmp::max(lw, rw) * cw;
+        if depth >= grid.len() {
+            return false;
         }
+        if x >= grid[0].len() {
+            return false;
+        }
+
+        // write node
+        let mut i = 0;
+        for c in val_str.chars() {
+            grid[depth][x + i - cw/2] = c;
+            i += 1;
+        }
+        *ud = std::cmp::max(*ud, depth) + 1;
+        if let Some(c) = n.get_child(Side::Left) {
+            for i in 1..mw {
+                grid[depth + i][x - i] = LEFT;
+            }
+            if !fill_grid(x - mw, depth + mw, node.get(c), node, grid, ud) {
+                return false;
+            }
+        }
+        if let Some(c) = n.get_child(Side::Right) {
+            for i in 1..mw {
+                grid[depth + i][x + i] = RIGHT;
+            }
+            if !fill_grid(x + mw, depth + mw, node.get(c), node, grid, ud) {
+                return false;
+            }
+        }
+        return true;
     }
-    let root = rooter(node);
-    inner(Some(root), node) - node.get_depth()
+    if !fill_grid(grid_width / 2, 0, node, node, &mut grid, &mut used_depth) {
+        return None;
+    }
+
+    // grid to string
+    let mut res = String::from("");
+    for x in 0..used_depth {
+        res += &(grid[x].iter().collect::<String>() + "\n")
+    }
+    Some(res)
 }
 
+
+// visual tests for node
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -85,16 +122,33 @@ mod tests {
         t.insert(4);
         t.insert(6);
 
-        println!("{}", printpretty(t.get(t.get_root().unwrap())));
-        assert!(false);
+        if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
+            println!("{}", s);
+        }
+        // assert!(false);
     }
 
     #[test]
     fn test_2() {
         let mut t = RBTree::new();
-        for x in 0..20 {t.insert(x);}
-        println!("{}", printpretty(t.get(t.get_root().unwrap())));
-        assert!(false);
+        for x in 0..20 {
+            t.insert(x);
+        }
+        if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
+            println!("{}", s);
+        }
+        // assert!(false);
     }
 
+    #[test]
+    fn test_3() {
+        let mut t = RBTree::new();
+        for x in &[100, 232, 754, 877, 123, 654, 546, 324, 654, 876] {
+            t.insert(x);
+        }
+        if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
+            println!("{}", s);
+        }
+        // assert!(false);
+    }
 }
