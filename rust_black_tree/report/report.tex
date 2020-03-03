@@ -153,6 +153,8 @@ The results are illustrated below.
 \todo{create charts}
 
 \section{Additional features}
+
+\subsection{Helpful macros!}
 We decided to create a macro for instantiating the trees.  This will make it
 easier for programmers who decide to use our library for some reason to fill
 trees with initial values conveniently.  Similar to how vectors in Rust have a
@@ -167,6 +169,31 @@ following macros:
   avl!{1, 2, 3, 4, 5, 6, 7, 8, 9}
 \end{texttt}
 
+\begin{texttt}
+  bst!{1, 2, 3, 4, 5, 6, 7, 8, 9}
+\end{texttt}
+
+\subsection{Pretty tree printing}
+We decided to go above and beyond, and have the tree displayed in a pretty
+fashion. If the terminal width allows for it, a pretty ASCII tree will be
+printed . For Red Black trees, the colour of the node will also be printed to
+the terminal! A black node has a black background colour, while the red nodes
+have a red background colour.
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{rbtree.png}
+      \caption{Pretty visualization for a tree in the CLI. This shows a Red
+      Black tree, which also has coloured outputs for the nodes}
+\end{figure}
+
+\subsection{Readline buffering}
+We also decided to allow the user to easily access previous commands entered in
+the CLI simply by pressing the up arrow button. Normally, without this feature,
+the following characters would be displayed instead of the previous command that
+the user entered, which is not as user-friendly:
+\verb|^[[A|
+
+
 \section{Answers to questions}
 
 \textit{What does a red-black tree provide that cannot be accomplished with
@@ -177,7 +204,6 @@ in-order traversal (the order Left–Root–Right) of their elements.
 Because  height of a Red Black tree remains \(O(\log n)\) after every
 insertion and deletion, we can then guarantee that the
 upper bound for searching, inserting, deleting, etc is also \(O(\log n)\)
-
 In comparison, an unbalanced Binary Search tree might have a worst-case scenario
 of a traversal of size \(O(n)\), for example if every single element was
 inserted in ascending or descending order such that each child in the tree is
