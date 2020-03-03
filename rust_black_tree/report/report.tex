@@ -284,6 +284,21 @@ the following characters would be displayed instead of the previous command that
 the user entered, which is not as user-friendly:
 \verb|^[[A|
 
+\subsection{TTY detection}
+
+While it's nice to have a friendly welcome message when you start up a
+REPL.\@ It's less nice to have a welcome message when you pipe data into
+a program and are just looking for the output. That's why our program
+will detect if it's running in a pipe, or a tty, and only display the
+welcome message in the tty. That way it's friendly when you want it to
+be, and not when you don't.
+
+\begin{verbatim}
+printf "new rb\na 1\na 2\na 3\na 4\na 5\na 6\np\n" | cargo run
+\end{verbatim}
+
+This is ideal for running commands like this to allow for having trees
+as part of a script.
 
 \section{Answers to questions}
 
