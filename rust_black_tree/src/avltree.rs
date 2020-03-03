@@ -20,7 +20,7 @@ pub struct AVLNode<T> {
     pub balance_factor: isize,
 }
 
-impl <T> AVLNode<T> {
+impl<T> AVLNode<T> {
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<AVLNode<T>>>>) -> Self {
         Self {
             value: val,
@@ -35,12 +35,12 @@ impl <T> AVLNode<T> {
     }
 }
 
-impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for AVLNode<T> {
+impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for AVLNode<T> {
     fn to_self_string(&self) -> String {
-        format!("[V:{:?} H:{:?} BF:{:?}]",
-            self.value,
-            self.height,
-            self.balance_factor)
+        format!(
+            "[V:{:?} H:{:?} BF:{:?}]",
+            self.value, self.height, self.balance_factor
+        )
     }
     fn get_value(&self) -> &T {
         &self.value
@@ -56,23 +56,18 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for AVLNode<T> {
         &self.value < val
     }
 
-
     /**
-    * In order to return a reference to a value of a vector contained within a
-    * refcell, a raw pointer is used. The unsafe code could be avoided by
-    * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
-    * to self.get_mut(n) with &mut self.data.borrow()[n]
-    */
+     * In order to return a reference to a value of a vector contained within a
+     * refcell, a raw pointer is used. The unsafe code could be avoided by
+     * replacing each call to self.get(n) with &self.data.borrow()[n] and each call
+     * to self.get_mut(n) with &mut self.data.borrow()[n]
+     */
     fn get(&self, ptr: usize) -> &AVLNode<T> {
-        unsafe {
-            &(*self.data.as_ptr())[ptr]
-        }
+        unsafe { &(*self.data.as_ptr())[ptr] }
     }
 
     fn get_mut(&self, ptr: usize) -> &mut AVLNode<T> {
-        unsafe {
-            &mut (*self.data.as_ptr())[ptr]
-        }
+        unsafe { &mut (*self.data.as_ptr())[ptr] }
     }
 
     fn get_child(&self, side: Side) -> Option<usize> {
@@ -259,11 +254,12 @@ where
             if !x.is_some() {
                 // current node z is the root of the tree
                 // nothing to do, return?
-                return
+                return;
             }
-            let x:usize = x.expect("Retrace get z parent");
+            let x: usize = x.expect("Retrace get z parent");
 
-            if self.get(z).is_child(Side::Right) { // The right subtree increases
+            if self.get(z).is_child(Side::Right) {
+                // The right subtree increases
                 if self.is_heavy_on_side(Side::Right, x) {
                     if self.is_heavy_on_side(Side::Left, z) {
                         self.avl_rotate(Side::Right, z);
@@ -308,10 +304,10 @@ where
             }
             break;
         }
-    // Unless loop is left via break, the height of the total tree increases by 1.
+        // Unless loop is left via break, the height of the total tree increases by 1.
     }
 
-    fn avl_rotate(&mut self, side:Side, n:usize){
+    fn avl_rotate(&mut self, side: Side, n: usize) {
         // make an adjustment to account for differnt rotate
         // algorithm off wiki than implemented in tree...
         self.rotate(
@@ -335,7 +331,6 @@ where
             Side::Left => self.get_balance_factor(n) < 0,
         }
     }
-
 }
 
 #[cfg(test)]
@@ -344,7 +339,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let tree = AVLTree::<i32>::new();
+        let _tree = AVLTree::<i32>::new();
     }
 
     #[test]
@@ -410,15 +405,14 @@ mod tests {
         assert!(true);
     }
 
-//    #[test]
-//    fn insert_many() {
-//        let mut tree = AVLTree::<i32>::new();
-//        for i in 1..10 {
-//            tree.insert(i);
-//        }
-//        println!("{}", tree.to_pretty_string());
-//        assert_eq!("A BALANCED REEE", tree.to_pretty_string());
-//
-//    }
-
+    //    #[test]
+    //    fn insert_many() {
+    //        let mut tree = AVLTree::<i32>::new();
+    //        for i in 1..10 {
+    //            tree.insert(i);
+    //        }
+    //        println!("{}", tree.to_pretty_string());
+    //        assert_eq!("A BALANCED REEE", tree.to_pretty_string());
+    //
+    //    }
 }

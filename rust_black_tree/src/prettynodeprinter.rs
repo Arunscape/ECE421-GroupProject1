@@ -109,6 +109,8 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
 // visual tests for node
 #[cfg(test)]
 mod tests {
+    use super::super::rbtree::RBTree;
+    use super::super::tree::{BaseTree, Tree};
     use super::*;
 
     #[test]
