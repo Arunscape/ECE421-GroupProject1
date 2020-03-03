@@ -31,6 +31,7 @@ where
     T: std::fmt::Debug,
     T: std::cmp::PartialOrd,
 {
+
     fn new(val: T, selfptr: usize, data: Rc<RefCell<Vec<ColorNode<T>>>>) -> Self {
         Self {
             value: val,
@@ -90,6 +91,10 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for ColorNode<T> {
     }
     fn lesser(&self, val: &T) -> bool {
         &self.value < val
+    }
+
+    fn get_value(&self) -> &T {
+        &self.value
     }
 
 

@@ -8,7 +8,7 @@ use nom::{
     character::{is_alphabetic, is_digit},
     IResult,
 };
-
+use rust_black_trees::node::Node;
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
@@ -126,6 +126,21 @@ fn read_line() -> String {
     line
 }
 
+fn printTree<Tr: Tree<isize>>(tree: &Tr) {
+    let r = tree.get_root();
+    if let Some(root) = r {
+        let root = tree.get(root);
+        let sTree = if tree.get_height() > 6 {
+            root.to_pretty_string(1)
+        } else {
+            root.to_pretty_string(1)
+        };
+        println!("{}", sTree);
+    } else {
+        println!("Empty Tree");
+    }
+}
+
 fn eval(
     cmd: Cmd,
     rb: &mut RBTree<isize>,
@@ -140,12 +155,13 @@ fn eval(
         Cmd::Clear => {
             print!("\x1B[2J");
         }
-        Cmd::Print => match tree_type {
-            TreeSelection::RedBlack => println!("{}", rb.to_pretty_string()),
-            TreeSelection::AVL => println!("{}", avl.to_pretty_string()),
-            TreeSelection::BST => println!("{}", bs.to_pretty_string()),
-            TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
-        },
+        Cmd::Print =>
+            match tree_type {
+                TreeSelection::RedBlack => printTree(rb),
+                TreeSelection::AVL => printTree(avl),
+                TreeSelection::BST => printTree(bs),
+                TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
+            }
         Cmd::Add(v) => match tree_type {
             TreeSelection::RedBlack => rb.insert(v),
             TreeSelection::AVL => avl.insert(v),

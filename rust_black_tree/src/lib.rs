@@ -1,8 +1,9 @@
-mod node;
+pub mod node;
 pub mod tree;
 pub mod rbtree;
 pub mod unbalancetree;
 pub mod avltree;
+mod prettynodeprinter;
 
 pub fn test() {
     //let mut tree = tree::RBTree::new();
