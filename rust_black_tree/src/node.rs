@@ -167,6 +167,10 @@ pub trait Node<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rbtree::ColorNode;
+    use crate::rbtree::ColoredNode;
+    use std::rc::Rc;
+    use std::cell::RefCell;
 
     fn attach_child(data: &mut Vec<ColorNode<i32>>, p: usize, c: usize, side: Side) {
         let par = &mut data[p];
