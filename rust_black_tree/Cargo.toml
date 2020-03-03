@@ -25,3 +25,7 @@ path = "src/lib.rs"
 [[bin]]
 name = "demo"
 path = "src/main.rs"
+
+exclude = [
+    "report/*",
+]
