@@ -295,6 +295,8 @@ where
                 return;
             }
             let x: usize = x.expect("Deletion retrace get z parent");
+            //println!("n v:{:?}", self.get(n).value);
+            //println!("{}", self.to_pretty_string());
             if self.get(n).is_child(Side::Left) {
                 if self.is_heavy_on_side(Side::Right, x) {
                     // Sibling of N (higher by 2)
@@ -306,6 +308,8 @@ where
 	                        self.avl_rotate(Side::Left, x);
 	                    }
                     } else {
+                        println!("THIS IS SKETCHY");
+                        //self.del_retrace(x);
                         self.avl_rotate(Side::Left, x);
                     }
                 } else {
@@ -328,6 +332,8 @@ where
 	                        self.avl_rotate(Side::Right, x);
 	                    }
                     } else {
+                        println!("THIS IS SKETCHY");
+                        //self.del_retrace(x);
                         self.avl_rotate(Side::Right, x);
                     }
                 } else {
@@ -410,6 +416,9 @@ where
         // make an adjustment to account for differnt rotate
         // algorithm off wiki than implemented in tree...
         // ALSO adjust the balance factors
+        println!("Pre-rotate on n={:?} for\n {}",
+            self.get(n).value,
+            self.to_pretty_string());
         if let Some(z) = self.get(n).get_child(!side) {
             self.rotate(side, z);
             match self.calc_bal_fac(z) {
@@ -422,10 +431,10 @@ where
                     self.set_balance_factor(z, 0);
                 }
             }
+        println!("post-rotate on n={:?} for\n {}",
+            self.get(n).value,
+            self.to_pretty_string());
         } else {
-            println!("Rotate on v={:?} for tree:\n {}",
-                self.get(n).value,
-                self.to_pretty_string());
             panic!("avl rotate unwrap");
         }
     }
