@@ -1,7 +1,7 @@
 [package]
 name = "rust_black_tree"
 version = "0.1.0"
-authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>", "Alexander Rostron"]
+authors = ["Jacob R", "Arun Woosaree <arun@woosaree.xyz>", "Alexander Rostron"]
 edition = "2018"
 exclude = [
     "report/*",
