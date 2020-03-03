@@ -310,10 +310,28 @@ where
     fn avl_rotate(&mut self, side: Side, n: usize) {
         // make an adjustment to account for differnt rotate
         // algorithm off wiki than implemented in tree...
-        self.rotate(
-            side,
-            self.get(n).get_child(!side).expect("avl rotate unwrap kid"),
-        );
+        // ALSO adjust the balance factors
+        if let Some(z) = self.get(n).get_child(!side) {
+	        self.rotate(
+	            side,
+	            z
+	        );
+            match self.get_balance_factor(z)  {
+                0 =>
+                    {
+                    self.set_balance_factor(n,1);
+                    self.set_balance_factor(z,-1);
+                    },
+                _ =>
+                    {
+                    self.set_balance_factor(n,0);
+                    self.set_balance_factor(z, 0);
+                    },
+            }
+        } else {
+            panic!("avl rotate unwrap");
+        }
+
     }
 
     fn get_balance_factor(&self, n: usize) -> isize {
