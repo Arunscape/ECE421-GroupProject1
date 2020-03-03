@@ -339,14 +339,6 @@ where
 		}
 	}
 
-	fn get_size_recursive(&self) -> usize {
-		if let Some(root) = self.root {
-			self.get(root).get_size()
-		} else {
-			0
-		}
-	}
-
 }
 
 
