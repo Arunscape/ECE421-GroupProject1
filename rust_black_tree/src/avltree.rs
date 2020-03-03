@@ -261,14 +261,14 @@ where
 			if self.get(z).is_child(Side::Right) { // The right subtree increases
 				if self.is_heavy_on_side(Side::Right, x) {
 					if self.is_heavy_on_side(Side::Left, z) {
-						self.rotate(Side::Right, z);
-						self.rotate(Side::Left, x);
+						self.avl_rotate(Side::Right, z);
+						self.avl_rotate(Side::Left, x);
 					} else {
 						// TODO: rotates panic rn
 						// wiki has a differnet definiton of
 						// rotate than we do I think
-						//self.rotate(Side::Left, x);
-						self.rotate(Side::Left, z);
+						self.avl_rotate(Side::Left, x);
+						//self.rotate(Side::Left, z);
 					}
 				} else {
 					if self.is_heavy_on_side(Side::Left, x) {
@@ -284,10 +284,10 @@ where
 			} else {
 				if self.is_heavy_on_side(Side::Left, x) {
 					if self.is_heavy_on_side(Side::Right, z) {
-						self.rotate(Side::Left, z);
-						self.rotate(Side::Right, x);
+						self.avl_rotate(Side::Left, z);
+						self.avl_rotate(Side::Right, x);
 					} else {
-						self.rotate(Side::Right, x);
+						self.avl_rotate(Side::Right, x);
 					}
 				} else {
 					if self.is_heavy_on_side(Side::Right, x) {
@@ -304,6 +304,17 @@ where
 			break;
 		}
 	// Unless loop is left via break, the height of the total tree increases by 1.
+	}
+
+	fn avl_rotate(&mut self, side:Side, n:usize){
+		// make an adjustment to account for differnt rotate
+		// algorithm off wiki than implemented in tree...
+		self.rotate(
+			side,
+			self.get(n).get_child(!side)
+			.expect("avl rotate unwrap kid")
+		);
+
 	}
 
 	fn get_balance_factor(&self, n: usize) -> isize {
@@ -396,5 +407,30 @@ mod tests {
 		assert_eq!(tree.to_string(), "([P:None V:2] ([P:Some(1) V:1] () ()) ([P:Some(1) V:3] () ()))");
 		assert!(tree.is_heavy_on_side(Side::Right, root) == false);
 		assert!(tree.is_heavy_on_side(Side::Left, root) == false);
+	}
+	#[test]
+	fn rotate_crash_test() {
+		// puts the smallest tree through all the combos
+		// of rebalance rotations
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(2);
+		tree.insert(3);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(1);
+		tree.insert(3);
+		tree.insert(2);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(3);
+		tree.insert(2);
+		tree.insert(1);
+
+		let mut tree = AVLTree::<i32>::new();
+		tree.insert(3);
+		tree.insert(1);
+		tree.insert(2);
+		assert!(true);
 	}
 }
