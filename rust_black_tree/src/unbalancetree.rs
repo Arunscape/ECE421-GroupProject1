@@ -51,6 +51,12 @@ impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for RegularNode<T> {
         format!("[P:{:?} V:{:?}]", self.parent, self.value)
     }
 
+    fn to_self_string_display(&self) -> (String, usize) {
+        let s = format!("{:?}", self.value);
+        let l = s.len();
+        (s, l)
+    }
+
     fn is(&self, val: &T) -> bool {
         &self.value == val
     }

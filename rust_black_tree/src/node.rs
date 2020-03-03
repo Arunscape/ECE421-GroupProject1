@@ -1,7 +1,6 @@
 use std::cmp::max;
 use std::ops::Not;
 
-
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
     Red,
@@ -46,6 +45,7 @@ pub trait Node<T> {
     fn set_child(&mut self, child: usize, side: Side);
     fn set_child_opt(&mut self, child: Option<usize>, side: Side);
     fn to_self_string(&self) -> String;
+    fn to_self_string_display(&self) -> (String, usize);
     fn is(&self, val: &T) -> bool;
     fn greater(&self, val: &T) -> bool;
     fn lesser(&self, val: &T) -> bool;

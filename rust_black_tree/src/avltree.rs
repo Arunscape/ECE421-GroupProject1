@@ -42,6 +42,11 @@ impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for AVLNode<T> {
             self.value, self.height, self.balance_factor
         )
     }
+    fn to_self_string_display(&self) -> (String, usize) {
+        let s = format!("{:?}", self.value);
+        let l = s.len();
+        (s, l)
+    }
     fn get_value(&self) -> &T {
         &self.value
     }

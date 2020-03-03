@@ -5,8 +5,9 @@ use super::avltree::AVLNode;
 use super::rbtree::ColorNode;
 use super::unbalancetree::RegularNode;
 
-const LEFT: char = '╱';
-const RIGHT: char = '╲';
+const LEFT: &str = "╱";
+const RIGHT: &str = "╲";
+const ZWSP: &str = "​"; // this string contains a zero width space
 
 pub fn printprettybst<T: std::fmt::Debug + std::cmp::PartialOrd>(
     node: &RegularNode<T>,
@@ -32,13 +33,13 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
     } else {
         (150, 100)
     };
-    let mut grid: Vec<Vec<char>> = Vec::with_capacity(grid_height);
+    let mut grid: Vec<Vec<String>> = Vec::with_capacity(grid_height);
     let mut used_depth = 0;
     // make grid
     for row in 0..grid_height {
         grid.push(Vec::with_capacity(grid_width));
         for _ in 0..grid_width {
-            grid[row].push(' ');
+            grid[row].push(" ".to_string());
         }
     }
 
@@ -48,11 +49,10 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         depth: usize,
         n: &N,
         node: &N,
-        grid: &mut Vec<Vec<char>>,
+        grid: &mut Vec<Vec<String>>,
         ud: &mut usize,
     ) -> bool {
-        let val_str = format!("{:?}", n.get_value());
-        let cw = val_str.len();
+        let (val_str, cw) = n.to_self_string_display();
         let lw = n
             .get_child(Side::Left)
             .map(|x| node.get(x).get_size())
@@ -65,20 +65,25 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         if depth >= grid.len() {
             return false;
         }
-        if x >= grid[0].len() {
+        if x + mw >= grid[0].len() {
+            return false;
+        }
+        if x  < mw {
+            return false;
+        }
+        if x + cw/2 > grid[0].len() {
             return false;
         }
 
         // write node
-        let mut i = 0;
-        for c in val_str.chars() {
-            grid[depth][x + i - cw / 2] = c;
-            i += 1;
+        grid[depth][x  - cw / 2] = val_str;
+        for i in 1..cw {
+            grid[depth][x  - cw / 2 + i] = ZWSP.to_string();
         }
         *ud = std::cmp::max(*ud, depth) + 1;
         if let Some(c) = n.get_child(Side::Left) {
             for i in 1..mw {
-                grid[depth + i][x - i] = LEFT;
+                grid[depth + i][x - i] = String::from(LEFT);
             }
             if !fill_grid(x - mw, depth + mw, node.get(c), node, grid, ud) {
                 return false;
@@ -86,7 +91,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         }
         if let Some(c) = n.get_child(Side::Right) {
             for i in 1..mw {
-                grid[depth + i][x + i] = RIGHT;
+                grid[depth + i][x + i] = String::from(RIGHT);
             }
             if !fill_grid(x + mw, depth + mw, node.get(c), node, grid, ud) {
                 return false;
@@ -101,7 +106,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
     // grid to string
     let mut res = String::from("");
     for x in 0..used_depth {
-        res += &(grid[x].iter().collect::<String>() + "\n")
+        res += &(grid[x].join("").trim_end().to_string() + "\n")
     }
     Some(res)
 }
