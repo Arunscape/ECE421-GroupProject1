@@ -81,20 +81,21 @@ different types of nodes, while still allowing for new, separate functionality
 defined by the different nodes. 
 
 \subsection{The Tree Trait}
-For the Tree structs for the Red Black tree and AVL trees, we decided to not go
-through the trouble of sharing code. There is a small amount of code
-duplication, but because the tree deals with different types of nodes, we deemed
-it reasonable to have a little bit of code duplication, like the \texttt{find}
-method, for example.
-\todo{are we sharing the trait?}
+%For the Tree structs for the Red Black tree and AVL trees, we decided to not go
+%through the trouble of sharing code. There is a small amount of code
+%duplication, but because the tree deals with different types of nodes, we deemed
+%it reasonable to have a little bit of code duplication, like the \texttt{find}
+%method, for example.
+%\todo{are we sharing the trait?}
 
 Both the Red Black tree and the AVL tree share a Tree trait, with default
-implementations for contains, \dots \todo{}. Then, the functionality which is
-specific to either the Red Black tree or the AVL tree is implemented in the Red
-Black tree struct, and the AVL tree struct, respectively.This approach allowed
-us to re-use common functionality between the
-different types of trees, while still allowing for new, separate functionality
-defined by the different trees.
+implementations for insert, delete, rotate, find, get\_height, and making a
+string representation of the tree. Then, the functionality which is specific to
+either the Red Black tree or the AVL tree is implemented in the Red Black tree
+struct, and the AVL tree struct, respectively.  (For example, re-balancing the
+tree after insertion/deletion).  This approach allowed us to re-use common
+functionality between the different types of trees, while still allowing for
+new, separate functionality defined by the different trees.
 
 \subsection{Arena based allocation}
 The way the memory is allocated for the nodes is a little unusual, in that the
@@ -142,8 +143,10 @@ the following functionality:
 \section{Defects}
 
 There are no known faults in the program.
-(Or we could mention that the CLI will panic if we haven't handled erroneous
-input yet)
+We wrote fairly comprehensive tests, so we feel confident that the trees work as
+intended.
+%(Or we could mention that the CLI will panic if we haven't handled erroneous
+%input yet)
 
 \section{Benchmarking}
 Both the Red Black tree and the AVL tree were benchmarked against each other.
@@ -219,12 +222,14 @@ however more benchmarks can be easily run on your machine by running
 \end{figure}
 
 \section{Additional features}
+So-called ``Major innovations''- Additional to the project specification.
 
 \subsection{Helpful macros!}
-We decided to create a macro for instantiating the trees.  This will make it
+We decided to create some macros for instantiating the trees.  This will make it
 easier for programmers who decide to use our library for some reason to fill
-trees with initial values conveniently.  Similar to how vectors in Rust have a
-macro \texttt{vec!}, a Red Black tree, or AVL tree can be created using the
+trees with initial values in a nice, convenient, and concise manner.  
+Similar to how vectors in Rust have a macro \texttt{vec!}, a Red Black tree,
+AVL tree, or unbalanced binary tree can be created using the
 following macros:
 
 \begin{texttt}
@@ -249,7 +254,8 @@ have a red background colour.
       \centering
       \includegraphics[width=.8\textwidth]{rbtree.png}
       \caption{Pretty visualization for a tree in the CLI. This shows a Red
-      Black tree, which also has coloured outputs for the nodes}
+      Black tree, which also has coloured outputs for the different types of
+      nodes}
 \end{figure}
 
 \subsection{Readline buffering}
@@ -277,18 +283,39 @@ either all on the left side or all on the right side.
 
 \textit{Please add a command-line interface (function main) to your crate to
 allow users to test it.}
-\todo{print help output of the CLI}
 
-\textit{Do you need to apply any kind of error handling in your system (e.g., panic macro,
-Option<T>, Result<T, E>, etc..)}
-\todo{i dunno\dots}
+Here's a preview of the CLI!
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=.8\textwidth]{cli.png}
+      \caption{A preview of our command-line interface.}
+\end{figure}
+
+\textit{Do you need to apply any kind of error handling in your system (e.g.,
+panic macro,}
+\verb|Option<T>|, \verb|Result<T, E>| \textit{etc..)}
+\todo{I DON'T KNOW}
 
 \textit{What components do the Red-black tree and AVL tree have in common? Don’t Repeat
 Yourself! Never, ever repeat yourself – a fundamental idea in programming.}
+
 The Red Black tree and the AVL tree have a ColorNode, and a DepthNode,
 respectively. These nodes share the Node trait, which we have defined.
 Furthermore, the Red Black tree and the AVL tree share a Tree trait, which
 handles common functionality such as determining if the tree contains a certain
 value.
 Please see the design rationale above for more details. \ref{dry}
+
+\textit{How do we construct our design to “allow it to be efficiently and
+effectively extended”? For example. Could your code be reused to build a 2-3-4
+tree or B tree?}
+
+Actually, with the way we implemented the trees, it would be very easy to re-use
+some code to create a 2-3-4 tree, a B tree, or some other type of tree. To
+begin, one would have to create a node struct which implements our Node trait,
+and then make a tree which implements out Tree trait. From there, the programmer
+would simply need to implement the methods without a default implementation.
+To make the new tree compatible with out command-line interface, they would need
+to add a new tree type to the enum defined in \texttt{main.rs}, and pass it
+as an additional argument to the parsing functions in \texttt{main.rs}.
 \end{document}
