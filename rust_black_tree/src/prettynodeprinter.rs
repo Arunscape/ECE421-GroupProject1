@@ -50,8 +50,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         grid: &mut Vec<Vec<char>>,
         ud: &mut usize,
     ) -> bool {
-        let val_str = format!("{:?}", n.get_value());
-        let cw = val_str.len();
+        let (val_str, cw) = n.to_self_string_display();
         let lw = n
             .get_child(Side::Left)
             .map(|x| node.get(x).get_size())
@@ -64,7 +63,7 @@ fn print_node_pretty<T: std::fmt::Debug, N: Node<T>>(node: &N) -> Option<String>
         if depth >= grid.len() {
             return false;
         }
-        if x >= grid[0].len() {
+        if x + mw >= grid[0].len() {
             return false;
         }
 

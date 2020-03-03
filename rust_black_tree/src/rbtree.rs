@@ -94,12 +94,32 @@ where
     }
 }
 
+fn paint(fg: usize, bg: usize) -> String {
+    let esc = char::from(0x1b);
+    format!("{}[{};{}m", esc, fg, bg)
+}
+fn endpaint() -> String {
+    let esc = char::from(0x1b);
+    format!("{}[0m", esc)
+}
+
 impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for ColorNode<T> {
     fn to_self_string(&self) -> String {
         format!(
             "[P:{:?} C:{:?} V:{:?}]",
             self.parent, self.color, self.value
         )
+    }
+    fn to_self_string_display(&self) -> (String, usize) {
+        const RED: usize = 1;
+        const BLK: usize = 0;
+        const FG: usize = 30;
+        const BG: usize = 40;
+        if self.is_red() {
+            (format!("{}{:?}{}", paint(FG + BLK, BG + RED), self.value, endpaint()), format!("{:?}", self.value).len())
+        } else {
+            (format!("{}{:?}{}", paint(FG + RED, BG + BLK), self.value, endpaint()), format!("{:?}", self.value).len())
+        }
     }
 
     fn is(&self, val: &T) -> bool {
