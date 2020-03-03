@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 nom = "5.1.1"
+term_size = "0.3.1"
 
 [dev-dependencies]
 criterion = "0.3"

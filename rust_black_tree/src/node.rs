@@ -1,6 +1,7 @@
 use std::cmp::max;
 use std::ops::Not;
 
+
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
     Red,
@@ -35,6 +36,7 @@ pub struct DepthNode<T> {
 
 pub trait Node<T> {
     // Base methods
+    fn get_value(&self) -> &T;
     fn get(&self, i: usize) -> &Self;
     fn get_mut(&self, i: usize) -> &mut Self;
     fn location(&self) -> usize;
@@ -91,6 +93,11 @@ pub trait Node<T> {
             self.get_child(Side::Left).and_then(f).unwrap_or(1),
             self.get_child(Side::Right).and_then(f).unwrap_or(1),
         )
+    }
+
+    fn get_depth(&self) -> usize {
+        let f = |c| Some(1 + self.get(c).get_depth());
+        self.get_parent().and_then(f).unwrap_or(0)
     }
 
     fn get_size(&self) -> usize {

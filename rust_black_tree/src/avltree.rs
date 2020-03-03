@@ -39,6 +39,9 @@ impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for AVLNode<T> {
 	fn to_self_string(&self) -> String {
 		format!("[P:{:?} V:{:?}]", self.parent, self.value)
 	}
+	fn get_value(&self) -> &T {
+		&self.value
+	}
 
 	fn is(&self, val: &T) -> bool {
 		&self.value == val

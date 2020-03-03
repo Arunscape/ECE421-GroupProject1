@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate nom;
-
+extern crate term_size;
 use std::io::{self, BufRead, Write};
 
 use nom::{
@@ -8,7 +8,8 @@ use nom::{
     character::{is_alphabetic, is_digit},
     IResult,
 };
-
+use rust_black_trees::node::Node;
+use rust_black_trees::tree::BaseTree;
 use rust_black_trees::tree::Tree;
 use rust_black_trees::{avltree::AVLTree, rbtree::RBTree, unbalancetree::BSTree};
 
@@ -143,9 +144,33 @@ fn eval(
             print!("\x1B[2J");
         }
         Cmd::Print => match tree_type {
-            TreeSelection::RedBlack => println!("{}", rb.to_pretty_string()),
-            TreeSelection::AVL => println!("{}", avl.to_pretty_string()),
-            TreeSelection::BST => println!("{}", bs.to_pretty_string()),
+            TreeSelection::RedBlack => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettyrb(rb.get(rb.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", rb.to_pretty_string())
+                }
+            }
+            TreeSelection::AVL => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettyavl(avl.get(avl.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", avl.to_pretty_string())
+                }
+            }
+            TreeSelection::BST => {
+                if let Some(s) =
+                    rust_black_trees::prettynodeprinter::printprettybst(bs.get(bs.get_root().unwrap()))
+                {
+                    println!("{}", s)
+                } else {
+                    println!("{}", avl.to_pretty_string())
+                }
+            }
             TreeSelection::Undefined => eprintln!("Need to create a tree first!"),
         },
         Cmd::Add(v) => match tree_type {

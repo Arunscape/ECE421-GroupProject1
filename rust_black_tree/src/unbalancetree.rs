@@ -61,6 +61,9 @@ impl<T: std::fmt::Debug + std::cmp::PartialOrd> Node<T> for RegularNode<T> {
         &self.value < val
     }
 
+    fn get_value(&self) -> &T {
+        &self.value
+    }
     /**
      * In order to return a reference to a value of a vector contained within a
      * refcell, a raw pointer is used. The unsafe code could be avoided by
