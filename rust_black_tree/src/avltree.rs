@@ -37,7 +37,10 @@ impl <T> AVLNode<T> {
 
 impl <T: std::fmt::Debug+std::cmp::PartialOrd> Node<T> for AVLNode<T> {
 	fn to_self_string(&self) -> String {
-		format!("[P:{:?} V:{:?}]", self.parent, self.value)
+		format!("[V:{:?} H:{:?} BF:{:?}]",
+			self.value,
+			self.height,
+			self.balance_factor)
 	}
 	fn get_value(&self) -> &T {
 		&self.value
