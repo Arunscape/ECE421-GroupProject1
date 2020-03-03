@@ -421,4 +421,15 @@ mod tests {
 		assert!(true);
 	}
 
+//	#[test]
+//	fn insert_many() {
+//		let mut tree = AVLTree::<i32>::new();
+//		for i in 1..10 {
+//			tree.insert(i);
+//		}
+//		println!("{}", tree.to_pretty_string());
+//		assert_eq!("A BALANCED REEE", tree.to_pretty_string());
+//
+//	}
+
 }
