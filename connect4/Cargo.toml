@@ -1,0 +1,18 @@
+[package]
+name = "connect4"
+version = "0.1.0"
+authors = ["Jacob Reckhard <jacobreckhard@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[[bin]]
+name="connect4"
+path="src/main.rs"
+
+
+[lib]
+name="connect4"
+path="src/lib.rs"

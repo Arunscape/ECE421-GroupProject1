@@ -134,7 +134,7 @@ mod tests {
         if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
-        // assert!(false);
+        assert!(false);
     }
 
     #[test]
@@ -146,7 +146,7 @@ mod tests {
         if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
-        // assert!(false);
+        assert!(false);
     }
 
     #[test]
@@ -158,7 +158,7 @@ mod tests {
         if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
-        // assert!(false);
+        assert!(false);
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
         if let Some(s) = printprettyrb(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
-        // assert!(false);
+        assert!(false);
     }
 
     #[test]
@@ -182,6 +182,6 @@ mod tests {
         if let Some(s) = printprettyavl(t.get(t.get_root().unwrap())) {
             println!("{}", s);
         }
-        // assert!(false);
+        assert!(false);
     }
 }
