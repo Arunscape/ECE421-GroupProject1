@@ -7,19 +7,19 @@ use toto::TotoType;
 pub mod connect4;
 use connect4::ConnectColor;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GameType {
     Connect4,
     Toto,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ChipDescrip {
     Connect(ConnectColor),
     Toto(TotoType),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BoardState {
     Win(usize),
     Draw,
@@ -147,17 +147,6 @@ impl Board {
             layout.push(locs.get(&(x % self.width, x / self.width)).map(|x| *x));
         }
         layout
-    }
-
-    pub fn unpack_layout<C>(&self, valid: fn(ChipDescrip) -> bool,
-                        convert: fn(ChipDescrip) -> C) -> Option<Vec<Option<C>>> {
-        let layout = self.get_layout();
-        if layout.iter().all(|x| x.is_none() ||
-                             x.map(valid).unwrap()) {
-            Some(layout.iter().map(|x| x.map(convert)).collect())
-        } else {
-            None
-        }
     }
 
     // fn chip_at(&self, x: usize, y: usize) -> Option<Chip> {self.chips.iter().find(|&chip| chip.get_pos() == (x, y))}

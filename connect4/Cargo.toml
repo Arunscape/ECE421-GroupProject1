@@ -9,10 +9,10 @@ edition = "2018"
 [dependencies]
 
 [[bin]]
-name="connect4"
+name="connect_game"
 path="src/main.rs"
 
 
 [lib]
-name="connect4"
+name="connect_game"
 path="src/lib.rs"

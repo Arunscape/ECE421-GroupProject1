@@ -1,3 +1,3 @@
 fn main() {
-    connect4::play()
+    connect_game::play()
 }
