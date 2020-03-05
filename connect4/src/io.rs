@@ -1,5 +1,5 @@
 use super::game::{ChipDescrip, ConnectColor, GameBoard, TotoType, Game, GameType};
-use std::io::{self, Write, stdin, stdout};
+use std::io::{Write, stdin, stdout};
 
 pub trait GameIO {
     fn draw_board(game: &GameBoard);
