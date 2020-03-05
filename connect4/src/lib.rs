@@ -1,15 +1,11 @@
 mod io;
-mod game;
+pub mod game;
 
 use io::{GameIO, TermIO};
-use game::{Board, Game, GameType::*};
+use game::{Game};
 
 
-pub fn play() {
-    println!("Hello, world!");
-
-    let board = Board::new(7, 6);
-    let mut game = Game::new(board, Connect4);
+pub fn play(game: &mut Game) {
     let mut is_over = false;
     while !is_over {
         TermIO::draw_board(game.get_board());
@@ -19,6 +15,10 @@ pub fn play() {
             x => { TermIO::display_gameover(x); is_over = true; },
         }
     }
+    TermIO::draw_board(game.get_board());
+
+    // for debugging
     game.print_moves();
+    println!();
 }
 

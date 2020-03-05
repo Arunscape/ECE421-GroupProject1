@@ -189,8 +189,10 @@ pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
             return false;
         }
 
+        /*
         println!("Check loc[{},{}], dir[{},{}] -> {:?}",x,y,dx,dy,
                  (0..len).map(|i|idx(i)).collect::<Vec<isize>>());
+        */
 
         let check = |nums| -> bool {
             pattern.iter().zip(nums).all(|(p, n)| {

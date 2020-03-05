@@ -81,7 +81,8 @@ impl GameIO for TermIO {
         }
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);
-        print!("234567 ");
+        (1..game.width).for_each(|i| print!("{}", i+1));
+        print!(" ");
         Self::endpaint();
         println!();
     }
@@ -90,6 +91,7 @@ impl GameIO for TermIO {
         const UNASSIGNED: usize = std::usize::MAX;
         let mut buffer = String::new();
         let mut val = UNASSIGNED;
+        println!("Player {} turn.", game.get_turn() % 2 + 1);
 
         let ch = if let GameType::Connect4 = game.get_game_type() {
             if game.get_turn() % 2 == 0 {
@@ -115,11 +117,11 @@ impl GameIO for TermIO {
             get_toto_type()
         };
 
-        print!("Enter a number in range [1,7]: ");
+        print!("Enter a number in range [1,{}]: ", game.get_board().width);
         stdout().flush().expect("Failed to flush");
         if let Ok(_) = stdin().read_line(&mut buffer) {
             if let Ok(v) =  buffer.trim().parse::<usize>(){
-                if v > 0 && v <= 7 {
+                if v > 0 && v <= game.get_board().width {
                     val = v-1;
                 }
             }
