@@ -1,13 +1,40 @@
 use std::collections::HashSet;
+use std::collections::HashMap;
+
+pub mod toto;
+use toto::TotoType;
+
+pub mod connect4;
+use connect4::ConnectColor;
+
+#[derive(Clone, Copy, Debug)]
+pub enum GameType {
+    Connect4,
+    Toto,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum ChipDescrip {
+    Connect(ConnectColor),
+    Toto(TotoType),
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum BoardState {
+    Win(usize),
+    Draw,
+    Ongoing,
+}
+
 
 pub struct Game {
     turn: usize,
-    board: GameBoard,
+    board: Board,
     game_type: GameType,
 }
 
 impl Game {
-    pub fn new(board: GameBoard, game_type: GameType) -> Self {
+    pub fn new(board: Board, game_type: GameType) -> Self {
         Self {
             turn: 0,
             board,
@@ -15,13 +42,14 @@ impl Game {
         }
     }
 
-    pub fn get_board(&self) -> &GameBoard {
+    pub fn get_board(&self) -> &Board {
         &self.board
     }
 
-    pub fn play(&mut self, col: usize, color: ChipDescrip) {
+    pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         self.board.insert(Chip::new(col, 10, color));
         self.turn += 1;
+        self.check_state()
     }
 
     pub fn get_game_type(&self) -> GameType {
@@ -31,30 +59,17 @@ impl Game {
     pub fn get_turn(&self) -> usize {
         self.turn
     }
-}
 
-#[derive(Clone, Copy)]
-pub enum GameType {
-    Connect4,
-    Toto,
-}
+    fn check_state(&self) -> BoardState {
+        match self.game_type {
+            GameType::Connect4 => connect4::checker(&self),
+            GameType::Toto => toto::checker(&self),
+        }
+    }
 
-#[derive(Clone, Copy)]
-pub enum ChipDescrip {
-    Connect(ConnectColor),
-    Toto(TotoType),
-}
-
-#[derive(Clone, Copy)]
-pub enum ConnectColor {
-    Red,
-    Yellow,
-}
-
-#[derive(Clone, Copy)]
-pub enum TotoType {
-    T,
-    O,
+    fn get_board_layout(&self) -> Vec<Option<ChipDescrip>> {
+        self.board.get_layout()
+    }
 }
 
 pub struct Chip {
@@ -82,13 +97,13 @@ impl Chip {
     }
 }
 
-pub struct GameBoard {
+pub struct Board {
     pub width: usize,
     pub height: usize,
     pub chips: Vec<Chip>,
 }
 
-impl GameBoard {
+impl Board {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
             width,
@@ -122,5 +137,29 @@ impl GameBoard {
         }
     }
 
+    fn get_layout(&self) -> Vec<Option<ChipDescrip>> {
+        let mut locs = HashMap::new();
+        for chip in self.chips.iter() {
+            locs.insert(chip.get_pos(), chip.get_descrip());
+        }
+        let mut layout = Vec::with_capacity(self.width * self.height);
+        for x in 0..(self.width*self.height) {
+            layout.push(locs.get(&(x % self.width, x / self.width)).map(|x| *x));
+        }
+        layout
+    }
+
+    pub fn unpack_layout<C>(&self, valid: fn(ChipDescrip) -> bool,
+                        convert: fn(ChipDescrip) -> C) -> Option<Vec<Option<C>>> {
+        let layout = self.get_layout();
+        if layout.iter().all(|x| x.is_none() ||
+                             x.map(valid).unwrap()) {
+            Some(layout.iter().map(|x| x.map(convert)).collect())
+        } else {
+            None
+        }
+    }
+
     // fn chip_at(&self, x: usize, y: usize) -> Option<Chip> {self.chips.iter().find(|&chip| chip.get_pos() == (x, y))}
 }
+

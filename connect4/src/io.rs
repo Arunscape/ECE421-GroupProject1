@@ -1,9 +1,12 @@
-use super::game::{ChipDescrip, ConnectColor, GameBoard, TotoType, Game, GameType};
+use super::game::{ChipDescrip, Board, Game, GameType, BoardState};
+use super::game::connect4::ConnectColor;
+use super::game::toto::TotoType;
 use std::io::{Write, stdin, stdout};
 
 pub trait GameIO {
-    fn draw_board(game: &GameBoard);
+    fn draw_board(game: &Board);
     fn get_move(game: &Game) -> (usize, ChipDescrip);
+    fn display_gameover(ending: BoardState);
 }
 
 const FILLED: char = '◼';
@@ -42,7 +45,7 @@ impl TermIO {
     }
 }
 impl GameIO for TermIO {
-    fn draw_board(game: &GameBoard) {
+    fn draw_board(game: &Board) {
         let mut drawer = Self { fg: 0, bg: 0 };
         for r in (0..game.height).rev() {
             for c in 0..game.width {
@@ -127,6 +130,14 @@ impl GameIO for TermIO {
             Self::get_move(game)
         } else {
             (val, ch)
+        }
+    }
+
+    fn display_gameover(ending: BoardState) {
+        match ending {
+            BoardState::Win(x) => println!("Player {} wins!", x),
+            BoardState::Draw => println!("It's a draw :("),
+            BoardState::Ongoing => (),
         }
     }
 }
