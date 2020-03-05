@@ -1,7 +1,8 @@
-use super::game::{Chip, GameBoard};
+use super::game::{ChipDescrip, ConnectColor, GameBoard, TotoType, Game, GameType};
 
-pub trait GameIO  {
-    fn draw_board<C: Chip>(game: &GameBoard<C>);
+pub trait GameIO {
+    fn draw_board(game: &GameBoard);
+    fn get_move(game: &Game) -> (usize, ChipDescrip);
 }
 
 const FILLED: char = '◼';
@@ -15,12 +16,12 @@ const YEL: usize = 3;
 const WHT: usize = 7;
 const RST: usize = 9;
 
-pub struct TermDraw {
+pub struct TermIO {
     fg: usize,
     bg: usize,
 }
 
-impl TermDraw {
+impl TermIO {
     fn paint(fg: usize, bg: usize) {
         let esc = char::from(0x1b);
         print!("{}[{};{}m", esc, fg + FG, bg + BG)
@@ -39,17 +40,33 @@ impl TermDraw {
         print!("{}", s);
     }
 }
-impl GameIO for TermDraw {
-    fn draw_board<C: Chip>(game: &GameBoard<C>) {
-        let mut drawer = TermDraw {fg: 0, bg: 0};
-        let mut col = RED;
+impl GameIO for TermIO {
+    fn draw_board(game: &GameBoard) {
+        let mut drawer = Self { fg: 0, bg: 0 };
         for r in (0..game.height).rev() {
             for c in 0..game.width {
-                if game.chips.iter().any(|ch| if ch.get_pos() == (c, r) { col = ch.get_draw_info(); true } else { false }) {
-                    if col >= 10 {
-                        drawer.print_with_color(if col == 10 {'T'} else {'O'}, WHT, BLK + BRIGHTEN);
-                    } else {
-                        drawer.print_with_color(FILLED, col, BLK + BRIGHTEN);
+                if let Some(chip) = game.chips.iter().find(|ch| ch.get_pos() == (c, r)) {
+                    match chip.get_descrip() {
+                        ChipDescrip::Connect(col) => {
+                            drawer.print_with_color(
+                                FILLED,
+                                match col {
+                                    ConnectColor::Yellow => YEL,
+                                    ConnectColor::Red => RED,
+                                },
+                                BLK + BRIGHTEN,
+                            );
+                        }
+                        ChipDescrip::Toto(ty) => {
+                            drawer.print_with_color(
+                                match ty {
+                                    TotoType::T => 'T',
+                                    TotoType::O => 'O',
+                                },
+                                WHT + BRIGHTEN,
+                                BLK + BRIGHTEN,
+                            );
+                        }
                     }
                 } else {
                     drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
@@ -61,7 +78,37 @@ impl GameIO for TermDraw {
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);
         print!("234567 ");
-        TermDraw::endpaint();
+        Self::endpaint();
         println!();
+    }
+
+    fn get_move(game: &Game) -> (usize, ChipDescrip) {
+        const UNASSIGNED: usize = std::usize::MAX;
+        let mut buffer = String::new();
+        let mut val = UNASSIGNED;
+        let ch = if let GameType::Connect4 = game.get_game_type() {
+            if game.get_turn() % 2 == 0 {
+                ChipDescrip::Connect(ConnectColor::Yellow)
+            } else {
+                ChipDescrip::Connect(ConnectColor::Red)
+            }
+        } else {
+                ChipDescrip::Toto(TotoType::T)
+        };
+
+        if let Ok(_) = std::io::stdin().read_line(&mut buffer) {
+            if let Ok(v) =  buffer.trim().parse::<usize>(){
+                if v > 0 && v <= 7 {
+                    val = v-1;
+                }
+            }
+        }
+
+        if val == UNASSIGNED {
+            println!("Invalid move, enter a number in range [1,7]");
+            Self::get_move(game)
+        } else {
+            (val, ch)
+        }
     }
 }
