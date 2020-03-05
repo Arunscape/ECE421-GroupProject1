@@ -93,9 +93,9 @@ impl GameIO for TermIO {
 
         let ch = if let GameType::Connect4 = game.get_game_type() {
             if game.get_turn() % 2 == 0 {
-                ChipDescrip::Connect(ConnectColor::Yellow)
-            } else {
                 ChipDescrip::Connect(ConnectColor::Red)
+            } else {
+                ChipDescrip::Connect(ConnectColor::Yellow)
             }
         } else {
             fn get_toto_type() -> ChipDescrip {
