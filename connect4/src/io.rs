@@ -1,4 +1,5 @@
 use super::game::{ChipDescrip, ConnectColor, GameBoard, TotoType, Game, GameType};
+use std::io::{self, Write, stdin, stdout};
 
 pub trait GameIO {
     fn draw_board(game: &GameBoard);
@@ -86,6 +87,7 @@ impl GameIO for TermIO {
         const UNASSIGNED: usize = std::usize::MAX;
         let mut buffer = String::new();
         let mut val = UNASSIGNED;
+
         let ch = if let GameType::Connect4 = game.get_game_type() {
             if game.get_turn() % 2 == 0 {
                 ChipDescrip::Connect(ConnectColor::Yellow)
@@ -93,10 +95,26 @@ impl GameIO for TermIO {
                 ChipDescrip::Connect(ConnectColor::Red)
             }
         } else {
-                ChipDescrip::Toto(TotoType::T)
+            fn get_toto_type() -> ChipDescrip {
+                print!("Enter 't' or 'o': ");
+                stdout().flush().expect("Failed to flush");
+                let mut buffer = String::new();
+                stdin().read_line(&mut buffer).expect("Did not get toot and otto type");
+                buffer = buffer.trim().to_string();
+                if buffer == "t" {
+                    ChipDescrip::Toto(TotoType::T)
+                } else if buffer == "o" {
+                    ChipDescrip::Toto(TotoType::O)
+                } else {
+                    get_toto_type()
+                }
+            }
+            get_toto_type()
         };
 
-        if let Ok(_) = std::io::stdin().read_line(&mut buffer) {
+        print!("Enter a number in range [1,7]: ");
+        stdout().flush().expect("Failed to flush");
+        if let Ok(_) = stdin().read_line(&mut buffer) {
             if let Ok(v) =  buffer.trim().parse::<usize>(){
                 if v > 0 && v <= 7 {
                     val = v-1;
@@ -105,7 +123,7 @@ impl GameIO for TermIO {
         }
 
         if val == UNASSIGNED {
-            println!("Invalid move, enter a number in range [1,7]");
+            print!("Invalid move. ");
             Self::get_move(game)
         } else {
             (val, ch)

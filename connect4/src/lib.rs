@@ -9,7 +9,7 @@ pub fn play() {
     println!("Hello, world!");
 
     let board = GameBoard::new(7, 6);
-    let mut game = Game::new(board, Connect4);
+    let mut game = Game::new(board, Toto);
     loop {
         TermIO::draw_board(game.get_board());
         let (loc, ty) = TermIO::get_move(&game);
