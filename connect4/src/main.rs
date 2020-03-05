@@ -13,6 +13,9 @@ fn toto() {
 }
 
 fn main() {
-    toto();
-    // connect4();
+    if std::env::args().len() > 1 {
+        toto();
+    } else {
+        connect4();
+    }
 }
