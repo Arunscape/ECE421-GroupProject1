@@ -75,13 +75,13 @@ impl GameIO for TermIO {
                 } else {
                     drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
                 }
+                print!(" ");
             }
-            print!(" ");
             drawer.print_with_color('\n', RST, RST);
         }
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);
-        (1..game.width).for_each(|i| print!("{}", i+1));
+        (1..game.width).for_each(|i| print!(" {}", i+1));
         print!(" ");
         Self::endpaint();
         println!();
