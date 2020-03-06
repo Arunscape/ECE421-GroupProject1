@@ -12,6 +12,10 @@ pub fn play(game: &mut Game) {
         let (loc, ty) = TermIO::get_move(&game);
         match game.play(loc, ty) {
             game::BoardState::Ongoing => {},
+            game::BoardState::Invalid => {
+                println!("\n\nInvalid move.");
+                game.undo_move();
+            },
             x => { TermIO::display_gameover(x); is_over = true; },
         }
     }

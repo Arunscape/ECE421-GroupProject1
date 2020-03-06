@@ -4,7 +4,7 @@ use connect_game::game::GameType::*;
 use connect_game::game::*;
 
 fn main() {
-    gen_table(4, 6, connect4::checker)
+    gen_table(4, 4, connect4::checker)
 }
 
 // The board packing takes a game object and stores it in as few bits
@@ -124,7 +124,15 @@ fn unpack_board(data: u128, width: usize, height: usize) -> Game {
 }
 
 fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
-    println!("hello world");
+    let board = connect_game::game::Board::new(7, 6);
+    let mut game = connect_game::game::Game::new(board, Connect4);
+}
+
+fn evaluate_board(isP2: bool, board: &Board) -> isize {
+    let score = 0;
+    // TODO
+
+    score
 }
 
 #[cfg(test)]

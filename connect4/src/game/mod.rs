@@ -21,6 +21,7 @@ pub enum ChipDescrip {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BoardState {
+    Invalid,
     Win(isize),
     Draw,
     Ongoing,
@@ -48,7 +49,11 @@ impl Game {
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         self.board.insert(Chip::new(col, 10, color));
         self.turn += 1;
-        self.check_state()
+        if self.board.get_col_height(col) > self.board.height {
+            BoardState::Invalid
+        } else {
+            self.check_state()
+        }
     }
 
     pub fn get_game_type(&self) -> GameType {
@@ -74,6 +79,11 @@ impl Game {
 
     pub fn get_board_layout(&self) -> Vec<Option<ChipDescrip>> {
         self.board.get_layout()
+    }
+
+    pub fn undo_move(&mut self) {
+        self.turn -= 1;
+        self.board.chips.pop();
     }
 }
 
@@ -128,25 +138,31 @@ impl Board {
         }
     }
 
-    fn falldown1(&mut self) {
-        let mut locs = HashSet::new();
+    fn get_col_height(&self, x: usize) -> usize {
+        self.chips.iter().filter(|ch| ch.x == x).count()
+    }
+
+    fn chipmap(&self) -> HashMap<(usize, usize), ChipDescrip> {
+        let mut locs = HashMap::new();
         for chip in self.chips.iter() {
-            locs.insert(chip.get_pos());
+            locs.insert(chip.get_pos(), chip.get_descrip());
         }
+        locs
+    }
+
+    fn falldown1(&mut self) {
+        let locs = self.chipmap();
 
         for chip in self.chips.iter_mut() {
             let (x, y) = chip.get_pos();
-            if y > 0 && !locs.contains(&(x, y - 1)) {
+            if y > 0 && !locs.contains_key(&(x, y - 1)) {
                 chip.set_pos(x, y - 1);
             }
         }
     }
 
     fn get_layout(&self) -> Vec<Option<ChipDescrip>> {
-        let mut locs = HashMap::new();
-        for chip in self.chips.iter() {
-            locs.insert(chip.get_pos(), chip.get_descrip());
-        }
+        let locs = self.chipmap();
         let mut layout = Vec::with_capacity(self.width * self.height);
         for x in 0..(self.width * self.height) {
             layout.push(locs.get(&(x % self.width, x / self.width)).map(|x| *x));

@@ -140,6 +140,7 @@ impl GameIO for TermIO {
             BoardState::Win(x) => println!("Player {} wins!", x),
             BoardState::Draw => println!("It's a draw :("),
             BoardState::Ongoing => (),
+            BoardState::Invalid => println!("Illegal move!"),
         }
     }
 }
