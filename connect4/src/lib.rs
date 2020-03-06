@@ -35,6 +35,6 @@ pub fn run_app() -> Result<(), JsValue> {
     yew::start_app::<web::App>();
 
     let c = web::canvas::Canvas::new("#canvas", 20, 20);
-    c.draw(0, 0, &"red".into());
+    c.draw_mask();
     Ok(())
 }
