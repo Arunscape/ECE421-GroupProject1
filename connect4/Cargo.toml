@@ -8,9 +8,18 @@ default-run="connect_game"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-stdweb = "0.4.20"
 yew = { version = "0.13.2", features = ["std_web"] }
 wasm-bindgen = "0.2.59"
+
+[dependencies.web-sys]
+web-sys = "0.3.36"
+features = [
+  'CanvasRenderingContext2d',
+  'Document',
+  'Element',
+  'HtmlCanvasElement',
+  'Window',
+]
 
 [[bin]]
 name="connect_game"

@@ -1,4 +1,5 @@
 use yew::{html, Callback, ClickEvent, Component, ComponentLink, Html, ShouldRender};
+pub mod canvas;
 
 pub struct App {
     clicked: bool,
@@ -39,7 +40,7 @@ impl Component for App {
         html! {
         //            <div>
         //                <button onclick=&self.onclick>{ button_text }</button>
-                        <canvas id="gameboard" height="480" width="640" style="outline: black 3px solid;"/>
+                        <canvas id="canvas" height="480" width="640" style="outline: black 3px solid;"/>
         //            </div>
                 }
     }
