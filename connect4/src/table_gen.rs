@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use connect_game::game::connect4::ConnectColor;
 use connect_game::game::toto::TotoType;
 use connect_game::game::GameType::*;
@@ -40,7 +42,7 @@ fn pack_board_128(game: &Game) -> u128 {
     let lay = game.get_board_layout();
     let pack_column = |col| lay.iter().skip(col).step_by(game.get_board().width);
     let mut res = 0;
-    let bit_width = (1 + game.get_board().height);
+    let bit_width = 1 + game.get_board().height;
     for col in 0..game.get_board().width {
         let col = pack_column(col);
         let mut bit_col = 0;
@@ -114,25 +116,101 @@ fn unpack_board(data: u128, width: usize, height: usize) -> Game {
     };
 
     for x in 0..width {
-        unpack_col(
-            (data >> ((width - x - 1) * mask_width)) & col_mask,
-            x,
-        )
+        unpack_col((data >> ((width - x - 1) * mask_width)) & col_mask, x)
     }
 
     game
 }
 
-fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
-    let board = connect_game::game::Board::new(7, 6);
-    let mut game = connect_game::game::Game::new(board, Connect4);
+// modifies in place and returns a reference
+fn flip_color(game: &mut Game) -> &mut Game {
+    let board = game.get_board_mut();
+    let bw = board.width;
+    board.chips.iter_mut().for_each(|chip| chip.flip());
+    game
 }
 
-fn evaluate_board(isP2: bool, board: &Board) -> isize {
-    let score = 0;
-    // TODO
+// modifies in place and returns a reference
+fn flip_x(game: &mut Game) -> &mut Game {
+    let board = game.get_board_mut();
+    let bw = board.width;
+    board
+        .chips
+        .iter_mut()
+        .for_each(|chip| chip.set_x(bw - (chip.get_x() + 1)));
+    game
+}
 
-    score
+fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
+    let board = connect_game::game::Board::new(4, 4);
+    let mut game = connect_game::game::Game::new(board, Connect4);
+    let mut data = HashMap::new();
+
+    evaluate_board(&mut game, &mut data);
+}
+
+// specifically for the 4x6 board, as it uses a u32
+fn evaluate_board(game: &mut Game, data: &mut HashMap<u32, i8>) -> isize {
+    fn min_or_max(isP2: bool, x1: isize, x2: isize) -> isize {
+        if isP2 {
+            // Min
+            std::cmp::min(x1, x2)
+        } else {
+            // P1 -> Max
+            std::cmp::max(x1, x2)
+        }
+    }
+
+    fn inner(game: &mut Game, data: &mut HashMap<u32, i8>) -> isize {
+        let mut score = 0;
+        for x in 0..game.get_board().width {
+            let res = game.play(
+                x,
+                if game.get_turn() % 2 == 1 {
+                    ChipDescrip::Connect(ConnectColor::Yellow)
+                } else {
+                    ChipDescrip::Connect(ConnectColor::Red)
+                },
+            );
+            match res {
+                BoardState::Invalid => (),
+                BoardState::Ongoing => {
+                    score = min_or_max(
+                        game.get_turn() % 2 == 1,
+                        score,
+                        evaluate_board(game, data)
+                    )
+                }
+                BoardState::Draw => score = 0,
+                BoardState::Win(x) => score = x,
+            }
+            game.undo_move();
+        }
+
+        score
+    }
+
+    use connect_game::io::GameIO;
+    // connect_game::io::TermIO::draw_board(game.get_board());
+
+    let p1 = pack_board(flip_color(game)); // FL color, OG X
+    let p2 = pack_board(flip_x(game)); // FL color, FL X
+    let p3 = pack_board(flip_color(game)); // OG color, FL X
+    let p4 = pack_board(flip_x(game)); // OG color, OG X
+
+    if let Some(res) = data.get(&p1) {
+        *res as isize
+    } else if let Some(res) = data.get(&p2) {
+        *res as isize
+    } else if let Some(res) = data.get(&p3) {
+        *res as isize
+    } else if let Some(res) = data.get(&p4) {
+        *res as isize
+    } else {
+        let val = inner(game, data);
+        data.insert(p4, val as i8);
+        val
+    }
 }
 
 #[cfg(test)]
@@ -214,5 +292,87 @@ mod tests {
         let packed = pack_board_128(&game2);
         println!("{:#051b}", packed);
         assert_eq!(res, packed);
+    }
+
+    #[test]
+    fn test_flip_x() {
+        use connect_game::io::GameIO;
+        let width = 7;
+        let board = connect_game::game::Board::new(width, 6);
+        let mut game = connect_game::game::Game::new(board, Connect4);
+        let board = connect_game::game::Board::new(width, 6);
+        let mut game2 = connect_game::game::Game::new(board, Connect4);
+        let moves = [0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5, 3];
+        let mut i = 0;
+        for m in &moves {
+            game.play(*m, get_chip_descript_from_int(i));
+            game2.play(*m, get_chip_descript_from_int(i));
+            i += 1;
+        }
+        println!("OG:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        flip_x(&mut game);
+        println!("Flipped X:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        assert!(game
+            .get_board()
+            .chips
+            .iter()
+            .zip(game2.get_board().chips.iter())
+            .all(|(l, r)| l.get_x() == width - 1 - r.get_x()));
+
+        flip_x(&mut game);
+        println!("Double Flipped X:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        assert!(game
+            .get_board()
+            .chips
+            .iter()
+            .zip(game2.get_board().chips.iter())
+            .all(|(l, r)| l.get_x() == r.get_x()));
+    }
+
+    #[test]
+    fn test_flip_color() {
+        use connect_game::io::GameIO;
+        let width = 7;
+        let board = connect_game::game::Board::new(width, 6);
+        let mut game = connect_game::game::Game::new(board, Connect4);
+        let board = connect_game::game::Board::new(width, 6);
+        let mut game2 = connect_game::game::Game::new(board, Connect4);
+        let moves = [0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5, 3];
+        let mut i = 0;
+        for m in &moves {
+            game.play(*m, get_chip_descript_from_int(i));
+            game2.play(*m, get_chip_descript_from_int(i));
+            i += 1;
+        }
+        println!("OG:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        flip_color(&mut game);
+        println!("Flipped Color:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        assert!(game
+            .get_board()
+            .chips
+            .iter()
+            .zip(game2.get_board().chips.iter())
+            .all(|(l, r)| l.get_descrip() != r.get_descrip()));
+
+        flip_color(&mut game);
+        println!("Double Flipped Color:");
+        connect_game::io::TermIO::draw_board(game.get_board());
+
+        assert!(game
+            .get_board()
+            .chips
+            .iter()
+            .zip(game2.get_board().chips.iter())
+            .all(|(l, r)| l.get_descrip() == r.get_descrip()));
     }
 }

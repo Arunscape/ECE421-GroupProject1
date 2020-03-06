@@ -46,6 +46,10 @@ impl Game {
         &self.board
     }
 
+    pub fn get_board_mut(&mut self) -> &mut Board {
+        &mut self.board
+    }
+
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         self.board.insert(Chip::new(col, 10, color));
         self.turn += 1;
@@ -107,8 +111,29 @@ impl Chip {
         self.y = y;
     }
 
+    pub fn get_x(&self) -> usize {
+        self.x
+    }
+
+    pub fn set_x(&mut self, x: usize) {
+        self.x = x;
+    }
+
     pub fn get_descrip(&self) -> ChipDescrip {
         self.descrip
+    }
+
+    pub fn flip(&mut self) {
+        self.descrip = match self.descrip {
+            ChipDescrip::Connect(ConnectColor::Red) =>
+                ChipDescrip::Connect(ConnectColor::Yellow),
+            ChipDescrip::Connect(ConnectColor::Yellow) =>
+                ChipDescrip::Connect(ConnectColor::Red),
+            ChipDescrip::Toto(TotoType::T) =>
+                ChipDescrip::Toto(TotoType::O),
+            ChipDescrip::Toto(TotoType::O) =>
+                ChipDescrip::Toto(TotoType::T),
+        }
     }
 }
 
@@ -196,11 +221,11 @@ pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         let l = len as isize;
         if (0..len)
             .map(|i| idx(i))
-            .any(|x| x < 0 || x as usize >= width * height) ||
-            x + dx * (l-1) < 0 ||
-            y + dy * (l-1) < 0 ||
-            y + dy * (l-1) >= height as isize ||
-            x + dx * (l-1) >= width as isize
+            .any(|x| x < 0 || x as usize >= width * height)
+            || x + dx * (l - 1) < 0
+            || y + dy * (l - 1) < 0
+            || y + dy * (l - 1) >= height as isize
+            || x + dx * (l - 1) >= width as isize
         {
             return false;
         }
@@ -230,7 +255,7 @@ pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         res |= check_line(x as isize, 0, 1, 1); // diagonal /
         res |= check_line(x as isize, 0, -1, 1); // diagonal \
         if res {
-            return true
+            return true;
         }
     }
     for y in 0..height {
@@ -238,7 +263,7 @@ pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         res |= check_line(0, y as isize, 1, 1); // diagonal /
         res |= check_line(width as isize - 1, y as isize, -1, 1); // diagonal \
         if res {
-            return true
+            return true;
         }
     }
 
