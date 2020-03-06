@@ -37,7 +37,10 @@ impl Component for App {
         };
 
         html! {
-            <button onclick=&self.onclick>{ button_text }</button>
-        }
+        //            <div>
+        //                <button onclick=&self.onclick>{ button_text }</button>
+                        <canvas id="gameboard" height="480" width="640" style="outline: black 3px solid;"/>
+        //            </div>
+                }
     }
 }
