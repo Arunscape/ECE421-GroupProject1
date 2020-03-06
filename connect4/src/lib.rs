@@ -1,4 +1,4 @@
-mod io;
+pub mod io;
 pub mod game;
 
 use io::{GameIO, TermIO};
