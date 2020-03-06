@@ -126,10 +126,7 @@ fn unpack_board(data: u128, width: usize, height: usize) -> Game {
 fn flip_color(game: &mut Game) -> &mut Game {
     let board = game.get_board_mut();
     let bw = board.width;
-    board
-        .chips
-        .iter_mut()
-        .for_each(|chip| chip.flip());
+    board.chips.iter_mut().for_each(|chip| chip.flip());
     game
 }
 
@@ -145,23 +142,61 @@ fn flip_x(game: &mut Game) -> &mut Game {
 }
 
 fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
-    let board = connect_game::game::Board::new(7, 6);
+    let board = connect_game::game::Board::new(4, 4);
     let mut game = connect_game::game::Game::new(board, Connect4);
+    let mut data = HashMap::new();
+
+    evaluate_board(&mut game, &mut data);
 }
 
 // specifically for the 4x6 board, as it uses a u32
-fn evaluate_board(isP2: bool, game: &mut Game, data: HashMap<u32, i8>) -> isize {
-    fn inner(isP2: bool, game: &mut Game) -> isize {
-        let score = 0;
-        // TODO
+fn evaluate_board(game: &mut Game, data: &mut HashMap<u32, i8>) -> isize {
+    fn min_or_max(isP2: bool, x1: isize, x2: isize) -> isize {
+        if isP2 {
+            // Min
+            std::cmp::min(x1, x2)
+        } else {
+            // P1 -> Max
+            std::cmp::max(x1, x2)
+        }
+    }
+
+    fn inner(game: &mut Game, data: &mut HashMap<u32, i8>) -> isize {
+        let mut score = 0;
+        for x in 0..game.get_board().width {
+            let res = game.play(
+                x,
+                if game.get_turn() % 2 == 1 {
+                    ChipDescrip::Connect(ConnectColor::Yellow)
+                } else {
+                    ChipDescrip::Connect(ConnectColor::Red)
+                },
+            );
+            match res {
+                BoardState::Invalid => (),
+                BoardState::Ongoing => {
+                    score = min_or_max(
+                        game.get_turn() % 2 == 1,
+                        score,
+                        evaluate_board(game, data)
+                    )
+                }
+                BoardState::Draw => score = 0,
+                BoardState::Win(x) => score = x,
+            }
+            game.undo_move();
+        }
 
         score
     }
 
+    use connect_game::io::GameIO;
+    // connect_game::io::TermIO::draw_board(game.get_board());
+
     let p1 = pack_board(flip_color(game)); // FL color, OG X
-    let p4 = pack_board(flip_x(game)); // FL color, FL X
-    let p2 = pack_board(flip_color(game)); // OG color, FL X
-    let p3 = pack_board(flip_x(game)); // OG color, OG X
+    let p2 = pack_board(flip_x(game)); // FL color, FL X
+    let p3 = pack_board(flip_color(game)); // OG color, FL X
+    let p4 = pack_board(flip_x(game)); // OG color, OG X
 
     if let Some(res) = data.get(&p1) {
         *res as isize
@@ -172,7 +207,9 @@ fn evaluate_board(isP2: bool, game: &mut Game, data: HashMap<u32, i8>) -> isize 
     } else if let Some(res) = data.get(&p4) {
         *res as isize
     } else {
-        inner(isP2, game)
+        let val = inner(game, data);
+        data.insert(p4, val as i8);
+        val
     }
 }
 
