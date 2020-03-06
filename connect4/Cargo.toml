@@ -3,6 +3,7 @@ name = "connect4"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>"]
 edition = "2018"
+default-run="connect_game"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,6 +13,9 @@ edition = "2018"
 name="connect_game"
 path="src/main.rs"
 
+[[bin]]
+name = "tablegen"
+path = "src/table_gen.rs"
 
 [lib]
 name="connect_game"

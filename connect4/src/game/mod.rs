@@ -72,7 +72,7 @@ impl Game {
         }
     }
 
-    fn get_board_layout(&self) -> Vec<Option<ChipDescrip>> {
+    pub fn get_board_layout(&self) -> Vec<Option<ChipDescrip>> {
         self.board.get_layout()
     }
 }
