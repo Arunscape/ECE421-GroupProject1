@@ -47,37 +47,42 @@ impl TermIO {
 impl GameIO for TermIO {
     fn draw_board(game: &Board) {
         let mut drawer = Self { fg: 0, bg: 0 };
-        for r in (0..game.height).rev() {
-            for c in 0..game.width {
-                if let Some(chip) = game.chips.iter().find(|ch| ch.get_pos() == (c, r)) {
-                    match chip.get_descrip() {
-                        ChipDescrip::Connect(col) => {
-                            drawer.print_with_color(
-                                FILLED,
-                                match col {
-                                    ConnectColor::Yellow => YEL,
-                                    ConnectColor::Red => RED,
-                                },
-                                BLK + BRIGHTEN,
-                            );
-                        }
-                        ChipDescrip::Toto(ty) => {
-                            drawer.print_with_color(
-                                match ty {
-                                    TotoType::T => 'T',
-                                    TotoType::O => 'O',
-                                },
-                                WHT + BRIGHTEN,
-                                BLK + BRIGHTEN,
-                            );
-                        }
+        let chips = game.get_layout();
+        for i in 0..chips.len() {
+            let x = i % game.width;
+            let y = i / game.width;
+            let y = game.height - y - 1;
+            let i = x + y * game.width;
+            if let Some(chip) = chips[i] {
+                match chip {
+                    ChipDescrip::Connect(col) => {
+                        drawer.print_with_color(
+                            FILLED,
+                            match col {
+                                ConnectColor::Yellow => YEL,
+                                ConnectColor::Red => RED,
+                            },
+                            BLK + BRIGHTEN,
+                        );
                     }
-                } else {
-                    drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
+                    ChipDescrip::Toto(ty) => {
+                        drawer.print_with_color(
+                            match ty {
+                                TotoType::T => 'T',
+                                TotoType::O => 'O',
+                            },
+                            WHT + BRIGHTEN,
+                            BLK + BRIGHTEN,
+                        );
+                    }
                 }
-                print!(" ");
+            } else {
+                drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
             }
-            drawer.print_with_color('\n', RST, RST);
+            print!(" ");
+            if (i + 1) % game.width == 0 {
+                drawer.print_with_color('\n', RST, RST);
+            }
         }
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);

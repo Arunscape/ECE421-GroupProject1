@@ -51,9 +51,10 @@ impl Game {
     }
 
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
-        self.board.insert(Chip::new(col, 10, color));
+        let y = self.board.get_col_height(col);
+        self.board.insert(Chip::new(col, color));
         self.turn += 1;
-        if self.board.get_col_height(col) > self.board.height {
+        if y + 1 > self.board.height {
             BoardState::Invalid
         } else {
             self.check_state()
@@ -93,22 +94,12 @@ impl Game {
 
 pub struct Chip {
     x: usize,
-    y: usize,
     descrip: ChipDescrip,
 }
 
 impl Chip {
-    fn new(x: usize, y: usize, descrip: ChipDescrip) -> Self {
-        Self { x, y, descrip }
-    }
-
-    pub fn get_pos(&self) -> (usize, usize) {
-        (self.x, self.y)
-    }
-
-    pub fn set_pos(&mut self, x: usize, y: usize) {
-        self.x = x;
-        self.y = y;
+    fn new(x: usize, descrip: ChipDescrip) -> Self {
+        Self { x, descrip }
     }
 
     pub fn get_x(&self) -> usize {
@@ -154,13 +145,6 @@ impl Board {
 
     fn insert(&mut self, chip: Chip) {
         self.chips.push(chip);
-        self.falldown();
-    }
-
-    fn falldown(&mut self) {
-        for _ in 0..10 {
-            self.falldown1();
-        }
     }
 
     fn get_col_height(&self, x: usize) -> usize {
@@ -168,25 +152,16 @@ impl Board {
     }
 
     fn chipmap(&self) -> HashMap<(usize, usize), ChipDescrip> {
+        let mut heights = vec![0; self.width];
         let mut locs = HashMap::new();
         for chip in self.chips.iter() {
-            locs.insert(chip.get_pos(), chip.get_descrip());
+            locs.insert((chip.get_x(), heights[chip.get_x()]), chip.get_descrip());
+            heights[chip.get_x()] += 1;
         }
         locs
     }
 
-    fn falldown1(&mut self) {
-        let locs = self.chipmap();
-
-        for chip in self.chips.iter_mut() {
-            let (x, y) = chip.get_pos();
-            if y > 0 && !locs.contains_key(&(x, y - 1)) {
-                chip.set_pos(x, y - 1);
-            }
-        }
-    }
-
-    fn get_layout(&self) -> Vec<Option<ChipDescrip>> {
+    pub fn get_layout(&self) -> Vec<Option<ChipDescrip>> {
         let locs = self.chipmap();
         let mut layout = Vec::with_capacity(self.width * self.height);
         for x in 0..(self.width * self.height) {
