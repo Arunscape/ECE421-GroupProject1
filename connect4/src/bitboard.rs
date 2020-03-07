@@ -11,6 +11,8 @@ pub struct BitBoard64 {
     turns: usize,
 }
 
+// Assumes the current player is going to play a '1 bit',
+// flips the color each time
 impl BitBoard64 {
     pub fn from_game(game: &Game) -> Self {
         let key = pack_board_64(game);
@@ -34,7 +36,31 @@ impl BitBoard64 {
         }
     }
 
+    pub fn get_turns(&self) -> usize {
+        self.turns
+    }
+
+    pub fn size(&self) -> usize {
+        self.height * self.width
+    }
+
     pub fn flip_x(&mut self) -> &Self {
+        let mut m = 0;
+        let mut p = 0;
+
+        let mask_width = self.height + 1;
+        let col_mask = (0x1 << mask_width) - 1;
+
+        for x in 0..self.width {
+            let mcol = (self.mask >> ((self.width - x - 1) * mask_width)) & col_mask;
+            m |= mcol << x * mask_width;
+
+            let pcol = (self.mask >> ((self.width - x - 1) * mask_width)) & col_mask;
+            p |= pcol << x * mask_width;
+        }
+
+        self.mask = m;
+        self.position = p;
         self
     }
 
@@ -44,7 +70,86 @@ impl BitBoard64 {
     }
 
     pub fn key(&self) -> u64 {
-        self.position + self.mask
+        self.position + self.mask + self.full_bottom_mask()
+    }
+
+    pub fn get_pos_mask(&self) -> (u64, u64) {
+        (self.position, self.mask)
+    }
+
+    pub fn undo_to(&mut self, p: u64, m: u64) {
+        self.turns -= 1;
+        self.set_pos_mask(p, m);
+    }
+
+
+    fn set_pos_mask(&mut self, p: u64, m: u64) {
+        self.position = p;
+        self.mask = m;
+    }
+
+    pub fn can_play(&self, col: usize) -> bool {
+        (self.mask & self.top_mask(col)) == 0
+    }
+
+    pub fn play(&mut self, col: usize) {
+        self.position ^= self.mask;
+        self.mask |= self.mask + self.bottom_mask(col);
+        self.turns += 1;
+    }
+
+    pub fn is_winning_move(&self, col: usize) -> bool {
+        let mut pos = self.position;
+        pos |= (self.mask + self.bottom_mask(col)) & self.column_mask(col);
+        self.alignment(pos)
+    }
+
+    fn alignment(&self, pos: u64) -> bool {
+        // horizontal
+        let mut m = pos & (pos >> (self.height + 1));
+        if m & (m >> (2 * (self.height + 1))) != 0 {
+            return true;
+        }
+
+        // diagonal 1
+        m = pos & (pos >> self.height);
+        if m & (m >> (2 * self.height)) != 0{
+            return true;
+        }
+
+        // diagonal 2
+        m = pos & (pos >> (self.height + 2));
+        if m & (m >> (2 * (self.height + 2))) != 0{
+            return true;
+        }
+
+        // vertical;
+        m = pos & (pos >> 1);
+        if m & (m >> 2) != 0{
+            return true;
+        }
+
+        false
+    }
+
+    fn top_mask(&self, col: usize) -> u64 {
+        (1 << (self.height - 1)) << col * (self.height + 1)
+    }
+
+    fn bottom_mask(&self, col: usize) -> u64 {
+        1 << col * (self.height + 1)
+    }
+
+    fn full_bottom_mask(&self) -> u64 {
+        let mut res = 0;
+        for x in 0..self.width {
+            res += self.bottom_mask(x);
+        }
+        res
+    }
+
+    fn column_mask(&self, col: usize) -> u64 {
+        ((1 << self.height) - 1) << col * (self.height + 1)
     }
 }
 
@@ -83,27 +188,19 @@ fn pack_board_n(game: &Game, n: usize) -> u128 {
     let bit_width = 1 + game.get_board().height;
     for col in 0..game.get_board().width {
         let col = pack_column(col);
+        let mut l = col.len();
         let mut bit_col = 0;
-        let mut first_none = true;
-        for val in col {
-            // RY... -> 10100
+        for (i, val) in col.enumerate() {
+            // ..YR -> 00101
             bit_col |= match val {
                 Some(ChipDescrip::Connect(ConnectColor::Red)) => 1,
                 Some(ChipDescrip::Connect(ConnectColor::Yellow)) => 0,
                 Some(ChipDescrip::Toto(TotoType::T)) => 1,
                 Some(ChipDescrip::Toto(TotoType::O)) => 0,
-                None => {
-                    if first_none {
-                        first_none = false;
-                        1
-                    } else {
-                        0
-                    }
-                }
-            };
-            bit_col <<= 1;
+                None => { l -= 1; 0},
+            } << i;
         }
-        bit_col |= if first_none { 1 } else { 0 };
+        bit_col |= 1 << l;
 
         res |= bit_col;
         res <<= bit_width;
@@ -129,27 +226,23 @@ fn unpack_board(data: u128, width: usize, height: usize) -> Game {
         }
     }
 
-    let mut unpack_col = |col, x| {
+    let mut unpack_col = |col, c| {
         let mut data = col;
-        let mut stuff = Vec::with_capacity(height);
-        let mut first = true;
-
+        // ..YR <- 00101
         // println!("{:#b} -> {}", col, x);
         let mut i = 0;
         while i < mask_width {
-            i += 1;
             let x = (data & 0x1 as u128) as usize;
             data >>= 1;
-            if x == 0 && first {
-            } else if x == 1 && first {
-                first = false;
-            } else {
-                stuff.push(bit_to_chip(x, Connect4))
+            game.play(c, bit_to_chip(x, Connect4));
+            if x == 1 {
+                i = 0;
             }
+            i += 1;
         }
 
-        for chip in stuff.iter().rev() {
-            game.play(x, *chip);
+        for _ in 0..i {
+            game.undo_move()
         }
     };
 
@@ -178,36 +271,21 @@ fn flip_x(game: &mut Game) -> &mut Game {
     game
 }
 
-pub fn check_win_4(width: usize, height: usize, game: u64, pos: usize) -> bool {
-    false
-}
-
 fn decode_key_128(key: u128, width: usize, height: usize) -> (u128, u128) {
     let mask_width = height + 1;
     let col_mask = (0x1 << mask_width) - 1;
 
-    let mut mask = 0;
-    let mut pos = 0;
+    let mut mask: u128 = 0;
     for loc in 0..width {
         let col_bs = (width - loc - 1) * mask_width;
-        let mut col = (key >> col_bs) & col_mask;
-        let mut i = 0;
-        let mut first = true;
+        let col: u128 = (key >> col_bs) & col_mask;
+        let lead = col.leading_zeros();
+        let m = (1 << (128 - lead - 1)) - 1;
+        let p = col & mask;
 
-        while i < mask_width {
-            i += 1;
-            let x = (col & 0x1 as u128) as usize;
-            col >>= 1;
-            if x == 0 && first {
-            } else if x == 1 && first {
-                first = false;
-            } else {
-                pos |= x << (col_bs + i);
-                mask |= 1 << (col_bs + i);
-            }
-        }
+        mask |= m << col_bs;
     }
-    (mask as u128, pos as u128)
+    (mask, key & mask)
 }
 fn decode_key_64(key: u64, width: usize, height: usize) -> (u64, u64) {
     let (m, p) = decode_key_128(key as u128, width, height);
@@ -218,6 +296,7 @@ fn decode_key_64(key: u64, width: usize, height: usize) -> (u64, u64) {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use crate::io::GameIO;
 
     fn get_chip_descript_from_int(i: usize) -> ChipDescrip {
         if i % 2 == 0 {
@@ -246,12 +325,12 @@ mod tests {
         // YRYR
         // RYRY
         // ====
-        // 10100_01011_10101_01110
+        // 00101_11010_10101_01110
 
         let game = make_game(4, 4, vec![0, 1, 2, 3, 3, 2, 1, 0, 2, 2, 3, 1, 1, 2]);
-        let res = 0b10100_01011_10101_01110;
+        let res = 0b00101_11010_10101_01110;
         let packed = pack_board(&game);
-        println!("{:#b}\n{:#b}", res, packed);
+        println!("{:#022b}\n{:#022b}", res, packed);
         assert_eq!(res, packed)
     }
 
@@ -263,7 +342,7 @@ mod tests {
             vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5, 3],
         );
 
-        let res = 0b1110000_1010000_0100100_0101000_1011000_0101100_1010000;
+        let res = 0b0000111_0000101_0010010_0001010_0001101_0011010_0000101;
         let packed = pack_board_128(&game);
         println!("{:#051b}\n{:#051b}", res, packed);
         assert_eq!(res, packed);
@@ -271,14 +350,13 @@ mod tests {
 
     #[test]
     fn test_unpack_7x6() {
-        use crate::io::GameIO;
         let game = make_game(
             7,
             6,
             vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5, 3],
         );
 
-        let res = 0b1110000_1010000_0100100_0101000_1011000_0101100_1010000;
+        let res = 0b0000111_0000101_0010010_0001010_0001101_0011010_0000101;
         let packed = pack_board_128(&game);
         println!("{:#051b}\n{:#051b}", res, packed);
         assert_eq!(res, packed);
@@ -297,7 +375,6 @@ mod tests {
 
     #[test]
     fn test_flip_x() {
-        use crate::io::GameIO;
         let width = 7;
         let mut game = make_game(
             width,
@@ -338,7 +415,6 @@ mod tests {
 
     #[test]
     fn test_flip_color() {
-        use crate::io::GameIO;
         let width = 7;
         let mut game = make_game(
             width,
@@ -380,7 +456,6 @@ mod tests {
 
     #[test]
     fn test_check_win_4() {
-        use crate::io::GameIO;
         let width = 7;
         let mut game = make_game(
             width,
@@ -395,11 +470,26 @@ mod tests {
         game.play(3, get_chip_descript_from_int(1));
 
         crate::io::TermIO::draw_board(game.get_board());
-        assert!(check_win_4(width, 6, pack_board_64(&game), 23));
+        //assert!(check_win_4(width, 6, pack_board_64(&game), 23));
         crate::io::TermIO::draw_board(game2.get_board());
-        assert!(!check_win_4(width, 6, pack_board_64(&game2), 23));
+        //assert!(!check_win_4(width, 6, pack_board_64(&game2), 23));
     }
 
     #[test]
-    fn test_bit_board_key_and_create() {}
+    fn test_bit_board_key_and_create() {
+        let game = make_game(7, 6, vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0]);
+        let bb = BitBoard64::from_game(&game);
+
+        let packed = pack_board_64(&game);
+        let key = bb.key();
+        crate::io::TermIO::draw_board(game.get_board());
+        println!("BB pos:\n{:#051b}\nMask:\n{:#051b}\nBottom\n{:#051b}",
+                 bb.position, bb.mask, bb.full_bottom_mask());
+        println!("Packed:\n{:#051b}\nKey:\n{:#051b}", packed, key);
+        assert_eq!(packed, key);
+    }
+
+    #[test]
+    fn test_bb_flip_x() {
+    }
 }

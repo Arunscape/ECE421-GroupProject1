@@ -11,7 +11,6 @@ fn main() {
     gen_table(4, 4, connect4::checker)
 }
 
-
 fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
     let board = connect_game::game::Board::new(4, 4);
     let mut game = connect_game::game::Game::new(board, Connect4);
@@ -19,69 +18,49 @@ fn gen_table(width: usize, height: usize, checker: fn(&Game) -> BoardState) {
 
     let mut bb = BitBoard64::from_game(&game);
     evaluate_board(&mut bb, &mut data);
+    println!("{} items in table", data.len())
 }
 
-// specifically for the 4x6 board, as it uses a u32
-fn evaluate_board(game: &mut BitBoard64, data: &mut HashMap<u32, i8>) -> isize {
-    /*
-    fn min_or_max(isP2: bool, x1: isize, x2: isize) -> isize {
-        if isP2  {// Min
-            std::cmp::min(x1, x2)
-        } else { // P1 -> Max
-            std::cmp::max(x1, x2)
+fn calc_evaluate_board(game: &mut BitBoard64, data: &mut HashMap<u64, i8>) -> isize {
+    if game.get_turns() == game.size() {
+        return 0; // Draw game, 0 score
+    }
+
+    // check for immediate win
+    for x in 0..game.width {
+        if game.can_play(x) && game.is_winning_move(x) {
+            return ((game.size() + 1) as isize - game.get_turns() as isize) / 2;
         }
     }
 
-    fn inner(game: &mut BitBoard64, data: &mut HashMap<u32, i8>) -> isize {
-        let mut score = 0;
-        for x in 0..game.get_board().width {
-            let res = game.play(
-                x,
-                if game.get_turn() % 2 == 1 {
-                    ChipDescrip::Connect(ConnectColor::Yellow)
-                } else {
-                    ChipDescrip::Connect(ConnectColor::Red)
-                },
-            );
-            match res {
-                BoardState::Invalid => (),
-                BoardState::Ongoing => {
-                    score = min_or_max(
-                        game.get_turn() % 2 == 1,
-                        score,
-                        evaluate_board(game, data)
-                    )
-                }
-                BoardState::Draw => score = 0,
-                BoardState::Win(x) => score = x,
-            }
-            game.undo_move();
+    let mut score = std::isize::MIN;
+    for x in 0..game.width {
+        if game.can_play(x) {
+            let (p, m) = game.get_pos_mask();
+            game.play(x);
+            score = std::cmp::max(-evaluate_board(game, data), score);
+            game.undo_to(p, m);
         }
+    }
+    score
+}
 
+fn evaluate_board(game: &mut BitBoard64, data: &mut HashMap<u64, i8>) -> isize {
+    let k1 = game.flip_color().key();
+    let k2 = game.flip_x().key();
+    let k3 = game.flip_color().key();
+    let k4 = game.flip_x().key();
+    if let Some(score) = data.get(&k1) {
+        -(*score) as isize
+    } else if let Some(score) = data.get(&k2) {
+        -(*score) as isize
+    } else if let Some(score) = data.get(&k3) {
+        (*score) as isize
+    } else if let Some(score) = data.get(&k4) {
+        (*score) as isize
+    } else {
+        let score = calc_evaluate_board(game, data);
+        data.insert(game.key(), score as i8);
         score
     }
-
-    use connect_game::io::GameIO;
-    // connect_game::io::TermIO::draw_board(game.get_board());
-
-    let p1 = game.flip_color().key(); // FL color, OG X
-    let p2 = game.flip_x().key(); // FL color, FL X
-    let p3 = game.flip_color().key(); // OG color, FL X
-    let p4 = game.flip_x().key(); // OG color, OG X
-
-    if let Some(res) = data.get(&p1) {
-        *res as isize
-    } else if let Some(res) = data.get(&p2) {
-        *res as isize
-    } else if let Some(res) = data.get(&p3) {
-        *res as isize
-    } else if let Some(res) = data.get(&p4) {
-        *res as isize
-    } else {
-        let val = inner(game, data);
-        data.insert(p4, val as i8);
-        val
-    }
-    */
-    0
 }
