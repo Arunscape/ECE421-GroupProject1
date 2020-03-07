@@ -1,9 +1,8 @@
-pub mod io;
 pub mod game;
+pub mod io;
 
+use game::Game;
 use io::{GameIO, TermIO};
-use game::{Game};
-
 
 pub fn play(game: &mut Game) {
     let mut is_over = false;
@@ -11,12 +10,15 @@ pub fn play(game: &mut Game) {
         TermIO::draw_board(game.get_board());
         let (loc, ty) = TermIO::get_move(&game);
         match game.play(loc, ty) {
-            game::BoardState::Ongoing => {},
+            game::BoardState::Ongoing => {}
             game::BoardState::Invalid => {
                 println!("\n\nInvalid move.");
                 game.undo_move();
-            },
-            x => { TermIO::display_gameover(x); is_over = true; },
+            }
+            x => {
+                TermIO::display_gameover(x);
+                is_over = true;
+            }
         }
     }
     TermIO::draw_board(game.get_board());
@@ -26,3 +28,13 @@ pub fn play(game: &mut Game) {
     println!();
 }
 
+mod web;
+use wasm_bindgen::prelude::*;
+#[wasm_bindgen]
+pub fn run_app() -> Result<(), JsValue> {
+    yew::start_app::<web::App>();
+
+    let c = web::canvas::Canvas::new("#canvas", 20, 20);
+    c.draw_mask();
+    Ok(())
+}
