@@ -1,5 +1,6 @@
 pub mod game;
 pub mod io;
+pub mod bitboard;
 
 use game::Game;
 use io::{GameIO, TermIO};

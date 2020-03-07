@@ -21,6 +21,11 @@ features = [
   'Window',
 ]
 
+[lib]
+name="connect_game"
+path="src/lib.rs"
+#crate-type = ["cdylib"] # this breaks tablegen and connect_game binaries
+
 [[bin]]
 name="connect_game"
 path="src/main.rs"
@@ -28,8 +33,3 @@ path="src/main.rs"
 [[bin]]
 name = "tablegen"
 path = "src/table_gen.rs"
-
-[lib]
-name="connect_game"
-path="src/lib.rs"
-crate-type = ["cdylib"]
