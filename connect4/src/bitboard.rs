@@ -55,7 +55,7 @@ impl BitBoard64 {
             let mcol = (self.mask >> ((self.width - x - 1) * mask_width)) & col_mask;
             m |= mcol << x * mask_width;
 
-            let pcol = (self.mask >> ((self.width - x - 1) * mask_width)) & col_mask;
+            let pcol = (self.position >> ((self.width - x - 1) * mask_width)) & col_mask;
             p |= pcol << x * mask_width;
         }
 
@@ -81,7 +81,6 @@ impl BitBoard64 {
         self.turns -= 1;
         self.set_pos_mask(p, m);
     }
-
 
     fn set_pos_mask(&mut self, p: u64, m: u64) {
         self.position = p;
@@ -113,19 +112,19 @@ impl BitBoard64 {
 
         // diagonal 1
         m = pos & (pos >> self.height);
-        if m & (m >> (2 * self.height)) != 0{
+        if m & (m >> (2 * self.height)) != 0 {
             return true;
         }
 
         // diagonal 2
         m = pos & (pos >> (self.height + 2));
-        if m & (m >> (2 * (self.height + 2))) != 0{
+        if m & (m >> (2 * (self.height + 2))) != 0 {
             return true;
         }
 
         // vertical;
         m = pos & (pos >> 1);
-        if m & (m >> 2) != 0{
+        if m & (m >> 2) != 0 {
             return true;
         }
 
@@ -197,7 +196,10 @@ fn pack_board_n(game: &Game, n: usize) -> u128 {
                 Some(ChipDescrip::Connect(ConnectColor::Yellow)) => 0,
                 Some(ChipDescrip::Toto(TotoType::T)) => 1,
                 Some(ChipDescrip::Toto(TotoType::O)) => 0,
-                None => { l -= 1; 0},
+                None => {
+                    l -= 1;
+                    0
+                }
             } << i;
         }
         bit_col |= 1 << l;
@@ -483,13 +485,33 @@ mod tests {
         let packed = pack_board_64(&game);
         let key = bb.key();
         crate::io::TermIO::draw_board(game.get_board());
-        println!("BB pos:\n{:#051b}\nMask:\n{:#051b}\nBottom\n{:#051b}",
-                 bb.position, bb.mask, bb.full_bottom_mask());
+        println!(
+            "BB pos:\n{:#051b}\nMask:\n{:#051b}\nBottom\n{:#051b}",
+            bb.position,
+            bb.mask,
+            bb.full_bottom_mask()
+        );
         println!("Packed:\n{:#051b}\nKey:\n{:#051b}", packed, key);
         assert_eq!(packed, key);
     }
 
     #[test]
     fn test_bb_flip_x() {
+        let game = make_game(7, 6, vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0]);
+        let mut bb = BitBoard64::from_game(&game);
+
+        let key = bb.key();
+        let key2 = bb.flip_x().key();
+        let key3 = bb.flip_x().key();
+
+        let res = 0b0000111_0000101_0001010_0000110_0000101_0000110_0000001;
+        let flp = 0b0000001_0000110_0000101_0000110_0001010_0000101_0000111;
+        println!(
+            "Key:\n{:#051b}\nKey2:\n{:#051b}\nKey3:\n{:#051b}",
+            key, key2, key3
+        );
+        assert_eq!(res, key);
+        assert_eq!(flp, key2);
+        assert_eq!(res, key3);
     }
 }
