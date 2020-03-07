@@ -1,7 +1,7 @@
-use super::game::connect4::ConnectColor;
-use super::game::toto::TotoType;
-use super::game::GameType::*;
-use super::game::*;
+use crate::game::connect4::ConnectColor;
+use crate::game::toto::TotoType;
+use crate::game::GameType::*;
+use crate::game::*;
 
 pub struct BitBoard64 {
     pub width: usize,
