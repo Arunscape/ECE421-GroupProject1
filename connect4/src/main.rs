@@ -1,6 +1,6 @@
 use connect_game::game::{check_pattern, Checker, ChipDescrip, Game, Player};
 
-use connect_game::io::{BLK, BRIGHTEN, FILLED, RED, YEL};
+use connect_game::io::{BLK, BRIGHTEN, FILLED, RED, YEL, BLU};
 
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
     let check = move |game: &Game| -> bool { check_pattern(&vec![chip; 4], game) };
@@ -72,11 +72,50 @@ fn toto() -> Game {
     connect_game::game::Game::new(board, players)
 }
 
+fn connect4_3player() -> Game {
+    let board = connect_game::game::Board::new(9, 7);
+
+    // setup chip types
+    let red = ChipDescrip {
+        bg_color: BLK + BRIGHTEN,
+        fg_color: RED,
+        graphic: FILLED,
+    };
+    let yellow = ChipDescrip {
+        bg_color: BLK + BRIGHTEN,
+        fg_color: YEL,
+        graphic: FILLED,
+    };
+    let blue = ChipDescrip {
+        bg_color: BLK + BRIGHTEN,
+        fg_color: BLU,
+        graphic: FILLED,
+    };
+
+    let players = vec![
+        Player {
+            chip_options: vec![red],
+            win_conditions: vec![four_in_a_row(red)],
+        },
+        Player {
+            chip_options: vec![yellow],
+            win_conditions: vec![four_in_a_row(yellow)],
+        },
+        Player {
+            chip_options: vec![blue],
+            win_conditions: vec![four_in_a_row(blue)],
+        },
+    ];
+
+    connect_game::game::Game::new(board, players)
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut game = if args.len() > 1 {
         match args[1].as_ref() {
             "toto" => toto(),
+            "3" => connect4_3player(),
             _ => connect4(),
         }
     } else {
