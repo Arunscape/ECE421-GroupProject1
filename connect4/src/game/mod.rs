@@ -54,7 +54,11 @@ impl Game {
             if player.win_conditions.iter().any(|x| x(game)) {
                 BoardState::Win(player_num as isize + 1)
             } else {
-                BoardState::Ongoing
+                if self.turn == self.board.width * self.board.height {
+                    BoardState::Draw
+                } else {
+                    BoardState::Ongoing
+                }
             }
         }
     }
