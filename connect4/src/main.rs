@@ -1,15 +1,15 @@
-use connect_game::game::{check_pattern, Checker, ChipDescrip, Game, Player};
+use connect_game::game::{check_linear_pattern, Checker, ChipDescrip, Game, Player};
 
 use connect_game::io::{BLK, BRIGHTEN, FILLED, RED, YEL, BLU};
 
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
-    let check = move |game: &Game| -> bool { check_pattern(&vec![chip; 4], game) };
+    let check = move |game: &Game| -> bool { check_linear_pattern(&vec![chip; 4], game) };
     Box::from(check)
 }
 
 pub fn wrap_4_check(chip: ChipDescrip, chip_inner: ChipDescrip) -> Checker {
     let check = move |game: &Game| -> bool {
-        check_pattern(&vec![chip, chip_inner, chip_inner, chip], game)
+        check_linear_pattern(&vec![chip, chip_inner, chip_inner, chip], game)
     };
     Box::from(check)
 }

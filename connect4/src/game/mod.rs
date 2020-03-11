@@ -136,7 +136,7 @@ impl Board {
     // fn chip_at(&self, x: usize, y: usize) -> Option<Chip> {self.chips.iter().find(|&chip| chip.get_pos() == (x, y))}
 }
 
-pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
+pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
     let lay = game.get_board_layout();
     let width = game.board.width;
     let height = game.board.height;
@@ -227,14 +227,14 @@ mod tests {
 
     pub fn four_in_a_row_red() -> Checker {
         fn check(game: &Game) -> bool {
-            check_pattern(&vec![P_RED; 4], game)
+            check_linear_pattern(&vec![P_RED; 4], game)
         }
         Box::from(check)
     }
 
     pub fn four_in_a_row_yellow() -> Checker {
         fn check(game: &Game) -> bool {
-            check_pattern(&vec![P_YEL; 4], game)
+            check_linear_pattern(&vec![P_YEL; 4], game)
         }
         Box::from(check)
     }
@@ -266,36 +266,36 @@ mod tests {
     #[test]
     fn test_hor_check() {
         let pat = vec![P_RED, P_RED];
-        assert!(check_pattern(
+        assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 1, 2, 3, 0, 1, 2, 3, 0, 2, 1, 3])
         ));
-        assert!(check_pattern(&pat, &make_game(&vec![0, 6, 0, 5])));
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 6, 0, 5])));
 
         let pat = vec![P_RED, P_RED, P_RED];
-        assert!(!check_pattern(&pat, &make_game(&vec![0, 2, 1])));
+        assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
     }
 
     #[test]
     fn test_ver_check() {
         let pat = vec![P_RED, P_RED, P_RED];
-        assert!(check_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0, 1])));
-        assert!(check_pattern(
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0, 1])));
+        assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 6, 1, 6, 6, 1, 6, 1, 6, 1])
         ));
-        assert!(!check_pattern(&pat, &make_game(&vec![0, 2, 1])));
+        assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
     }
 
     #[test]
     fn test_dia_check() {
         let pat = vec![P_RED, P_RED, P_RED];
 
-        assert!(check_pattern(&pat, &make_game(&vec![0, 1, 1, 2, 3, 2, 2])));
-        assert!(check_pattern(&pat, &make_game(&vec![0, 0, 0, 1, 1, 3, 2])));
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 1, 2, 3, 2, 2])));
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 0, 0, 1, 1, 3, 2])));
 
         let pat = vec![P_RED, P_RED, P_RED, P_RED];
-        assert!(check_pattern(
+        assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
                 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1
@@ -305,7 +305,7 @@ mod tests {
     #[test]
     fn test_dia_check2() {
         let pat = vec![P_RED, P_RED, P_RED, P_RED];
-        assert!(!check_pattern(
+        assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
                 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4
