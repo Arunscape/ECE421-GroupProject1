@@ -27,35 +27,3 @@ impl Chip {
         self.descrip
     }
 }
-
-
-const FILLED: char = '◼';
-const BLK: usize = 0;
-const RED: usize = 1;
-const YEL: usize = 3;
-const WHT: usize = 7;
-const BRIGHTEN: usize = 60;
-
-pub fn connect4_yellow() -> ChipDescrip {
-    ChipDescrip {
-        bg_color: BLK + BRIGHTEN,
-        fg_color: YEL,
-        graphic: FILLED,
-    }
-}
-
-pub fn connect4_red() -> ChipDescrip {
-    ChipDescrip {
-        bg_color: BLK + BRIGHTEN,
-        fg_color: RED,
-        graphic: FILLED,
-    }
-}
-
-pub fn connect4_col(col: usize) -> ChipDescrip {
-    ChipDescrip {
-        bg_color: BLK + BRIGHTEN,
-        fg_color: col,
-        graphic: FILLED,
-    }
-}

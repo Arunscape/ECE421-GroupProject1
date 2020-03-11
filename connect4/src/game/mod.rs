@@ -3,20 +3,7 @@ use std::collections::HashMap;
 pub mod chip;
 pub use chip::*;
 
-pub type Checker = fn(&Game) -> bool;
-
-pub fn four_in_a_row_red() -> Checker {
-    fn check(game: &Game) -> bool {
-        check_pattern(&vec![connect4_red(); 4], game)
-    }
-    check
-}
-pub fn four_in_a_row_yellow() -> Checker {
-    fn check(game: &Game) -> bool {
-        check_pattern(&vec![connect4_yellow(); 4], game)
-    }
-    check
-}
+pub type Checker = Box<dyn Fn(&Game) -> bool>;
 
 pub struct Player {
     pub chip_options: Vec<ChipDescrip>,
@@ -61,8 +48,14 @@ impl Game {
         if y + 1 > self.board.height {
             BoardState::Invalid
         } else {
-            // TODO: check for win after play
-            BoardState::Ongoing
+            let player_num = (self.turn - 1) % self.players.len();
+            let player = &self.players[player_num];
+            let game = &self;
+            if player.win_conditions.iter().any(|x| x(game)) {
+                BoardState::Win(player_num as isize + 1)
+            } else {
+                BoardState::Ongoing
+            }
         }
     }
 
@@ -92,8 +85,11 @@ impl Game {
     pub fn get_player(&self, p: usize) -> &Player {
         &self.players[p]
     }
-}
 
+    pub fn current_player(&self) -> &Player {
+        &self.players[self.turn % self.players.len()]
+    }
+}
 
 pub struct Board {
     pub width: usize,
@@ -229,30 +225,38 @@ mod tests {
         graphic: 'y',
     };
 
+    pub fn four_in_a_row_red() -> Checker {
+        fn check(game: &Game) -> bool {
+            check_pattern(&vec![P_RED; 4], game)
+        }
+        Box::from(check)
+    }
+
+    pub fn four_in_a_row_yellow() -> Checker {
+        fn check(game: &Game) -> bool {
+            check_pattern(&vec![P_YEL; 4], game)
+        }
+        Box::from(check)
+    }
     // specifically connect4
     fn make_game(locs: &Vec<usize>) -> Game {
         let board = Board::new(7, 6);
-        let players =
-            vec![
-                Player {
-                    chip_options: vec![P_RED],
-                    win_conditions: vec![four_in_a_row_red()],
-                },
-                Player {
-                    chip_options: vec![P_YEL],
-                    win_conditions: vec![four_in_a_row_yellow()],
-                },
-            ];
+        let players = vec![
+            Player {
+                chip_options: vec![P_RED],
+                win_conditions: vec![four_in_a_row_red()],
+            },
+            Player {
+                chip_options: vec![P_YEL],
+                win_conditions: vec![four_in_a_row_yellow()],
+            },
+        ];
 
         let mut game = Game::new(board, players);
 
         let mut i = 0;
         for x in locs {
-            let col = if i % 2 == 0 {
-                P_RED
-            } else {
-                P_YEL
-            };
+            let col = if i % 2 == 0 { P_RED } else { P_YEL };
             i += 1;
             game.play(*x, col);
         }
@@ -261,31 +265,20 @@ mod tests {
 
     #[test]
     fn test_hor_check() {
-        let pat = vec![
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED];
         assert!(check_pattern(
             &pat,
             &make_game(&vec![0, 1, 2, 3, 0, 1, 2, 3, 0, 2, 1, 3])
         ));
         assert!(check_pattern(&pat, &make_game(&vec![0, 6, 0, 5])));
 
-        let pat = vec![
-            P_RED,
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED, P_RED];
         assert!(!check_pattern(&pat, &make_game(&vec![0, 2, 1])));
     }
 
     #[test]
     fn test_ver_check() {
-        let pat = vec![
-            P_RED,
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED, P_RED];
         assert!(check_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0, 1])));
         assert!(check_pattern(
             &pat,
@@ -296,21 +289,12 @@ mod tests {
 
     #[test]
     fn test_dia_check() {
-        let pat = vec![
-            P_RED,
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED, P_RED];
 
         assert!(check_pattern(&pat, &make_game(&vec![0, 1, 1, 2, 3, 2, 2])));
         assert!(check_pattern(&pat, &make_game(&vec![0, 0, 0, 1, 1, 3, 2])));
 
-        let pat = vec![
-            P_RED,
-            P_RED,
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED, P_RED, P_RED];
         assert!(check_pattern(
             &pat,
             &make_game(&vec![
@@ -320,12 +304,7 @@ mod tests {
     }
     #[test]
     fn test_dia_check2() {
-        let pat = vec![
-            P_RED,
-            P_RED,
-            P_RED,
-            P_RED,
-        ];
+        let pat = vec![P_RED, P_RED, P_RED, P_RED];
         assert!(!check_pattern(
             &pat,
             &make_game(&vec![

@@ -7,13 +7,20 @@ pub trait GameIO {
     fn display_gameover(ending: BoardState);
 }
 
-const EMPTY: char = '◻';
-const FG: usize = 30;
-const BG: usize = 40;
-const BRIGHTEN: usize = 60;
-const BLK: usize = 0;
-const RST: usize = 9;
-const WHT: usize = 7;
+pub const EMPTY: char = '◻';
+pub const FILLED: char = '◼';
+pub const BRIGHTEN: usize = 60;
+pub const FG: usize = 30;
+pub const BG: usize = 40;
+pub const BLK: usize = 0;
+pub const RED: usize = 1;
+pub const GRN: usize = 2;
+pub const YEL: usize = 3;
+pub const BLU: usize = 4;
+pub const MAG: usize = 5;
+pub const CYN: usize = 6;
+pub const WHT: usize = 7;
+pub const RST: usize = 9;
 
 pub struct TermIO {
     fg: usize,
@@ -83,7 +90,7 @@ impl GameIO for TermIO {
 
         println!("Player {} turn.", game.get_turn() % game.get_player_count() + 1);
 
-        let player = game.get_player(game.get_turn() % game.get_player_count());
+        let player = game.current_player();
         let ch = if player.chip_options.len() == 1 {
             player.chip_options[0]
         } else {
