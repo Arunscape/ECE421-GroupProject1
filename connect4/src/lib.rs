@@ -1,6 +1,5 @@
 pub mod game;
 pub mod io;
-pub mod ai;
 
 use game::Game;
 use io::{GameIO, TermIO};

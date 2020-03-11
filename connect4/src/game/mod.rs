@@ -1,21 +1,26 @@
 use std::collections::HashMap;
 
-pub mod toto;
-use toto::TotoType;
+pub mod chip;
+pub use chip::*;
 
-pub mod connect4;
-use connect4::ConnectColor;
+pub type Checker = fn(&Game) -> bool;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum GameType {
-    Connect4,
-    Toto,
+pub fn four_in_a_row_red() -> Checker {
+    fn check(game: &Game) -> bool {
+        check_pattern(&vec![connect4_red(); 4], game)
+    }
+    check
+}
+pub fn four_in_a_row_yellow() -> Checker {
+    fn check(game: &Game) -> bool {
+        check_pattern(&vec![connect4_yellow(); 4], game)
+    }
+    check
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ChipDescrip {
-    Connect(ConnectColor),
-    Toto(TotoType),
+pub struct Player {
+    pub chip_options: Vec<ChipDescrip>,
+    pub win_conditions: Vec<Checker>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -29,15 +34,15 @@ pub enum BoardState {
 pub struct Game {
     turn: usize,
     board: Board,
-    game_type: GameType,
+    players: Vec<Player>,
 }
 
 impl Game {
-    pub fn new(board: Board, game_type: GameType) -> Self {
+    pub fn new(board: Board, players: Vec<Player>) -> Self {
         Self {
             turn: 0,
             board,
-            game_type,
+            players,
         }
     }
 
@@ -56,12 +61,9 @@ impl Game {
         if y + 1 > self.board.height {
             BoardState::Invalid
         } else {
-            self.check_state()
+            // TODO: check for win after play
+            BoardState::Ongoing
         }
-    }
-
-    pub fn get_game_type(&self) -> GameType {
-        self.game_type
     }
 
     pub fn get_turn(&self) -> usize {
@@ -70,14 +72,7 @@ impl Game {
 
     pub fn print_moves(&self) {
         for c in self.board.chips.iter() {
-            print!("{}, ", c.x);
-        }
-    }
-
-    fn check_state(&self) -> BoardState {
-        match self.game_type {
-            GameType::Connect4 => connect4::checker(&self),
-            GameType::Toto => toto::checker(&self),
+            print!("{}, ", c.get_x());
         }
     }
 
@@ -89,43 +84,16 @@ impl Game {
         self.turn -= 1;
         self.board.chips.pop();
     }
-}
 
-pub struct Chip {
-    x: usize,
-    descrip: ChipDescrip,
-}
-
-impl Chip {
-    fn new(x: usize, descrip: ChipDescrip) -> Self {
-        Self { x, descrip }
+    pub fn get_player_count(&self) -> usize {
+        self.players.len()
     }
 
-    pub fn get_x(&self) -> usize {
-        self.x
-    }
-
-    pub fn set_x(&mut self, x: usize) {
-        self.x = x;
-    }
-
-    pub fn get_descrip(&self) -> ChipDescrip {
-        self.descrip
-    }
-
-    pub fn flip(&mut self) {
-        self.descrip = match self.descrip {
-            ChipDescrip::Connect(ConnectColor::Red) =>
-                ChipDescrip::Connect(ConnectColor::Yellow),
-            ChipDescrip::Connect(ConnectColor::Yellow) =>
-                ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Toto(TotoType::T) =>
-                ChipDescrip::Toto(TotoType::O),
-            ChipDescrip::Toto(TotoType::O) =>
-                ChipDescrip::Toto(TotoType::T),
-        }
+    pub fn get_player(&self, p: usize) -> &Player {
+        &self.players[p]
     }
 }
+
 
 pub struct Board {
     pub width: usize,
@@ -147,7 +115,7 @@ impl Board {
     }
 
     fn get_col_height(&self, x: usize) -> usize {
-        self.chips.iter().filter(|ch| ch.x == x).count()
+        self.chips.iter().filter(|ch| ch.get_x() == x).count()
     }
 
     fn chipmap(&self) -> HashMap<(usize, usize), ChipDescrip> {
@@ -248,18 +216,42 @@ pub fn check_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::game::GameType::*;
 
+    const P_RED: ChipDescrip = ChipDescrip {
+        bg_color: 0,
+        fg_color: 0,
+        graphic: 'r',
+    };
+
+    const P_YEL: ChipDescrip = ChipDescrip {
+        bg_color: 1,
+        fg_color: 1,
+        graphic: 'y',
+    };
+
+    // specifically connect4
     fn make_game(locs: &Vec<usize>) -> Game {
         let board = Board::new(7, 6);
-        let mut game = Game::new(board, Connect4);
+        let players =
+            vec![
+                Player {
+                    chip_options: vec![P_RED],
+                    win_conditions: vec![four_in_a_row_red()],
+                },
+                Player {
+                    chip_options: vec![P_YEL],
+                    win_conditions: vec![four_in_a_row_yellow()],
+                },
+            ];
+
+        let mut game = Game::new(board, players);
 
         let mut i = 0;
         for x in locs {
             let col = if i % 2 == 0 {
-                ChipDescrip::Connect(ConnectColor::Red)
+                P_RED
             } else {
-                ChipDescrip::Connect(ConnectColor::Yellow)
+                P_YEL
             };
             i += 1;
             game.play(*x, col);
@@ -270,8 +262,8 @@ mod tests {
     #[test]
     fn test_hor_check() {
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
         ];
         assert!(check_pattern(
             &pat,
@@ -280,9 +272,9 @@ mod tests {
         assert!(check_pattern(&pat, &make_game(&vec![0, 6, 0, 5])));
 
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
+            P_RED,
         ];
         assert!(!check_pattern(&pat, &make_game(&vec![0, 2, 1])));
     }
@@ -290,9 +282,9 @@ mod tests {
     #[test]
     fn test_ver_check() {
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
+            P_RED,
         ];
         assert!(check_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0, 1])));
         assert!(check_pattern(
@@ -305,19 +297,19 @@ mod tests {
     #[test]
     fn test_dia_check() {
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
+            P_RED,
         ];
 
         assert!(check_pattern(&pat, &make_game(&vec![0, 1, 1, 2, 3, 2, 2])));
         assert!(check_pattern(&pat, &make_game(&vec![0, 0, 0, 1, 1, 3, 2])));
 
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
+            P_RED,
+            P_RED,
         ];
         assert!(check_pattern(
             &pat,
@@ -329,10 +321,10 @@ mod tests {
     #[test]
     fn test_dia_check2() {
         let pat = vec![
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
-            ChipDescrip::Connect(ConnectColor::Red),
+            P_RED,
+            P_RED,
+            P_RED,
+            P_RED,
         ];
         assert!(!check_pattern(
             &pat,

@@ -1,6 +1,4 @@
-use super::game::{ChipDescrip, Board, Game, GameType, BoardState};
-use super::game::connect4::ConnectColor;
-use super::game::toto::TotoType;
+use super::game::{ChipDescrip, Board, Game, BoardState, Player};
 use std::io::{Write, stdin, stdout};
 
 pub trait GameIO {
@@ -9,16 +7,13 @@ pub trait GameIO {
     fn display_gameover(ending: BoardState);
 }
 
-const FILLED: char = '◼';
 const EMPTY: char = '◻';
 const FG: usize = 30;
 const BG: usize = 40;
 const BRIGHTEN: usize = 60;
 const BLK: usize = 0;
-const RED: usize = 1;
-const YEL: usize = 3;
-const WHT: usize = 7;
 const RST: usize = 9;
+const WHT: usize = 7;
 
 pub struct TermIO {
     fg: usize,
@@ -54,28 +49,7 @@ impl GameIO for TermIO {
             let y = game.height - y - 1;
             let i = x + y * game.width;
             if let Some(chip) = chips[i] {
-                match chip {
-                    ChipDescrip::Connect(col) => {
-                        drawer.print_with_color(
-                            FILLED,
-                            match col {
-                                ConnectColor::Yellow => YEL,
-                                ConnectColor::Red => RED,
-                            },
-                            BLK + BRIGHTEN,
-                        );
-                    }
-                    ChipDescrip::Toto(ty) => {
-                        drawer.print_with_color(
-                            match ty {
-                                TotoType::T => 'T',
-                                TotoType::O => 'O',
-                            },
-                            WHT + BRIGHTEN,
-                            BLK + BRIGHTEN,
-                        );
-                    }
-                }
+                drawer.print_with_color(chip.graphic, chip.fg_color, chip.bg_color);
             } else {
                 drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
             }
@@ -93,51 +67,50 @@ impl GameIO for TermIO {
     }
 
     fn get_move(game: &Game) -> (usize, ChipDescrip) {
-        const UNASSIGNED: usize = std::usize::MAX;
-        let mut buffer = String::new();
-        let mut val = UNASSIGNED;
-        println!("Player {} turn.", game.get_turn() % 2 + 1);
-
-        let ch = if let GameType::Connect4 = game.get_game_type() {
-            if game.get_turn() % 2 == 0 {
-                ChipDescrip::Connect(ConnectColor::Red)
-            } else {
-                ChipDescrip::Connect(ConnectColor::Yellow)
-            }
-        } else {
-            fn get_toto_type() -> ChipDescrip {
-                print!("Enter 't' or 'o': ");
-                stdout().flush().expect("Failed to flush");
-                let mut buffer = String::new();
-                stdin().read_line(&mut buffer).expect("Did not get toot and otto type");
-                buffer = buffer.trim().to_string();
-                if buffer == "t" {
-                    ChipDescrip::Toto(TotoType::T)
-                } else if buffer == "o" {
-                    ChipDescrip::Toto(TotoType::O)
-                } else {
-                    get_toto_type()
+        fn get_num_in_range(lb: usize, ub: usize) -> usize {
+            let mut buffer = String::new();
+            print!("Enter a number in range [{},{}]: ", lb, ub);
+            stdout().flush().expect("Failed to flush");
+            if let Ok(_) = stdin().read_line(&mut buffer) {
+                if let Ok(v) =  buffer.trim().parse::<usize>(){
+                    if v >= lb && v <= ub {
+                        return v;
+                    }
                 }
             }
-            get_toto_type()
+            get_num_in_range(lb, ub)
+        }
+
+        println!("Player {} turn.", game.get_turn() % game.get_player_count() + 1);
+
+        let player = game.get_player(game.get_turn() % game.get_player_count());
+        let ch = if player.chip_options.len() == 1 {
+            player.chip_options[0]
+        } else {
+            fn get_chip_type(player: &Player) -> ChipDescrip {
+                let mut drawer = TermIO { fg: 0, bg: 0 };
+                println!("Select chip type:");
+                for chip in &player.chip_options {
+                    drawer.print_with_color(chip.graphic, chip.fg_color, chip.bg_color);
+                    drawer.print_with_color(' ', chip.fg_color, chip.bg_color)
+                }
+                TermIO::endpaint();
+                println!();
+                drawer.print_with_color('​', WHT, BLK + BRIGHTEN);
+                for i in 0..player.chip_options.len() {
+                    print!("{} ", i + 1);
+                }
+                TermIO::endpaint();
+                println!();
+
+                let l = player.chip_options.len();
+                player.chip_options[get_num_in_range(1, l) - 1]
+            }
+            get_chip_type(player)
         };
 
-        print!("Enter a number in range [1,{}]: ", game.get_board().width);
-        stdout().flush().expect("Failed to flush");
-        if let Ok(_) = stdin().read_line(&mut buffer) {
-            if let Ok(v) =  buffer.trim().parse::<usize>(){
-                if v > 0 && v <= game.get_board().width {
-                    val = v-1;
-                }
-            }
-        }
-
-        if val == UNASSIGNED {
-            print!("Invalid move. ");
-            Self::get_move(game)
-        } else {
-            (val, ch)
-        }
+        let val = get_num_in_range(1, game.get_board().width) - 1;
+        (val, ch)
     }
 
     fn display_gameover(ending: BoardState) {

@@ -29,7 +29,3 @@ path="src/lib.rs"
 [[bin]]
 name="connect_game"
 path="src/main.rs"
-
-[[bin]]
-name = "tablegen"
-path = "src/table_gen.rs"
