@@ -49,7 +49,7 @@ impl Game {
 
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         let y = self.board.get_col_height(col);
-        if y + 1 > self.board.height {
+        if y + 1 > self.board.height || col > self.board.width {
             BoardState::Invalid
         } else {
             self.board.insert(Chip::new(col, color));
@@ -142,6 +142,7 @@ impl Board {
         let mut v: Vec<usize> = (0..self.width)
             .filter(|x| self.get_col_height(*x) < self.height)
             .collect();
+        return v;
         v.sort_by(|a, b| {
             ((self.width as isize) / 2 - (*a as isize))
                 .abs()

@@ -11,7 +11,7 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
 }
 
 const MAX_DEPTH: usize = 4;
-const MONTE_CARLO_ITER: usize = 1000;
+const MONTE_CARLO_ITER: usize = 2000;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
@@ -54,8 +54,8 @@ fn monte_carlo_search(game: &mut Game) -> isize {
             match res {
                 BoardState::Ongoing => {
                     let m = game.get_board().get_valid_moves();
-                    let mov = random::<usize>() % m.len();
-                    let mov = m[mov];
+                    let ove = random::<usize>() % m.len();
+                    let mov = m[ove];
                     let chip = random::<usize>() % game.current_player().chip_options.len();
                     let chip = game.current_player().chip_options[chip];
                     res = game.play(mov, chip);

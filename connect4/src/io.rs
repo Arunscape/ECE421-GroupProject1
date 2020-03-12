@@ -74,15 +74,17 @@ impl GameIO for TermIO {
     }
 
     fn get_move(game: &Game) -> (usize, ChipDescrip) {
-        fn get_num_in_range(lb: usize, ub: usize) -> usize {
+        fn read_line() -> String {
             let mut buffer = String::new();
-            print!("Enter a number in range [{},{}]: ", lb, ub);
             stdout().flush().expect("Failed to flush");
-            if let Ok(_) = stdin().read_line(&mut buffer) {
-                if let Ok(v) =  buffer.trim().parse::<usize>(){
-                    if v >= lb && v <= ub {
-                        return v;
-                    }
+            let res = stdin().read_line(&mut buffer);
+            buffer.trim().to_string()
+        }
+        fn get_num_in_range(lb: usize, ub: usize) -> usize {
+            print!("Enter a number in range [{},{}]: ", lb, ub);
+            if let Ok(v) = read_line().parse::<usize>(){
+                if v >= lb && v <= ub {
+                    return v;
                 }
             }
             get_num_in_range(lb, ub)
