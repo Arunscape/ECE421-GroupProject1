@@ -1,5 +1,6 @@
 use crate::game::{check_linear_pattern, Checker, ChipDescrip, Board, Game, Player, PlayerType};
 use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
+use crate::ai::*;
 use std::rc::Rc;
 
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
@@ -46,7 +47,7 @@ pub fn connect4_large_ai() -> Game {
 
     let players = vec![
         Player {
-            player_type: PlayerType::AI,
+            player_type: PlayerType::AI(MID_AI),
             chip_options: vec![red],
             win_conditions: vec![four_in_a_row(red)],
         },
@@ -65,7 +66,7 @@ pub fn connect4_ai() -> Game {
 
     let players = vec![
         Player {
-            player_type: PlayerType::AI,
+            player_type: PlayerType::AI(HARD_AI),
             chip_options: vec![red],
             win_conditions: vec![four_in_a_row(red)],
         },
@@ -89,7 +90,7 @@ pub fn connect4_ai_p2() -> Game {
             win_conditions: vec![four_in_a_row(red)],
         },
         Player {
-            player_type: PlayerType::AI,
+            player_type: PlayerType::AI(HARD_AI),
             chip_options: vec![yellow],
             win_conditions: vec![four_in_a_row(yellow)],
         },
@@ -122,7 +123,7 @@ pub fn toto_ai() -> Game {
 
     let players = vec![
         Player {
-            player_type: PlayerType::AI,
+            player_type: PlayerType::AI(HARD_AI),
             chip_options: vec![chip_t, chip_o],
             win_conditions: vec![wrap_4_check(chip_t, chip_o)],
         },

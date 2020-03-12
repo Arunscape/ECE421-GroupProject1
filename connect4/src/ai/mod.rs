@@ -1,7 +1,7 @@
 use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct AIConfig {
     carlo_iter: usize,
     minmax_depth: usize,

@@ -12,7 +12,7 @@ pub fn play(game: &mut Game) {
         TermIO::draw_board(game.get_board());
         let (loc, ty) = match game.current_player().player_type {
             game::PlayerType::Local => TermIO::get_move(game),
-            game::PlayerType::AI => ai::get_best_move(game, ai::MID_AI),
+            game::PlayerType::AI(ai) => ai::get_best_move(game, ai),
         };
         match game.play(loc, ty) {
             game::BoardState::Ongoing => {}

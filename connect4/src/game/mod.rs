@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::rc::Rc;
+use crate::ai::AIConfig;
 
 pub mod chip;
 pub use chip::*;
@@ -9,7 +10,7 @@ pub type Checker = Rc<dyn Fn(&Game) -> bool>;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PlayerType {
     Local,
-    AI,
+    AI(AIConfig),
 }
 
 #[derive(Clone)]
