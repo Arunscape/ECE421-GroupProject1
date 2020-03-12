@@ -1,5 +1,7 @@
 pub mod game;
+pub mod games;
 pub mod io;
+pub mod ai;
 
 use game::Game;
 use io::{GameIO, TermIO};
@@ -8,7 +10,10 @@ pub fn play(game: &mut Game) {
     let mut is_over = false;
     while !is_over {
         TermIO::draw_board(game.get_board());
-        let (loc, ty) = TermIO::get_move(&game);
+        let (loc, ty) = match game.current_player().player_type {
+            game::PlayerType::Local => TermIO::get_move(game),
+            game::PlayerType::AI => ai::get_best_move(game),
+        };
         match game.play(loc, ty) {
             game::BoardState::Ongoing => {}
             game::BoardState::Invalid => {
