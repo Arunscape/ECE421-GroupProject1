@@ -11,7 +11,7 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
 }
 
 const MAX_DEPTH: usize = 4;
-const MONTE_CARLO_ITER: usize = 2000;
+const MONTE_CARLO_ITER: usize = 5000;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;

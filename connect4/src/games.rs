@@ -41,6 +41,25 @@ pub const chip_o: ChipDescrip = ChipDescrip {
     graphic: 'o',
 };
 
+pub fn connect4_large_ai() -> Game {
+    let board = Board::new(14, 10);
+
+    let players = vec![
+        Player {
+            player_type: PlayerType::AI,
+            chip_options: vec![red],
+            win_conditions: vec![four_in_a_row(red)],
+        },
+        Player {
+            player_type: PlayerType::Local,
+            chip_options: vec![yellow],
+            win_conditions: vec![four_in_a_row(yellow)],
+        },
+    ];
+
+    Game::new(board, players)
+}
+
 pub fn connect4_ai() -> Game {
     let board = Board::new(7, 6);
 

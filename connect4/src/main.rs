@@ -7,6 +7,7 @@ fn main() {
             "toto" => toto(),
             "3" => connect4_3player(),
             "ai" => connect4_ai(),
+            "aibig" => connect4_large_ai(),
             "ai2" => connect4_ai_p2(),
             _ => connect4(),
         }
