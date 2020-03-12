@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use crate::ai::AIConfig;
+use std::rc::Rc;
 
 pub mod chip;
 pub use chip::*;
@@ -21,7 +21,13 @@ pub struct Player {
 
 impl std::fmt::Debug for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({:?}, {:?}, {:?})", &self.player_type, &self.chip_options, &self.win_conditions.len())
+        write!(
+            f,
+            "({:?}, {:?}, {:?})",
+            &self.player_type,
+            &self.chip_options,
+            &self.win_conditions.len()
+        )
     }
 }
 
@@ -39,7 +45,6 @@ pub struct Game {
     board: Board,
     players: Vec<Player>,
 }
-
 
 impl Game {
     pub fn new(board: Board, players: Vec<Player>) -> Self {
@@ -59,8 +64,8 @@ impl Game {
     }
 
     pub fn play_no_check(&mut self, col: usize, color: ChipDescrip) {
-            self.board.insert(Chip::new(col, color));
-            self.turn += 1;
+        self.board.insert(Chip::new(col, color));
+        self.turn += 1;
     }
 
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
@@ -271,7 +276,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
     use crate::games::*;
-    use crate::io::{TermIO, GameIO};
+    use crate::io::{GameIO, TermIO};
 
     // specifically connect4
     fn make_game(locs: &Vec<usize>) -> Game {
