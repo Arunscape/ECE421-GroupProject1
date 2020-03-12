@@ -70,12 +70,12 @@ impl Canvas {
         )
     }
 
-    pub fn draw_mask(&self) {
+    pub fn draw_mask(&self, width: usize, height: usize) {
         self.context.save();
         self.context.set_fill_style(&"#00bfff".into());
         self.context.begin_path();
-        for y in 0..6 {
-            for x in 0..7 {
+        for y in 0..height {
+            for x in 0..width {
                 self.context.arc(
                     75.0 * x as f64 + 100.0,
                     75.0 * y as f64 + 50.0,
@@ -89,5 +89,9 @@ impl Canvas {
         }
         self.context.fill();
         self.context.restore();
+    }
+
+    pub fn draw_board(&self, board: &crate::game::Board) {
+        self.draw_mask(board.width, board.height);
     }
 }

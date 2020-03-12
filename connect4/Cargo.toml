@@ -29,7 +29,7 @@ features = [
 [lib]
 name="connect_game"
 path="src/lib.rs"
-#crate-type = ["cdylib"] # this breaks tablegen and connect_game binaries
+# crate-type = ["cdylib"] # this breaks connect_game binaries
 
 [[bin]]
 name="connect_game"

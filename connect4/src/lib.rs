@@ -38,7 +38,10 @@ use wasm_bindgen::prelude::*;
 pub fn run_app() -> Result<(), JsValue> {
     yew::start_app::<web::App>();
 
+    let game = crate::games::connect4();
     let c = web::canvas::Canvas::new("#canvas", 20, 20);
-    c.draw_mask();
+
+    c.draw_board(game.get_board());
+
     Ok(())
 }
