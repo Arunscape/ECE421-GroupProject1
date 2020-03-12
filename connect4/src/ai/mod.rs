@@ -15,7 +15,6 @@ const MONTE_CARLO_ITER: usize = 2000;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
-    let minmax: fn(isize, isize) -> isize = if is_max { std::cmp::max } else { std::cmp::min };
 
     fn test_move(mov: usize, game: &mut Game) -> isize {
         game.play(mov, game.current_player().chip_options[0]);
