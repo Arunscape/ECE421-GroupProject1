@@ -5,6 +5,7 @@ pub struct ChipDescrip {
     pub graphic: char
 }
 
+#[derive(Debug)]
 pub struct Chip {
     x: usize,
     descrip: ChipDescrip,

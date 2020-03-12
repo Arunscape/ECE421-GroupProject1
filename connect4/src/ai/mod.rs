@@ -1,7 +1,7 @@
-use super::game::{ChipDescrip, Game, BoardState};
+use super::game::{BoardState, ChipDescrip, Game};
 use crate::io::{GameIO, TermIO};
 use rand::prelude::*;
-
+use std::sync::Mutex;
 
 pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     let chip = game.current_player().chip_options[0];
@@ -17,36 +17,37 @@ pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
     let minmax: fn(isize, isize) -> isize = if is_max { std::cmp::max } else { std::cmp::min };
 
-    let mut score = if is_max {
-        std::isize::MIN
-    } else {
-        std::isize::MAX
-    };
-    //let mut score = 0;
-
-    let mut b_mov = std::usize::MAX;
-
-    for mov in game.get_board().get_valid_moves() {
+    fn test_move(mov: usize, game: &mut Game) -> isize {
         game.play(mov, game.current_player().chip_options[0]);
-        let os = score;
-        let mut sscore = minmax_search(game, MAX_DEPTH) << 14;
-        if sscore == 0 {
-            sscore = monte_carlo_search(game);
-        }
-        score = minmax(score, sscore);
-
-        if score != os {
-            b_mov = mov;
+        let mut score = minmax_search(game, MAX_DEPTH) << 14;
+        if score == 0 {
+            score = monte_carlo_search(game);
         }
         game.undo_move();
+        score
     }
 
+    let mut potentials: Vec<(usize, isize)> = game
+        .get_board()
+        .get_valid_moves()
+        .iter()
+        .map(|&mov| (mov, test_move(mov, &mut game.clone())))
+        .collect();
+
+    potentials.sort_by(|a, b| if is_max {
+        (b.1).partial_cmp(&a.1).unwrap()
+    } else {
+        (a.1).partial_cmp(&b.1).unwrap()
+    });
+
+    println!("{:?}", potentials);
+    let (b_mov, score) = potentials[0];
     (score >> 14, b_mov)
 }
 
 fn monte_carlo_search(game: &mut Game) -> isize {
     let mut score = 0;
-    for _ in 0..MONTE_CARLO_ITER {
+    (0..MONTE_CARLO_ITER).for_each(|_| {
         let mut moves = 0;
         let mut res = BoardState::Ongoing;
         let mut finished = false;
@@ -60,14 +61,14 @@ fn monte_carlo_search(game: &mut Game) -> isize {
                     let chip = game.current_player().chip_options[chip];
                     res = game.play(mov, chip);
                     moves += 1;
-                },
+                }
                 BoardState::Invalid => {
                     moves -= 1;
                     res = BoardState::Ongoing;
-                },
+                }
                 BoardState::Draw => {
                     finished = true;
-                },
+                }
                 BoardState::Win(x) => {
                     if x == 1 {
                         score += 1
@@ -81,7 +82,7 @@ fn monte_carlo_search(game: &mut Game) -> isize {
         for _ in 0..moves {
             game.undo_move()
         }
-    }
+    });
 
     score
 }
@@ -134,13 +135,11 @@ mod tests {
 
     use std::time::Instant;
     macro_rules! time {
-        ($x:expr) => {
-            {
-                let now = Instant::now();
-                $x;
-                now.elapsed().as_micros()
-            }
-        };
+        ($x:expr) => {{
+            let now = Instant::now();
+            $x;
+            now.elapsed().as_micros()
+        }};
     }
 
     fn make_game(moves: Vec<usize>) -> Game {
@@ -181,9 +180,15 @@ mod tests {
 
         let (x, _y) = get_best_move(&mut game);
 
+        println!("This test is supposed to fail. It is for keeping track of performance");
         unsafe {
-            println!("Took {}µs for depth of {}. Best move is {:?}. Searched {} iterations",
-                     time, MAX_DEPTH, x+1, COUNT);
+            println!(
+                "Took {}µs for depth of {}. Best move is {:?}. Searched {} iterations",
+                time,
+                MAX_DEPTH,
+                x + 1,
+                COUNT
+            );
         }
         assert!(false);
     }

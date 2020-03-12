@@ -1,19 +1,28 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub mod chip;
 pub use chip::*;
 
-pub type Checker = Box<dyn Fn(&Game) -> bool>;
+pub type Checker = Rc<dyn Fn(&Game) -> bool>;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PlayerType {
     Local,
     AI,
 }
 
+#[derive(Clone)]
 pub struct Player {
     pub player_type: PlayerType,
     pub chip_options: Vec<ChipDescrip>,
     pub win_conditions: Vec<Checker>,
+}
+
+impl std::fmt::Debug for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({:?}, {:?}, {:?})", &self.player_type, &self.chip_options, &self.win_conditions.len())
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -24,11 +33,13 @@ pub enum BoardState {
     Ongoing,
 }
 
+#[derive(Clone, Debug)]
 pub struct Game {
     turn: usize,
     board: Board,
     players: Vec<Player>,
 }
+
 
 impl Game {
     pub fn new(board: Board, players: Vec<Player>) -> Self {
@@ -53,7 +64,6 @@ impl Game {
             BoardState::Invalid
         } else {
             self.board.insert(Chip::new(col, color));
-            self.board.layout[col + y * self.board.width] = Some(color);
             self.turn += 1;
             let player_num = (self.turn - 1) % self.players.len();
             let player = &self.players[player_num];
@@ -86,11 +96,7 @@ impl Game {
 
     pub fn undo_move(&mut self) {
         self.turn -= 1;
-        let chip = self.board.chips.pop();
-        let x = chip.expect("Should never undo no moves").get_x();
-
-        let y = self.board.get_col_height(x) - 1;
-        self.board.layout[x + y * self.board.width] = None;
+        self.board.remove_last_chip();
     }
 
     pub fn get_player_count(&self) -> usize {
@@ -106,11 +112,27 @@ impl Game {
     }
 }
 
+#[derive(Debug)]
 pub struct Board {
     pub width: usize,
     pub height: usize,
     pub chips: Vec<Chip>,
-    layout:  Vec<Option<ChipDescrip>>,
+    layout: Vec<Option<ChipDescrip>>,
+}
+
+impl Clone for Board {
+    fn clone(&self) -> Self {
+        let mut x = Self {
+            width: self.width,
+            height: self.height,
+            layout: vec![None; self.width * self.height],
+            chips: Vec::new(),
+        };
+        for chip in &self.chips {
+            x.insert(Chip::new(chip.get_x(), chip.get_descrip()));
+        }
+        x
+    }
 }
 
 impl Board {
@@ -124,18 +146,18 @@ impl Board {
     }
 
     fn insert(&mut self, chip: Chip) {
+        let y = self.get_col_height(chip.get_x());
+        self.layout[chip.get_x() + y * self.width] = Some(chip.get_descrip());
         self.chips.push(chip);
     }
 
     pub fn get_col_height(&self, x: usize) -> usize {
         for y in 0..self.height {
             if self.layout[x + y * self.width].is_none() {
-                return y
+                return y;
             }
         }
         self.height
-
-        // self.chips.iter().filter(|ch| ch.get_x() == x).count()
     }
 
     pub fn get_valid_moves(&self) -> Vec<usize> {
@@ -143,13 +165,15 @@ impl Board {
             .filter(|x| self.get_col_height(*x) < self.height)
             .collect();
         return v;
-        v.sort_by(|a, b| {
-            ((self.width as isize) / 2 - (*a as isize))
-                .abs()
-                .partial_cmp(&((self.width as isize) / 2 - (*b as isize)).abs())
-                .unwrap()
-        });
-        v
+
+        // Intellegent move ordering
+        // v.sort_by(|a, b| {
+        //     ((self.width as isize) / 2 - (*a as isize))
+        //         .abs()
+        //         .partial_cmp(&((self.width as isize) / 2 - (*b as isize)).abs())
+        //         .unwrap()
+        // });
+        // v
     }
 
     pub fn last_move_loc(&self) -> (usize, usize) {
@@ -161,7 +185,13 @@ impl Board {
         &self.layout
     }
 
-    // fn chip_at(&self, x: usize, y: usize) -> Option<Chip> {self.chips.iter().find(|&chip| chip.get_pos() == (x, y))}
+    pub fn remove_last_chip(&mut self) {
+        let chip = self.chips.pop();
+        let x = chip.expect("Should never undo no moves").get_x();
+
+        let y = self.get_col_height(x) - 1;
+        self.layout[x + y * self.width] = None;
+    }
 }
 
 pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
@@ -318,8 +348,6 @@ mod tests {
                 3, 2, 3, 3, 3, 2, 3, 1, 3, 4, 2, 4, 2, 5, 2, 2, 1, 0, 1, 0, 1, 0, 1
             ])
         ));
-
-
     }
 
     #[test]
