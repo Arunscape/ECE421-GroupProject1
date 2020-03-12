@@ -129,9 +129,9 @@ impl Board {
             .filter(|x| self.get_col_height(*x) < self.height)
             .collect();
         v.sort_by(|a, b| {
-            ((self.width as isize)/2 - (*a as isize))
+            ((self.width as isize) / 2 - (*a as isize))
                 .abs()
-                .partial_cmp(&((self.width as isize)/2 - (*b as isize)).abs())
+                .partial_cmp(&((self.width as isize) / 2 - (*b as isize)).abs())
                 .unwrap()
         });
         v
@@ -183,72 +183,51 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         pattern: &Vec<ChipDescrip>,
         lay: &Vec<Option<ChipDescrip>>,
     ) -> bool {
-        let idx = |i| ((x + dx * i as isize) + (y + dy * i as isize) * (width as isize));
-        let l = len as isize;
-        if (0..len)
-            .map(|i| idx(i))
-            .any(|x| x < 0 || x as usize >= width * height)
-            || x + dx * (l - 1) < 0
-            || y + dy * (l - 1) < 0
-            || y + dy * (l - 1) >= height as isize
-            || x + dx * (l - 1) >= width as isize
-        {
-            return false;
+        //let idx = |i| ((x + dx * i as isize) + (y + dy * i as isize) * (width as isize));
+        let idx = |x, y| x as usize + y as usize * width;
+        let width = width as isize;
+        let height = height as isize;
+        let mut x = x;
+        let mut y = y;
+        let mut matched = 0;
+
+        while x >= 0 && x < width && y >= 0 && y < height {
+            match lay[idx(x, y)] {
+                _ if matched == len => return true,
+                Some(chip) if chip == pattern[matched] => {
+                    matched += 1;
+                }
+                _ => {
+                    x -= dx * (matched as isize);
+                    y -= dy * (matched as isize);
+                    matched = 0;
+                }
+            }
+
+            x += dx;
+            y += dy;
         }
-
-        /*
-        println!("Check loc[{},{}], dir[{},{}] -> {:?}",x,y,dx,dy,
-                 (0..len).map(|i|idx(i)).collect::<Vec<isize>>());
-        */
-
-        let check = |nums| -> bool {
-            pattern.iter().zip(nums).all(|(p, n)| {
-                let ln: Option<ChipDescrip> = lay[n];
-                ln.is_some() && p == &ln.unwrap()
-            })
-        };
-
-        check((0..len).map(|i| idx(i) as usize))
-            || check_dir(x + dx, y + dy, dx, dy, len, width, height, pattern, lay)
+        matched == len
     };
 
     let check_line = |x, y, dx, dy| check_dir(x, y, dx, dy, len, width, height, pattern, &lay);
 
     let mut res = false;
 
-    /*
-    for x in 0..width {
-        res |= check_line(x as isize, 0, 0, 1); // vertical
-        res |= check_line(x as isize, 0, 1, 1); // diagonal /
-        res |= check_line(x as isize, 0, -1, 1); // diagonal \
-        if res {
-            return true;
-        }
-    }
-    for y in 0..height {
-        res |= check_line(0, y as isize, 1, 0); // horizontal
-        res |= check_line(0, y as isize, 1, 1); // diagonal /
-        res |= check_line(width as isize - 1, y as isize, -1, 1); // diagonal \
-        if res {
-            return true;
-        }
-    }
-    */
     let (x, y) = game.get_board().last_move_loc();
     let x = x as isize;
     let y = y as isize;
 
+    let m = std::cmp::min(x, y);
+    let h = game.get_board().height as isize - 1;
+    let w = game.get_board().width as isize - 1;
+    let m2 = std::cmp::min(x, h - y);
+
     res |= check_line(x, 0, 0, 1);
     res |= check_line(0, y, 1, 0); // horizontal
+    res |= check_line(x - m2, y + m2, 1, -1); // diagonal \
+    res |= check_line(x - m, y - m, 1, 1); // diagonal /
 
-    let m = std::cmp::min(x, y);
-    let h = game.get_board().height as isize;
-    let w = game.get_board().width as isize;
-    let m2 = std::cmp::min(x, h - y);
-    res |= check_line(x-m2, y+m2, 1, -1); // diagonal \
-    res |= check_line(x-m, y-m, 1, 1); // diagonal /
-
-    println!("{}, {} -> {:?}", x, y, res);
     res
 }
 
@@ -325,10 +304,7 @@ mod tests {
     #[test]
     fn test_ver_check() {
         let pat = vec![P_RED, P_RED, P_RED];
-        assert!(check_linear_pattern(
-            &pat,
-            &make_game(&vec![0, 1, 0, 1, 0])
-        ));
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0])));
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 6, 1, 6, 6, 1, 6, 1, 6])
@@ -357,6 +333,7 @@ mod tests {
             ])
         ));
     }
+
     #[test]
     fn test_dia_check2() {
         let pat = vec![P_RED, P_RED, P_RED, P_RED];
@@ -366,5 +343,19 @@ mod tests {
                 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4
             ])
         ));
+
+        let pat = vec![P_YEL, P_YEL, P_YEL, P_YEL];
+        assert!(check_linear_pattern(
+            &pat,
+            &make_game(&vec![
+                3, 0, 3, 1, 3, 3, 3, 1, 3, 2, 4, 6, 4, 4, 4, 1, 1, 0, 4, 0, 0, 6, 4, 6, 6, 6, 5, 5
+            ])
+        ));
+    }
+
+    #[test]
+    fn test_check_small() {
+        let pat = vec![P_RED, P_RED];
+        assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0])));
     }
 }

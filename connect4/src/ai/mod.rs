@@ -7,7 +7,7 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     (mov, chip)
 }
 
-const MAX_DEPTH: usize = 4;
+const MAX_DEPTH: usize = 6;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
@@ -41,14 +41,18 @@ fn minmax_search(game: &mut Game, depth: usize) -> isize {
     if depth == 0 {
         return 0;
     }
-    if game.get_player(0).win_conditions.iter().any(|x| x(game)) {
-        return depth as isize;
-    }
-    if game.get_player(1).win_conditions.iter().any(|x| x(game)) {
-        return -(depth as isize);
-    }
 
     let is_max = game.get_turn() % 2 == 0;
+    if is_max {
+        if game.get_player(1).win_conditions.iter().any(|x| x(game)) {
+            return -(depth as isize);
+        }
+    } else {
+        if game.get_player(0).win_conditions.iter().any(|x| x(game)) {
+            return depth as isize;
+        }
+    }
+
     let minmax: fn(isize, isize) -> isize = if is_max { std::cmp::max } else { std::cmp::min };
 
     let mut score = if is_max {
@@ -111,7 +115,8 @@ mod tests {
     fn test_timing() {
         let mut game = make_game(vec![]);
         let time = time!(get_best_move(&mut game));
-        println!("Took {}µs for depth of {}", time, MAX_DEPTH);
+        let (x, _y) = get_best_move(&mut game);
+        println!("Took {}µs for depth of {}. Best move is {:?}", time, MAX_DEPTH, x+1);
         assert!(false);
     }
 }
