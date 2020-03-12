@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::rc::Rc;
 use crate::ai::AIConfig;
 
@@ -71,15 +70,27 @@ impl Game {
         } else {
             self.play_no_check(col, color);
             let game = &self;
+            let mut wins = 0;
+            let mut draws = false;
             for (player_num, player) in self.players.iter().enumerate() {
                 if player.win_conditions.iter().any(|x| x(game)) {
-                    return BoardState::Win(player_num as isize + 1)
+                    if wins == 0 {
+                        wins = player_num as isize + 1;
+                    } else {
+                        draws = true;
+                    }
                 }
             }
-            if self.turn == self.board.width * self.board.height {
-                BoardState::Draw
+            if wins == 0 || draws {
+                if draws {
+                    BoardState::Draw
+                } else if self.turn == self.board.width * self.board.height {
+                    BoardState::Draw
+                } else {
+                    BoardState::Ongoing
+                }
             } else {
-                BoardState::Ongoing
+                BoardState::Win(wins)
             }
         }
     }
