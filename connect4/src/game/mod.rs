@@ -49,12 +49,12 @@ impl Game {
 
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         let y = self.board.get_col_height(col);
-        self.board.insert(Chip::new(col, color));
-        self.board.layout[col + y * self.board.width] = Some(color);
-        self.turn += 1;
         if y + 1 > self.board.height {
             BoardState::Invalid
         } else {
+            self.board.insert(Chip::new(col, color));
+            self.board.layout[col + y * self.board.width] = Some(color);
+            self.turn += 1;
             let player_num = (self.turn - 1) % self.players.len();
             let player = &self.players[player_num];
             let game = &self;
@@ -309,6 +309,16 @@ mod tests {
                 3, 0, 3, 1, 3, 3, 3, 1, 3, 2, 4, 6, 4, 4, 4, 1, 1, 0, 4, 0, 0, 6, 4, 6, 6, 6, 5, 5
             ])
         ));
+
+        let pat = vec![yellow, yellow, yellow, yellow];
+        assert!(!check_linear_pattern(
+            &pat,
+            &make_game(&vec![
+                3, 2, 3, 3, 3, 2, 3, 1, 3, 4, 2, 4, 2, 5, 2, 2, 1, 0, 1, 0, 1, 0, 1
+            ])
+        ));
+
+
     }
 
     #[test]

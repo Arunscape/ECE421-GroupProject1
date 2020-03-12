@@ -13,6 +13,7 @@ rustflags = ["-Ctarget-cpu=native"]
 [dependencies]
 yew = { version = "0.13.2", features = ["std_web"] }
 wasm-bindgen = "0.2.59"
+rand = "0.7.3"
 
 [dependencies.web-sys]
 web-sys = "0.3.36"

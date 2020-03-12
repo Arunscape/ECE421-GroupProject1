@@ -1,4 +1,7 @@
-use super::game::{ChipDescrip, Game};
+use super::game::{ChipDescrip, Game, BoardState};
+use crate::io::{GameIO, TermIO};
+use rand::prelude::*;
+
 
 pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     let chip = game.current_player().chip_options[0];
@@ -7,7 +10,8 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     (mov, chip)
 }
 
-const MAX_DEPTH: usize = 8;
+const MAX_DEPTH: usize = 4;
+const MONTE_CARLO_ITER: usize = 1000;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
@@ -18,20 +22,68 @@ pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     } else {
         std::isize::MAX
     };
+    //let mut score = 0;
 
     let mut b_mov = std::usize::MAX;
 
     for mov in game.get_board().get_valid_moves() {
         game.play(mov, game.current_player().chip_options[0]);
         let os = score;
-        score = minmax(score, minmax_search(game, MAX_DEPTH));
+        let mut sscore = minmax_search(game, MAX_DEPTH) << 14;
+        if sscore == 0 {
+            sscore = monte_carlo_search(game);
+        }
+        score = minmax(score, sscore);
+
         if score != os {
             b_mov = mov;
         }
         game.undo_move();
     }
 
-    (score, b_mov)
+    (score >> 14, b_mov)
+}
+
+fn monte_carlo_search(game: &mut Game) -> isize {
+    let mut score = 0;
+    for _ in 0..MONTE_CARLO_ITER {
+        let mut moves = 0;
+        let mut res = BoardState::Ongoing;
+        let mut finished = false;
+        while !finished {
+            match res {
+                BoardState::Ongoing => {
+                    let m = game.get_board().get_valid_moves();
+                    let mov = random::<usize>() % m.len();
+                    let mov = m[mov];
+                    let chip = random::<usize>() % game.current_player().chip_options.len();
+                    let chip = game.current_player().chip_options[chip];
+                    res = game.play(mov, chip);
+                    moves += 1;
+                },
+                BoardState::Invalid => {
+                    moves -= 1;
+                    res = BoardState::Ongoing;
+                },
+                BoardState::Draw => {
+                    finished = true;
+                },
+                BoardState::Win(x) => {
+                    if x == 1 {
+                        score += 1
+                    } else {
+                        score -= 1
+                    }
+                    finished = true;
+                }
+            }
+        }
+        for _ in 0..moves {
+            game.undo_move()
+        }
+    }
+
+    score
 }
 
 static mut COUNT: usize = 0;

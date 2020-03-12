@@ -18,7 +18,6 @@ pub fn play(game: &mut Game) {
             game::BoardState::Ongoing => {}
             game::BoardState::Invalid => {
                 println!("\n\nInvalid move.");
-                game.undo_move();
             }
             x => {
                 TermIO::display_gameover(x);
