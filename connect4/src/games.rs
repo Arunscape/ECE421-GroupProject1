@@ -117,6 +117,25 @@ pub fn connect4() -> Game {
     Game::new(board, players)
 }
 
+pub fn toto_ai() -> Game {
+    let board = Board::new(6, 4);
+
+    let players = vec![
+        Player {
+            player_type: PlayerType::AI,
+            chip_options: vec![chip_t, chip_o],
+            win_conditions: vec![wrap_4_check(chip_t, chip_o)],
+        },
+        Player {
+            player_type: PlayerType::Local,
+            chip_options: vec![chip_t, chip_o],
+            win_conditions: vec![wrap_4_check(chip_o, chip_t)],
+        },
+    ];
+
+    Game::new(board, players)
+}
+
 pub fn toto() -> Game {
     let board = Board::new(6, 4);
 

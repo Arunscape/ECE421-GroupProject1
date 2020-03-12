@@ -58,24 +58,27 @@ impl Game {
         &mut self.board
     }
 
+    pub fn play_no_check(&mut self, col: usize, color: ChipDescrip) {
+            self.board.insert(Chip::new(col, color));
+            self.turn += 1;
+    }
+
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         let y = self.board.get_col_height(col);
         if y + 1 > self.board.height || col > self.board.width {
             BoardState::Invalid
         } else {
-            self.board.insert(Chip::new(col, color));
-            self.turn += 1;
-            let player_num = (self.turn - 1) % self.players.len();
-            let player = &self.players[player_num];
+            self.play_no_check(col, color);
             let game = &self;
-            if player.win_conditions.iter().any(|x| x(game)) {
-                BoardState::Win(player_num as isize + 1)
-            } else {
-                if self.turn == self.board.width * self.board.height {
-                    BoardState::Draw
-                } else {
-                    BoardState::Ongoing
+            for (player_num, player) in self.players.iter().enumerate() {
+                if player.win_conditions.iter().any(|x| x(game)) {
+                    return BoardState::Win(player_num as isize + 1)
                 }
+            }
+            if self.turn == self.board.width * self.board.height {
+                BoardState::Draw
+            } else {
+                BoardState::Ongoing
             }
         }
     }
@@ -161,19 +164,9 @@ impl Board {
     }
 
     pub fn get_valid_moves(&self) -> Vec<usize> {
-        let mut v: Vec<usize> = (0..self.width)
+        (0..self.width)
             .filter(|x| self.get_col_height(*x) < self.height)
-            .collect();
-        return v;
-
-        // Intellegent move ordering
-        // v.sort_by(|a, b| {
-        //     ((self.width as isize) / 2 - (*a as isize))
-        //         .abs()
-        //         .partial_cmp(&((self.width as isize) / 2 - (*b as isize)).abs())
-        //         .unwrap()
-        // });
-        // v
+            .collect()
     }
 
     pub fn last_move_loc(&self) -> (usize, usize) {
@@ -266,6 +259,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
     use crate::games::*;
+    use crate::io::{TermIO, GameIO};
 
     // specifically connect4
     fn make_game(locs: &Vec<usize>) -> Game {
@@ -273,6 +267,14 @@ mod tests {
         for x in locs {
             let col = game.current_player().chip_options[0];
             game.play(*x, col);
+        }
+        game
+    }
+
+    fn make_game_toto(locs: &Vec<(usize, ChipDescrip)>) -> Game {
+        let mut game = toto();
+        for (x, col) in locs {
+            game.play(*x, *col);
         }
         game
     }
@@ -288,6 +290,21 @@ mod tests {
 
         let pat = vec![red, red, red];
         assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
+
+        let pat = vec![chip_o, chip_t, chip_t, chip_o];
+        let game = &make_game_toto(&vec![
+            (0, chip_t),
+            (1, chip_o),
+            (2, chip_t),
+            (3, chip_t),
+            (4, chip_t),
+            (0, chip_o),
+            (2, chip_t),
+            (3, chip_o),
+            (1, chip_t),
+        ]);
+        TermIO::draw_board(game.get_board());
+        assert!(check_linear_pattern(&pat, game));
     }
 
     #[test]

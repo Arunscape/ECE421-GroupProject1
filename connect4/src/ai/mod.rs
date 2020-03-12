@@ -1,52 +1,68 @@
 use super::game::{BoardState, ChipDescrip, Game};
-use crate::io::{GameIO, TermIO};
 use rand::prelude::*;
-use std::sync::Mutex;
 
-pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
-    let chip = game.current_player().chip_options[0];
+#[derive(Clone, Copy, Debug)]
+pub struct AIConfig {
+    carlo_iter: usize,
+    minmax_depth: usize,
+}
 
-    let (_, mov) = evaluate_board(game);
+pub const EASY_AI: AIConfig = AIConfig {
+    carlo_iter: 5,
+    minmax_depth: 2,
+};
+
+pub const MID_AI: AIConfig = AIConfig {
+    carlo_iter: 1000,
+    minmax_depth: 4,
+};
+
+pub const HARD_AI: AIConfig = AIConfig {
+    carlo_iter: 4000,
+    minmax_depth: 6,
+};
+
+pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip) {
+    let (_, mov, chip) = evaluate_board(game, ai_conf);
     (mov, chip)
 }
 
-const MAX_DEPTH: usize = 4;
-const MONTE_CARLO_ITER: usize = 5000;
 // returns board evaluation and next best move
-pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
+pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, ChipDescrip) {
     let is_max = game.get_turn() % 2 == 0;
 
-    fn test_move(mov: usize, game: &mut Game) -> isize {
-        game.play(mov, game.current_player().chip_options[0]);
-        let mut score = minmax_search(game, MAX_DEPTH) << 14;
+    fn test_move(mov: usize, chip: ChipDescrip, game: &mut Game, ai_conf: AIConfig) -> isize {
+        game.play(mov, chip);
+        let mut score = minmax_search(game, ai_conf.minmax_depth) << 14;
         if score == 0 {
-            score = monte_carlo_search(game);
+            score = monte_carlo_search(game, ai_conf);
         }
         game.undo_move();
         score
     }
 
-    let mut potentials: Vec<(usize, isize)> = game
+    let mut potentials: Vec<(isize, usize, ChipDescrip)> = game
         .get_board()
         .get_valid_moves()
         .iter()
-        .map(|&mov| (mov, test_move(mov, &mut game.clone())))
+        .flat_map(|&mov| game.current_player().chip_options.iter().map(move |&c| (mov, c)))
+        .map(|(mov, c)| (test_move(mov, c, &mut game.clone(), ai_conf), mov, c))
         .collect();
 
     potentials.sort_by(|a, b| if is_max {
-        (b.1).partial_cmp(&a.1).unwrap()
+        (b.0).partial_cmp(&a.0).unwrap()
     } else {
-        (a.1).partial_cmp(&b.1).unwrap()
+        (a.0).partial_cmp(&b.0).unwrap()
     });
 
-    println!("{:?}", potentials);
-    let (b_mov, score) = potentials[0];
-    (score >> 14, b_mov)
+    // println!("{:?}", potentials);
+    let (score, b_mov, c) = potentials[0];
+    (score >> 14, b_mov, c)
 }
 
-fn monte_carlo_search(game: &mut Game) -> isize {
+fn monte_carlo_search(game: &mut Game, ai_conf: AIConfig) -> isize {
     let mut score = 0;
-    (0..MONTE_CARLO_ITER).for_each(|_| {
+    (0..ai_conf.carlo_iter).for_each(|_| {
         let mut moves = 0;
         let mut res = BoardState::Ongoing;
         let mut finished = false;
@@ -99,14 +115,11 @@ fn minmax_search(game: &mut Game, depth: usize) -> isize {
     }
 
     let is_max = game.get_turn() % 2 == 0;
-    if is_max {
-        if game.get_player(1).win_conditions.iter().any(|x| x(game)) {
-            return -(depth as isize);
-        }
-    } else {
-        if game.get_player(0).win_conditions.iter().any(|x| x(game)) {
-            return depth as isize;
-        }
+    if game.get_player(1).win_conditions.iter().any(|x| x(game)) {
+        return -(depth as isize);
+    }
+    if game.get_player(0).win_conditions.iter().any(|x| x(game)) {
+        return depth as isize;
     }
 
     let minmax: fn(isize, isize) -> isize = if is_max { std::cmp::max } else { std::cmp::min };
@@ -117,10 +130,14 @@ fn minmax_search(game: &mut Game, depth: usize) -> isize {
         std::isize::MAX
     };
 
-    for mov in game.get_board().get_valid_moves() {
-        game.play(mov, game.current_player().chip_options[0]);
-        score = minmax(score, minmax_search(game, depth - 1));
-        game.undo_move();
+    let moves = game.get_board().get_valid_moves();
+    let player = game.current_player().clone();
+    for mov in moves {
+        for chip in &player.chip_options {
+            game.play_no_check(mov, *chip);
+            score = minmax(score, minmax_search(game, depth - 1));
+            game.undo_move();
+        }
     }
 
     score
@@ -154,38 +171,38 @@ mod tests {
     fn test_win_1() {
         let mut game = make_game(vec![1, 2, 1, 2, 1, 2]);
         TermIO::draw_board(game.get_board());
-        let (eval, mov) = evaluate_board(&mut game);
+        let ai = MID_AI;
+        let (eval, mov, _) = evaluate_board(&mut game, ai);
         println!("Best move = {} which is {}", mov, eval);
-        assert_eq!(eval, MAX_DEPTH as isize);
+        assert_eq!(eval, ai.minmax_depth as isize);
         assert_eq!(mov, 1);
     }
 
     #[test]
     fn test_win_1_p2() {
         let mut game = make_game(vec![1, 2, 1, 2, 1, 2, 0]);
-        let (eval, mov) = evaluate_board(&mut game);
-        assert_eq!(eval, -(MAX_DEPTH as isize));
+        let ai = MID_AI;
+        let (eval, mov, _) = evaluate_board(&mut game, ai);
+        assert_eq!(eval, -(ai.minmax_depth as isize));
         assert_eq!(mov, 2);
     }
 
     #[test]
     fn test_timing() {
         let mut game = make_game(vec![]);
-        let time = time!(get_best_move(&mut game));
 
         unsafe {
             COUNT = 0;
         }
+        let time = time!(get_best_move(&mut game, HARD_AI));
 
-        let (x, _y) = get_best_move(&mut game);
 
         println!("This test is supposed to fail. It is for keeping track of performance");
         unsafe {
             println!(
-                "Took {}µs for depth of {}. Best move is {:?}. Searched {} iterations",
+                "Took {}µs for depth of {}. Searched {} iterations",
                 time,
-                MAX_DEPTH,
-                x + 1,
+                HARD_AI.minmax_depth,
                 COUNT
             );
         }
