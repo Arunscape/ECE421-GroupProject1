@@ -34,8 +34,8 @@ impl Game {
     pub fn new(board: Board, players: Vec<Player>) -> Self {
         Self {
             turn: 0,
-            board,
             players,
+            board,
         }
     }
 
@@ -50,6 +50,7 @@ impl Game {
     pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
         let y = self.board.get_col_height(col);
         self.board.insert(Chip::new(col, color));
+        self.board.layout[col + y * self.board.width] = Some(color);
         self.turn += 1;
         if y + 1 > self.board.height {
             BoardState::Invalid
@@ -79,13 +80,17 @@ impl Game {
         }
     }
 
-    pub fn get_board_layout(&self) -> Vec<Option<ChipDescrip>> {
+    pub fn get_board_layout(&self) -> &Vec<Option<ChipDescrip>> {
         self.board.get_layout()
     }
 
     pub fn undo_move(&mut self) {
         self.turn -= 1;
-        self.board.chips.pop();
+        let chip = self.board.chips.pop();
+        let x = chip.expect("Should never undo no moves").get_x();
+
+        let y = self.board.get_col_height(x) - 1;
+        self.board.layout[x + y * self.board.width] = None;
     }
 
     pub fn get_player_count(&self) -> usize {
@@ -105,6 +110,7 @@ pub struct Board {
     pub width: usize,
     pub height: usize,
     pub chips: Vec<Chip>,
+    layout:  Vec<Option<ChipDescrip>>,
 }
 
 impl Board {
@@ -113,6 +119,7 @@ impl Board {
             width,
             height,
             chips: Vec::new(),
+            layout: vec![None; height * width],
         }
     }
 
@@ -121,7 +128,14 @@ impl Board {
     }
 
     pub fn get_col_height(&self, x: usize) -> usize {
-        self.chips.iter().filter(|ch| ch.get_x() == x).count()
+        for y in 0..self.height {
+            if self.layout[x + y * self.width].is_none() {
+                return y
+            }
+        }
+        self.height
+
+        // self.chips.iter().filter(|ch| ch.get_x() == x).count()
     }
 
     pub fn get_valid_moves(&self) -> Vec<usize> {
@@ -137,28 +151,13 @@ impl Board {
         v
     }
 
-    fn chipmap(&self) -> HashMap<(usize, usize), ChipDescrip> {
-        let mut heights = vec![0; self.width];
-        let mut locs = HashMap::new();
-        for chip in self.chips.iter() {
-            locs.insert((chip.get_x(), heights[chip.get_x()]), chip.get_descrip());
-            heights[chip.get_x()] += 1;
-        }
-        locs
-    }
-
     pub fn last_move_loc(&self) -> (usize, usize) {
         let x = self.chips[self.chips.len() - 1].get_x();
         (x, self.get_col_height(x) - 1)
     }
 
-    pub fn get_layout(&self) -> Vec<Option<ChipDescrip>> {
-        let locs = self.chipmap();
-        let mut layout = Vec::with_capacity(self.width * self.height);
-        for x in 0..(self.width * self.height) {
-            layout.push(locs.get(&(x % self.width, x / self.width)).map(|x| *x));
-        }
-        layout
+    pub fn get_layout(&self) -> &Vec<Option<ChipDescrip>> {
+        &self.layout
     }
 
     // fn chip_at(&self, x: usize, y: usize) -> Option<Chip> {self.chips.iter().find(|&chip| chip.get_pos() == (x, y))}
@@ -235,54 +234,13 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use crate::games::*;
 
-    const P_RED: ChipDescrip = ChipDescrip {
-        bg_color: 0,
-        fg_color: 0,
-        graphic: 'r',
-    };
-
-    const P_YEL: ChipDescrip = ChipDescrip {
-        bg_color: 1,
-        fg_color: 1,
-        graphic: 'y',
-    };
-
-    pub fn four_in_a_row_red() -> Checker {
-        fn check(game: &Game) -> bool {
-            check_linear_pattern(&vec![P_RED; 4], game)
-        }
-        Box::from(check)
-    }
-
-    pub fn four_in_a_row_yellow() -> Checker {
-        fn check(game: &Game) -> bool {
-            check_linear_pattern(&vec![P_YEL; 4], game)
-        }
-        Box::from(check)
-    }
     // specifically connect4
     fn make_game(locs: &Vec<usize>) -> Game {
-        let board = Board::new(7, 6);
-        let players = vec![
-            Player {
-                player_type: PlayerType::Local,
-                chip_options: vec![P_RED],
-                win_conditions: vec![four_in_a_row_red()],
-            },
-            Player {
-                player_type: PlayerType::Local,
-                chip_options: vec![P_YEL],
-                win_conditions: vec![four_in_a_row_yellow()],
-            },
-        ];
-
-        let mut game = Game::new(board, players);
-
-        let mut i = 0;
+        let mut game = connect4();
         for x in locs {
-            let col = if i % 2 == 0 { P_RED } else { P_YEL };
-            i += 1;
+            let col = game.current_player().chip_options[0];
             game.play(*x, col);
         }
         game
@@ -290,20 +248,20 @@ mod tests {
 
     #[test]
     fn test_hor_check() {
-        let pat = vec![P_RED, P_RED];
+        let pat = vec![red, red];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 1, 2, 3, 0, 1, 2, 3, 0, 2, 1, 3])
         ));
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 6, 0])));
 
-        let pat = vec![P_RED, P_RED, P_RED];
+        let pat = vec![red, red, red];
         assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
     }
 
     #[test]
     fn test_ver_check() {
-        let pat = vec![P_RED, P_RED, P_RED];
+        let pat = vec![red, red, red];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0])));
         assert!(check_linear_pattern(
             &pat,
@@ -314,7 +272,7 @@ mod tests {
 
     #[test]
     fn test_dia_check() {
-        let pat = vec![P_RED, P_RED, P_RED];
+        let pat = vec![red, red, red];
 
         assert!(check_linear_pattern(
             &pat,
@@ -325,7 +283,7 @@ mod tests {
             &make_game(&vec![0, 0, 0, 1, 1, 3, 2])
         ));
 
-        let pat = vec![P_RED, P_RED, P_RED, P_RED];
+        let pat = vec![red, red, red, red];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -336,7 +294,7 @@ mod tests {
 
     #[test]
     fn test_dia_check2() {
-        let pat = vec![P_RED, P_RED, P_RED, P_RED];
+        let pat = vec![red, red, red, red];
         assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -344,7 +302,7 @@ mod tests {
             ])
         ));
 
-        let pat = vec![P_YEL, P_YEL, P_YEL, P_YEL];
+        let pat = vec![yellow, yellow, yellow, yellow];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -355,7 +313,10 @@ mod tests {
 
     #[test]
     fn test_check_small() {
-        let pat = vec![P_RED, P_RED];
+        let pat = vec![red, red];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0])));
+
+        let game = make_game(&vec![2]);
+        assert!(!game.current_player().win_conditions[0](&game));
     }
 }

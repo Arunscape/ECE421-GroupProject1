@@ -7,7 +7,7 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     (mov, chip)
 }
 
-const MAX_DEPTH: usize = 6;
+const MAX_DEPTH: usize = 8;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     let is_max = game.get_turn() % 2 == 0;
@@ -34,10 +34,14 @@ pub fn evaluate_board(game: &mut Game) -> (isize, usize) {
     (score, b_mov)
 }
 
+static mut COUNT: usize = 0;
 // specifically a 2 player AI
 // returns < 0 if player 2 wins
 // returns > 0 if player 1 wins
 fn minmax_search(game: &mut Game, depth: usize) -> isize {
+    unsafe {
+        COUNT += 1;
+    }
     if depth == 0 {
         return 0;
     }
@@ -74,6 +78,7 @@ fn minmax_search(game: &mut Game, depth: usize) -> isize {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use crate::io::{GameIO, TermIO};
 
     use std::time::Instant;
     macro_rules! time {
@@ -98,7 +103,9 @@ mod tests {
     #[test]
     fn test_win_1() {
         let mut game = make_game(vec![1, 2, 1, 2, 1, 2]);
+        TermIO::draw_board(game.get_board());
         let (eval, mov) = evaluate_board(&mut game);
+        println!("Best move = {} which is {}", mov, eval);
         assert_eq!(eval, MAX_DEPTH as isize);
         assert_eq!(mov, 1);
     }
@@ -115,8 +122,17 @@ mod tests {
     fn test_timing() {
         let mut game = make_game(vec![]);
         let time = time!(get_best_move(&mut game));
+
+        unsafe {
+            COUNT = 0;
+        }
+
         let (x, _y) = get_best_move(&mut game);
-        println!("Took {}µs for depth of {}. Best move is {:?}", time, MAX_DEPTH, x+1);
+
+        unsafe {
+            println!("Took {}µs for depth of {}. Best move is {:?}. Searched {} iterations",
+                     time, MAX_DEPTH, x+1, COUNT);
+        }
         assert!(false);
     }
 }

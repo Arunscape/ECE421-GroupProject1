@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChipDescrip {
     pub bg_color: usize,
     pub fg_color: usize,
