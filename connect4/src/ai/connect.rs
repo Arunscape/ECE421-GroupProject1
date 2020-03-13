@@ -42,6 +42,14 @@ fn negamax(bb: &mut BitBoard, depth: usize) -> isize {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::time::Instant;
+    macro_rules! time {
+        ($x:expr) => {{
+            let now = Instant::now();
+            $x;
+            now.elapsed().as_micros()
+        }};
+    }
 
     fn make_game(moves: Vec<usize>) -> Game {
         let mut game = crate::games::connect4();
@@ -57,6 +65,18 @@ mod test {
         let game = make_game(vec![0, 1, 0, 1, 0, 1]);
         let score = negamax(&mut BitBoard::from_game(&game), 5);
         println!("score: {}", score);
-        assert_eq!(score, 1);
+        assert_eq!(score, 18);
+
+        let game = make_game(vec![0, 3, 0, 2, 6, 4]);
+        let score = negamax(&mut BitBoard::from_game(&game), 5);
+        println!("score: {}", score);
+        assert_eq!(score, -17);
+    }
+
+    #[test]
+    fn time_test() {
+        let game = make_game(vec![]);
+        let time = time!(negamax(&mut BitBoard::from_game(&game), 6));
+        assert_eq!(time, 0);
     }
 }
