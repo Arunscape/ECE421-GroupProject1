@@ -1,6 +1,9 @@
 use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
 
+mod connect;
+mod bitboard;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct AIConfig {
     carlo_iter: usize,
@@ -25,7 +28,7 @@ pub const HARD_AI: AIConfig = AIConfig {
 pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip) {
     if ai_conf == HARD_AI {
         if crate::games::is_connect4(game) {
-            // connect 4 specific hard AI
+            return connect::get_best_move(game)
         } else if crate::games::is_toto(game) {
             // toto specific hard AI
         }
@@ -35,13 +38,14 @@ pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip)
     (mov, chip)
 }
 
+const MINMAX_SHIFT: usize = 14;
 // returns board evaluation and next best move
 pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, ChipDescrip) {
     let is_max = game.get_turn() % 2 == 0;
 
     fn test_move(mov: usize, chip: ChipDescrip, game: &mut Game, ai_conf: AIConfig) -> isize {
         game.play(mov, chip);
-        let mut score = minmax_search(game, ai_conf.minmax_depth) << 14;
+        let mut score = minmax_search(game, ai_conf.minmax_depth) << MINMAX_SHIFT;
         if score == 0 {
             score = monte_carlo_search(game, ai_conf);
         }
@@ -65,7 +69,7 @@ pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, Chip
 
     // println!("{:?}", potentials);
     let (score, b_mov, c) = potentials[0];
-    (score >> 14, b_mov, c)
+    (score >> MINMAX_SHIFT, b_mov, c)
 }
 
 fn monte_carlo_search(game: &mut Game, ai_conf: AIConfig) -> isize {
@@ -202,7 +206,9 @@ mod tests {
         unsafe {
             COUNT = 0;
         }
-        let time = time!(get_best_move(&mut game, HARD_AI));
+        let mut ai = HARD_AI;
+        ai.carlo_iter += 1;
+        let time = time!(get_best_move(&mut game, ai));
 
 
         println!("This test is supposed to fail. It is for keeping track of performance");

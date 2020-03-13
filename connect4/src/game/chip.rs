@@ -27,4 +27,8 @@ impl Chip {
     pub fn get_descrip(&self) -> ChipDescrip {
         self.descrip
     }
+
+    pub fn set_descrip(&mut self, c: ChipDescrip) {
+        self.descrip = c;
+    }
 }
