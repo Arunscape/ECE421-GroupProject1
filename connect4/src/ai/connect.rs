@@ -12,26 +12,28 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
 }
 
 fn solve(bb: &mut BitBoard) -> isize {
-    unsafe {
-        COUNT = 0;
-    }
     // null window search to maximize alpha beta pruning
-    let mut min = ((bb.size() - bb.get_turns()) / 2) as isize;
+    let mut min = - (((bb.size() - bb.get_turns()) / 2) as isize);
     let mut max = ((bb.size() + 1 - bb.get_turns()) / 2) as isize;
     while min < max {
         let mut mid = min + (max - min) / 2;
-        if mid < 0 && min / 2 < mid {
+        if mid <= 0 && min / 2 < mid {
             mid = min / 2;
-        } else if mid > 0 && max/2 > mid {
+        } else if mid >= 0 && max/2 > mid {
             mid = max / 2;
         }
 
+        unsafe {
+            COUNT = 0;
+        }
         let score = negamax(bb, mid, mid+1);
+        println!("got {} from window ({})-({})", score, mid, mid+1);
         if score <= mid {
             max = score;
         } else {
             min = score;
         }
+        println!("minmax is now [min: {}, max: {}]", min, max);
     }
     min
 }
@@ -40,7 +42,7 @@ static mut COUNT: usize = 0;
 fn negamax(bb: &BitBoard, alpha: isize, beta: isize) -> isize {
     unsafe {
         COUNT += 1;
-        if COUNT > 1000000 {
+        if COUNT > 10000000 {
             return 0;
         }
     }
@@ -117,6 +119,11 @@ mod test {
         println!("score: {}", score);
         assert_eq!(score, 18);
 
+        let game = make_game(vec![6, 6, 0, 1, 0, 1, 0, 1]);
+        let score = solve(&mut BitBoard::from_game(&game));
+        println!("score: {}", score);
+        assert_eq!(score, 17);
+
         let game = make_game(vec![0, 1, 0, 1, 0, 1, 6]);
         let score = solve(&mut BitBoard::from_game(&game));
         println!("score: {}", score);
@@ -124,8 +131,9 @@ mod test {
 
         let game = make_game(vec![0, 3, 0, 2, 6, 4]);
         let score = solve(&mut BitBoard::from_game(&game));
+        TermIO::draw_board(game.get_board());
         println!("score: {}", score);
-        assert_eq!(score, 18);
+        assert_eq!(score, -18);
 
         let game = make_game(vec![0, 3, 0, 2, 6]);
         let mut bb = BitBoard::from_game(&game);
@@ -137,15 +145,14 @@ mod test {
 
     #[test]
     fn time_test() {
-        let depth = 10;
         let game = make_game(vec![]);
 
         let time = time!(solve(&mut BitBoard::from_game(&game)));
         println!("This test is supposed to fail. It is for keeping track of performance");
         unsafe {
             println!(
-                "Took {}µs for depth of {}. Searched {} iterations",
-                time, depth, COUNT
+                "Took {}µs. Searched {} iterations",
+                time, COUNT
             );
         }
         assert!(false);
