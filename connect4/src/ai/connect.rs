@@ -1,8 +1,7 @@
-use crate::game::{Game, ChipDescrip};
-use super::bitboard::BitBoard;
 use super::bitboard;
+use super::bitboard::BitBoard;
+use crate::game::{ChipDescrip, Game};
 use crate::io::{GameIO, TermIO};
-
 
 pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     let chip = game.current_player().chip_options[0];
@@ -12,36 +11,87 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
     (mov, chip)
 }
 
-fn negamax(bb: &mut BitBoard, depth: usize) -> isize {
-    if depth == 0 {
-        return 0
+fn solve(bb: &mut BitBoard) -> isize {
+    unsafe {
+        COUNT = 0;
     }
+    // null window search to maximize alpha beta pruning
+    let mut min = ((bb.size() - bb.get_turns()) / 2) as isize;
+    let mut max = ((bb.size() + 1 - bb.get_turns()) / 2) as isize;
+    while min < max {
+        let mut mid = min + (max - min) / 2;
+        if mid < 0 && min / 2 < mid {
+            mid = min / 2;
+        } else if mid > 0 && max/2 > mid {
+            mid = max / 2;
+        }
 
-    let mut score = std::isize::MIN;
-    for mov in 0..7 {
-        if bb.is_winning_move(mov) {
-            println!("found win: {}, on turn {}", mov, bb.get_turns());
-            TermIO::draw_board(bitboard::unpack_board(bb.key()).get_board());
-            return ((bb.size() - bb.get_turns())/2) as isize;
+        let score = negamax(bb, mid, mid+1);
+        if score <= mid {
+            max = score;
+        } else {
+            min = score;
         }
     }
-
-    for mov in bb.clone().get_valid_moves() {
-        let (p, m) = bb.get_pos_mask();
-        bb.play(mov);
-        let ns = -negamax(bb, depth - 1);
-        if ns > score {
-            score = ns;
-        }
-        bb.undo_to(p, m);
-    }
-    score
+    min
 }
 
+static mut COUNT: usize = 0;
+fn negamax(bb: &BitBoard, alpha: isize, beta: isize) -> isize {
+    unsafe {
+        COUNT += 1;
+        if COUNT > 1000000 {
+            return 0;
+        }
+    }
+
+    if bb.get_turns() == bb.size() {
+        return 0;
+    }
+
+    if beta <= alpha {
+        return alpha;
+    }
+
+    //println!("searching board: alpha({}), beta({})", alpha, beta);
+    //TermIO::draw_board(bitboard::unpack_board(bb.key()).get_board());
+
+    for mov in 0..7 {
+        if bb.can_play(mov) && bb.is_winning_move(mov) {
+            //println!("found win: {}, on turn {}", mov, bb.get_turns());
+            //TermIO::draw_board(bitboard::unpack_board(bb.key()).get_board());
+            return ((bb.size() + 1 - bb.get_turns()) / 2) as isize;
+        }
+    }
+
+    let mut beta = beta;
+    let max = ((bb.size() - 1 - bb.get_turns()) / 2) as isize;
+    if beta > max {
+        beta = max;
+        if alpha >= beta {
+            return beta;
+        }
+    }
+
+    let mut alpha = alpha;
+    for mov in bb.clone().get_valid_moves() {
+        let mut p2 = bb.clone();
+        p2.play(mov);
+        let score = -negamax(&p2, -beta, -alpha);
+        if score >= beta {
+            return score;
+        }
+        if score > alpha {
+            alpha = score;
+        }
+    }
+    alpha
+}
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::ai::bitboard::unpack_board;
     use std::time::Instant;
     macro_rules! time {
         ($x:expr) => {{
@@ -63,20 +113,41 @@ mod test {
     #[test]
     fn endgame_test() {
         let game = make_game(vec![0, 1, 0, 1, 0, 1]);
-        let score = negamax(&mut BitBoard::from_game(&game), 5);
+        let score = solve(&mut BitBoard::from_game(&game));
+        println!("score: {}", score);
+        assert_eq!(score, 18);
+
+        let game = make_game(vec![0, 1, 0, 1, 0, 1, 6]);
+        let score = solve(&mut BitBoard::from_game(&game));
         println!("score: {}", score);
         assert_eq!(score, 18);
 
         let game = make_game(vec![0, 3, 0, 2, 6, 4]);
-        let score = negamax(&mut BitBoard::from_game(&game), 5);
+        let score = solve(&mut BitBoard::from_game(&game));
         println!("score: {}", score);
-        assert_eq!(score, -17);
+        assert_eq!(score, 18);
+
+        let game = make_game(vec![0, 3, 0, 2, 6]);
+        let mut bb = BitBoard::from_game(&game);
+        let score = solve(&mut bb);
+        TermIO::draw_board(unpack_board(bb.key()).get_board());
+        println!("score: {}", score);
+        assert_eq!(score, 18);
     }
 
     #[test]
     fn time_test() {
+        let depth = 10;
         let game = make_game(vec![]);
-        let time = time!(negamax(&mut BitBoard::from_game(&game), 6));
-        assert_eq!(time, 0);
+
+        let time = time!(solve(&mut BitBoard::from_game(&game)));
+        println!("This test is supposed to fail. It is for keeping track of performance");
+        unsafe {
+            println!(
+                "Took {}µs for depth of {}. Searched {} iterations",
+                time, depth, COUNT
+            );
+        }
+        assert!(false);
     }
 }

@@ -92,7 +92,7 @@ impl BitBoard {
     }
 
     pub fn get_valid_moves(&self) -> Vec<usize> {
-        (0..WIDTH).filter(|x| self.can_play(*x)).collect()
+        [3, 4, 2, 5, 1, 6, 0].iter().map(|x| *x).filter(|&x| self.can_play(x)).collect()
     }
 
     pub fn play(&mut self, col: usize) {
@@ -469,12 +469,13 @@ mod tests {
 
     #[test]
     fn test_bit_board_key_and_create() {
-        let game = make_game(vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0]);
+        let game = make_game(vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 6]);
         let bb = BitBoard::from_game(&game);
 
         let packed = pack_board(&game);
         let key = bb.key();
         crate::io::TermIO::draw_board(game.get_board());
+        crate::io::TermIO::draw_board(unpack_board(key).get_board());
         println!(
             "BB pos:\n{:#051b}\nMask:\n{:#051b}\nBottom\n{:#051b}",
             bb.position,
@@ -487,15 +488,15 @@ mod tests {
 
     #[test]
     fn test_bb_flip_x() {
-        let game = make_game(vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0]);
+        let game = make_game(vec![0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 6]);
         let mut bb = BitBoard::from_game(&game);
 
         let key = bb.key();
         let key2 = bb.flip_x().key();
         let key3 = bb.flip_x().key();
 
-        let res = 0b0000111_0000101_0001010_0000110_0000101_0000110_0000001;
-        let flp = 0b0000001_0000110_0000101_0000110_0001010_0000101_0000111;
+        let res = 0b0000111_0000101_0001010_0000110_0000101_0000110_0000010;
+        let flp = 0b0000010_0000110_0000101_0000110_0001010_0000101_0000111;
         println!(
             "Key:\n{:#051b}\nKey2:\n{:#051b}\nKey3:\n{:#051b}",
             key, key2, key3
