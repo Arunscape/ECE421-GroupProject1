@@ -1,3 +1,4 @@
+use crate::GameIO;
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
 use stdweb::web::html_element::CanvasElement;
@@ -61,5 +62,19 @@ impl Canvas {
             f64::from(self.canvas.width()),
             f64::from(self.canvas.height()),
         )
+    }
+}
+
+impl GameIO for Canvas {
+    fn draw_board(&self) {
+        self.draw()
+    }
+
+    fn get_move(&self) {
+        unimplemented!();
+    }
+
+    fn display_gameover(&self) {
+        unimplemented!();
     }
 }
