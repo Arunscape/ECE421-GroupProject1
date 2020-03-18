@@ -42,34 +42,6 @@ impl Canvas {
         }
     }
 
-    pub fn draw(&self, x: u32, y: u32, colour: &JsValue) {
-        assert!(x < self.width && y < self.height);
-
-        self.context.set_fill_style(colour);
-
-        let x = x * self.scaled_width;
-        let y = y * self.scaled_height;
-
-        self.context.fill_rect(
-            f64::from(x),
-            f64::from(y),
-            f64::from(self.scaled_width),
-            f64::from(self.scaled_height),
-        );
-    }
-
-    pub fn clear_all(&self) {
-        self.context.set_fill_style(&"white".into());
-        self.context.fill_rect(
-            0.0,
-            0.0,
-            // f64::from(self.width * self.scaled_width),
-            // f64::from(self.height * self.scaled_height),
-            f64::from(self.canvas.width()),
-            f64::from(self.canvas.height()),
-        )
-    }
-
     pub fn draw_mask(&self, width: usize, height: usize) {
         self.context.save();
         self.context.set_fill_style(&"#00bfff".into());
@@ -93,5 +65,63 @@ impl Canvas {
 
     pub fn draw_board(&self, board: &crate::game::Board) {
         self.draw_mask(board.width, board.height);
+    }
+
+    pub fn draw_circle(&self, x: f64, y: f64, r: f64, fill: String, stroke: String) {
+        self.context.save();
+        self.context.set_fill_style(&fill.into());
+        self.context.set_stroke_style(&stroke.into());
+        self.context.begin_path();
+        self.context.arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI);
+        self.context.fill();
+        self.context.restore();
+    }
+
+    pub fn draw() {
+        unimplemented!();
+        /*
+        let mut fg_color: &str;
+        for y in 0..6 {
+            for x in 0..7 {
+                fg_color = "transparent";
+                if (self.map[y][x] >= 1) {
+                    fg_color = "#ff4136";
+                } else if (this.map[y][x] <= -1) {
+                    fg_color = "#ffff00";
+                }
+                self.draw_circle(75 * x + 100, 75 * y + 50, 25, fg_color, "black");
+            }
+        }
+        */
+    }
+
+    pub fn clear(&self) {
+        self.context.clear_rect(
+            0.0,
+            0.0,
+            self.canvas.width().into(),
+            self.canvas.height().into(),
+        );
+    }
+
+    pub fn animate(column: usize, moove: usize, to_row: usize, cur_pos: usize, callback: fn()) {
+        unimplemented!();
+        /*
+        let mut fg_color = "transparent";
+        if moove >= 1 {
+            fg_color = "#ff4136";
+        } else if moove <= -1 {
+            fg_color = "#ffff00";
+        }
+        if to_row * 75 >= cur_pos {
+            self.clear();
+            self.draw();
+            self.draw_circle(75 * column + 100, cur_pos + 50, 25, fg_color, "black");
+            self.draw_mask();
+            web_sys::window().request_animation_frame(|| that.animate(column, moove, to_row, cur_pos + 25, callback)
+        } else {
+            callback();
+        }
+        */
     }
 }
