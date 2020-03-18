@@ -66,15 +66,15 @@ impl Canvas {
 }
 
 impl GameIO for Canvas {
-    fn draw_board(&self) {
+    fn draw_board(&self, game: &Board) {
         self.draw()
     }
 
-    fn get_move(&self) {
+    fn get_move(&self, game: &Game) {
         unimplemented!();
     }
 
-    fn display_gameover(&self) {
+    fn display_gameover(ending: BoardState) {
         unimplemented!();
     }
 }
