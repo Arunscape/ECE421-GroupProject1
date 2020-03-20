@@ -1,3 +1,4 @@
+use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -123,5 +124,19 @@ impl Canvas {
             callback();
         }
         */
+    }
+}
+
+impl GameIO for Canvas {
+    fn draw_board(game: &Board) {
+        Self::draw();
+    }
+
+    fn get_move(game: &Game) -> (usize, ChipDescrip) {
+        unimplemented!();
+    }
+
+    fn display_gameover(ending: BoardState) {
+        unimplemented!();
     }
 }
