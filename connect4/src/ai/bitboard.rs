@@ -334,9 +334,9 @@ mod tests {
         let game2 = unpack_board(packed);
 
         println!("Want:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         println!("Got:");
-        crate::io::TermIO::draw_board(game2.get_board());
+        crate::io::draw_term_board(game2.get_board());
 
         let packed = pack_board(&game2);
         println!("{:#051b}", packed);
@@ -353,11 +353,11 @@ mod tests {
         ]);
 
         println!("OG:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         flip_x(&mut game);
         println!("Flipped X:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         assert!(game
             .get_board()
@@ -368,7 +368,7 @@ mod tests {
 
         flip_x(&mut game);
         println!("Double Flipped X:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         assert!(game
             .get_board()
@@ -389,11 +389,11 @@ mod tests {
         ]);
 
         println!("OG:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         flip_color(&mut game);
         println!("Flipped Color:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         assert!(game
             .get_board()
@@ -404,7 +404,7 @@ mod tests {
 
         flip_color(&mut game);
         println!("Double Flipped Color:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
 
         assert!(game
             .get_board()
@@ -417,9 +417,9 @@ mod tests {
     fn debug_print(game: &Game) {
         let mut bb = BitBoard::from_game(&game);
         println!("OG Board:");
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         println!("Unpacked Board:");
-        crate::io::TermIO::draw_board(unpack_board(bb.key()).get_board());
+        crate::io::draw_term_board(unpack_board(bb.key()).get_board());
         println!("{:#051b} : Key\n{:#051b} : Mask\n{:#051b} : Pos",
                  bb.key(), bb.mask, bb.position);
     }
@@ -429,20 +429,20 @@ mod tests {
         let game = make_game(vec![
             0, 0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5
         ]);
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         let bb = BitBoard::from_game(&game);
         assert!(bb.is_winning_move(3));
 
         let game = make_game(vec![
             0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5,
         ]);
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         assert!(!BitBoard::from_game(&game).is_winning_move(0));
 
         let game = make_game(vec![
             1, 2, 1, 2, 1, 2
         ]);
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         assert!(BitBoard::from_game(&game).is_winning_move(1));
 
         let game = make_game(vec![
@@ -454,13 +454,13 @@ mod tests {
         let game = make_game(vec![
             1, 2, 1, 2, 1, 2, 3
         ]);
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         assert!(BitBoard::from_game(&game).is_winning_move(2));
 
         let game = make_game(vec![
             1, 2, 1, 2, 1, 2
         ]);
-        crate::io::TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         assert!(!BitBoard::from_game(&game).is_winning_move(3));
         assert!(!BitBoard::from_game(&game).is_winning_move(4));
         assert!(!BitBoard::from_game(&game).is_winning_move(5));
@@ -474,8 +474,8 @@ mod tests {
 
         let packed = pack_board(&game);
         let key = bb.key();
-        crate::io::TermIO::draw_board(game.get_board());
-        crate::io::TermIO::draw_board(unpack_board(key).get_board());
+        crate::io::draw_term_board(game.get_board());
+        crate::io::draw_term_board(unpack_board(key).get_board());
         println!(
             "BB pos:\n{:#051b}\nMask:\n{:#051b}\nBottom\n{:#051b}",
             bb.position,

@@ -320,7 +320,7 @@ mod tests {
             (3, chip_o),
             (1, chip_t),
         ]);
-        TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         assert!(check_linear_pattern(&pat, game));
     }
 

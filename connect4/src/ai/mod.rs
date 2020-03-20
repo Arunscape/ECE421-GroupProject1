@@ -182,7 +182,7 @@ mod tests {
     #[test]
     fn test_win_1() {
         let mut game = make_game(vec![1, 2, 1, 2, 1, 2]);
-        TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         let ai = MID_AI;
         let (eval, mov, _) = evaluate_board(&mut game, ai);
         println!("Best move = {} which is {}", mov, eval);

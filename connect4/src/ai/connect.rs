@@ -131,14 +131,14 @@ mod test {
 
         let game = make_game(vec![0, 3, 0, 2, 6, 4]);
         let score = solve(&mut BitBoard::from_game(&game));
-        TermIO::draw_board(game.get_board());
+        crate::io::draw_term_board(game.get_board());
         println!("score: {}", score);
         assert_eq!(score, -18);
 
         let game = make_game(vec![0, 3, 0, 2, 6]);
         let mut bb = BitBoard::from_game(&game);
         let score = solve(&mut bb);
-        TermIO::draw_board(unpack_board(bb.key()).get_board());
+        crate::io::draw_term_board(unpack_board(bb.key()).get_board());
         println!("score: {}", score);
         assert_eq!(score, 18);
     }
