@@ -15,5 +15,5 @@ fn main() {
     } else {
         connect4()
     };
-    connect_game::play(&mut game)
+    connect_game::play(&mut game, connect_game::io::TermIO::new())
 }

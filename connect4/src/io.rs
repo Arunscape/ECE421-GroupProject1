@@ -1,10 +1,15 @@
 use super::game::{ChipDescrip, Board, Game, BoardState, Player};
 use std::io::{Write, stdin, stdout};
 
+pub fn draw_term_board(game: &Board) {
+    let io = TermIO::new();
+    io.draw_board(game);
+}
+
 pub trait GameIO {
-    fn draw_board(game: &Board);
-    fn get_move(game: &Game) -> (usize, ChipDescrip);
-    fn display_gameover(ending: BoardState);
+    fn draw_board(&self, game: &Board);
+    fn get_move(&self, game: &Game) -> (usize, ChipDescrip);
+    fn display_gameover(&self, ending: BoardState);
 }
 
 pub const EMPTY: char = '◻';
@@ -28,6 +33,13 @@ pub struct TermIO {
 }
 
 impl TermIO {
+    pub fn new() -> Self {
+        Self {
+            fg: RST,
+            bg: RST,
+        }
+    }
+
     fn paint(fg: usize, bg: usize) {
         let esc = char::from(0x1b);
         print!("{}[{};{}m", esc, fg + FG, bg + BG)
@@ -47,7 +59,7 @@ impl TermIO {
     }
 }
 impl GameIO for TermIO {
-    fn draw_board(game: &Board) {
+    fn draw_board(&self, game: &Board) {
         let mut drawer = Self { fg: 0, bg: 0 };
         let chips = game.get_layout();
         for i in 0..chips.len() {
@@ -73,7 +85,7 @@ impl GameIO for TermIO {
         println!();
     }
 
-    fn get_move(game: &Game) -> (usize, ChipDescrip) {
+    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
         fn read_line() -> String {
             let mut buffer = String::new();
             stdout().flush().expect("Failed to flush");
@@ -122,7 +134,7 @@ impl GameIO for TermIO {
         (val, ch)
     }
 
-    fn display_gameover(ending: BoardState) {
+    fn display_gameover(&self, ending: BoardState) {
         match ending {
             BoardState::Win(x) => println!("Player {} wins!", x),
             BoardState::Draw => println!("It's a draw :("),
