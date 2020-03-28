@@ -1,6 +1,12 @@
 use yew::{html, Callback, ClickEvent, Component, ComponentLink, Html, ShouldRender};
 pub mod canvas;
 
+#[derive(Switch, Debug)]
+pub enum AppRoute {
+    #[to = "/connect4-computer"]
+    Connect4Computer,
+}
+
 pub struct App {
     clicked: bool,
     onclick: Callback<ClickEvent>,
@@ -38,10 +44,13 @@ impl Component for App {
         };
 
         html! {
-        //            <div>
-        //                <button onclick=&self.onclick>{ button_text }</button>
-                        <canvas id="canvas" height="480" width="640" style="outline: black 3px solid;"/>
-        //            </div>
-                }
+            <Router<AppRoute, ()>
+                render = Router::render(|switch: AppRoute| {
+                    match switch {
+                        AppRoute::Connect4Computer => <canvas id="canvas" height="480" width="640" style="outline: black 3px solid;"/> ,
+                    }
+                })
+            />
+        }
     }
 }

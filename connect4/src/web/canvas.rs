@@ -78,9 +78,7 @@ impl Canvas {
         self.context.restore();
     }
 
-    pub fn draw() {
-        unimplemented!();
-        /*
+    pub fn draw(&self) {
         let mut fg_color: &str;
         for y in 0..6 {
             for x in 0..7 {
@@ -90,10 +88,15 @@ impl Canvas {
                 } else if (this.map[y][x] <= -1) {
                     fg_color = "#ffff00";
                 }
-                self.draw_circle(75 * x + 100, 75 * y + 50, 25, fg_color, "black");
+                self.draw_circle(
+                    75.0 * x as f64 + 100.0,
+                    75.0 * y as f64 + 50.0,
+                    25.0,
+                    fg_color.into(),
+                    "black".into(),
+                );
             }
         }
-        */
     }
 
     pub fn clear(&self) {
@@ -128,15 +131,15 @@ impl Canvas {
 }
 
 impl GameIO for Canvas {
-    fn draw_board(game: &Board) {
-        Self::draw();
+    fn draw_board(&self, game: &Board) {
+        self.draw()
     }
 
-    fn get_move(game: &Game) -> (usize, ChipDescrip) {
+    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
         unimplemented!();
     }
 
-    fn display_gameover(ending: BoardState) {
+    fn display_gameover(&self, ending: BoardState) {
         unimplemented!();
     }
 }
