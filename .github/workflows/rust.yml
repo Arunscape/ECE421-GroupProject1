@@ -10,6 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: cargo build --verbose --manifest-path=rust_black_tree/Cargo.toml
+      run: cargo build --verbose --manifest-path=connect4/Cargo.toml
     - name: Run tests
-      run: cargo test --verbose --manifest-path=rust_black_tree/Cargo.toml
+      run: cargo test --verbose --manifest-path=connect4/Cargo.toml
