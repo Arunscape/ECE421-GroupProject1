@@ -5,7 +5,7 @@ pub mod canvas;
 
 #[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
-    #[to = "/connect4-computer"]
+    #[to = "/"]
     Connect4Computer,
 }
 
