@@ -79,6 +79,8 @@ impl Canvas {
     }
 
     pub fn draw(&self) {
+        unimplemented!();
+        /*
         let mut fg_color: &str;
         for y in 0..6 {
             for x in 0..7 {
@@ -97,6 +99,7 @@ impl Canvas {
                 );
             }
         }
+        */
     }
 
     pub fn clear(&self) {
