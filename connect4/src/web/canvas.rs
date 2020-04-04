@@ -2,6 +2,11 @@ use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
     pub context: web_sys::CanvasRenderingContext2d,
@@ -67,7 +72,7 @@ impl Canvas {
     // TODO: rename this to draw_gameboard or something
     // also, change the use of thie function from lib.rs to
     // the new name
-    pub fn draw_board(&self, board: &crate::game::Board) {
+    pub fn draw_gameboard(&self, board: &crate::game::Board) {
         self.draw_mask(board.width, board.height);
         // TODO: for each chip in board.chips,
         // call draw circle to draw the chip
@@ -81,6 +86,11 @@ impl Canvas {
         self.context.arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI);
         self.context.fill();
         self.context.restore();
+    }
+
+    pub fn draw_chip(&self, chip: crate::game::ChipDescrip, x: usize, y: usize) {
+        let colour = format!("#{:x}", chip.fg_color);
+        self.draw_circle(x as f64, y as f64, 25.0, colour, "black".into());
     }
 
     pub fn draw(&self) {
@@ -163,8 +173,20 @@ impl Canvas {
 // having display_gameover return til the person is node viewing the
 // screen
 impl GameIO for Canvas {
-    fn draw_board(&self, game: &Board) {
-        self.draw()
+    fn draw_board(&self, board: &Board) {
+        self.draw_gameboard(board);
+        let chips = board.get_layout();
+        for i in 0..chips.len() {
+            let x = i % board.width;
+            let y = i / board.width;
+            let y = board.height - y - 1;
+            let i = x + y * board.width;
+
+            match chips[i] {
+                Some(chip) => self.draw_chip(chip, x, y),
+                None => {}
+            };
+        }
     }
 
     fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
@@ -172,6 +194,6 @@ impl GameIO for Canvas {
     }
 
     fn display_gameover(&self, ending: BoardState) {
-        unimplemented!();
+        alert("Game over");
     }
 }

@@ -1,7 +1,7 @@
+pub mod ai;
 pub mod game;
 pub mod games;
 pub mod io;
-pub mod ai;
 
 use game::Game;
 use io::{GameIO, TermIO};
@@ -41,7 +41,7 @@ pub fn run_app() -> Result<(), JsValue> {
     let game = crate::games::connect4();
     let c = web::canvas::Canvas::new("#canvas", 20, 20);
 
-    c.draw_board(game.get_board());
+    c.draw_gameboard(game.get_board());
 
     Ok(())
 }
