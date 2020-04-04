@@ -1,5 +1,5 @@
 use yew::{html, Callback, Component, ComponentLink, Html, ShouldRender};
-use yew_router::{self, Switch};
+use yew_router::{self, router::Router, Switch};
 
 pub mod canvas;
 
