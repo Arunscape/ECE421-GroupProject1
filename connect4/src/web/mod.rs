@@ -1,4 +1,6 @@
-use yew::{html, Callback, ClickEvent, Component, ComponentLink, Html, ShouldRender};
+use yew::{html, Callback, Component, ComponentLink, Html, ShouldRender};
+use yew_router::{self, Switch};
+
 pub mod canvas;
 
 #[derive(Switch, Debug)]
@@ -9,7 +11,7 @@ pub enum AppRoute {
 
 pub struct App {
     clicked: bool,
-    onclick: Callback<ClickEvent>,
+    //onclick: Callback<ClickEvent>,
 }
 
 pub enum Msg {
@@ -23,7 +25,7 @@ impl Component for App {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         App {
             clicked: false,
-            onclick: link.callback(|_| Msg::Click),
+            //onclick: link.callback(|_| Msg::Click),
         }
     }
 
