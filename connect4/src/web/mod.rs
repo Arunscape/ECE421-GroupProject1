@@ -1,9 +1,9 @@
-use yew::{html, Callback, Component, ComponentLink, Html, ShouldRender};
+use yew::prelude::*;
 use yew_router::prelude::*;
 
 pub mod canvas;
 
-#[derive(Switch, Debug)]
+#[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
     #[to = "/connect4-computer"]
     Connect4Computer,
@@ -46,7 +46,7 @@ impl Component for App {
         };
 
         html! {
-            <Router<AppRoute, ()>
+            <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
                         AppRoute::Connect4Computer => html!{<canvas id="canvas" height="480" width="640" style="outline: black 3px solid;"/>},
