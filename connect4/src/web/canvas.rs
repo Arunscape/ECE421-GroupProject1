@@ -64,8 +64,13 @@ impl Canvas {
         self.context.restore();
     }
 
+    // TODO: rename this to draw_gameboard or something
+    // also, change the use of thie function from lib.rs to
+    // the new name
     pub fn draw_board(&self, board: &crate::game::Board) {
         self.draw_mask(board.width, board.height);
+        // TODO: for each chip in board.chips,
+        // call draw circle to draw the chip
     }
 
     pub fn draw_circle(&self, x: f64, y: f64, r: f64, fill: String, stroke: String) {
@@ -79,6 +84,22 @@ impl Canvas {
     }
 
     pub fn draw(&self) {
+        // TODO: implement the finite state machine drawing
+        /*
+         match self.state {
+             State::GetMove => {
+                 call draw game board
+                 call function to highlight column on which a player is moused over or, to show a ghost chip where it would go if they clicked, or something that gives feedback to show they can click to select a move.
+             },
+             State::DrawBoard => {
+                 call draw game board
+                 call function that draws an animation of a chip falling down, or appearing into the spot
+             },
+             State::GameOver => {
+                 call function that draws a game over message and shows who wins
+             }
+         }
+        */
         unimplemented!();
         /*
         let mut fg_color: &str;
@@ -133,6 +154,14 @@ impl Canvas {
     }
 }
 
+// TODO: so arun, this is going to be the tricky bit, none of these
+// functions are actually going to do anything other then update the
+// state of Canvas to the appropriate state. The hard part, is making
+// sure none of these functions return until they are finished. That
+// means, not having draw board return until the piece animation is
+// done. Not having get move return until a move is selected, and not
+// having display_gameover return til the person is node viewing the
+// screen
 impl GameIO for Canvas {
     fn draw_board(&self, game: &Board) {
         self.draw()
