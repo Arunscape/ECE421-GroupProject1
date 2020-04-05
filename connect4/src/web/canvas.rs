@@ -92,12 +92,16 @@ impl Canvas {
     }
 
     pub fn draw_chip(&self, chip: crate::game::ChipDescrip, x: usize, y: usize) {
-        let colour = format!("#{:x}", chip.fg_color);
+        let colour = match chip.fg_color {
+            crate::io::RED => "red",
+            crate::io::YEL => "yellow",
+            _ => unreachable!(),
+        };
         self.draw_circle(
             x as f64 * 75.0 + 100.0,
             y as f64 * 75.0 + 50.0,
             25.0,
-            colour,
+            colour.into(),
             "black".into(),
         );
     }
