@@ -1,6 +1,9 @@
 use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use futures::Future;
+
+static mut waiting_for_input: bool = true;
 
 #[wasm_bindgen]
 extern "C" {
@@ -200,26 +203,37 @@ impl GameIO for Canvas {
         // wait for user input
         //
         //
-        let mut input = false;
-        alert(&"about to ask for input");
+        #[wasm_bindgen(
+            inline_js = "export function set_wait_for_input(x){window.waiting_for_input=x; console.log(window);}"
+        )]
+        extern "C" {
+            fn set_wait_for_input(x: bool);
+        }
+        set_wait_for_input(true);
+        //alert(&"about to ask for input");
 
         let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
-            alert(&"hmmm");
             let x = _event.client_x() as f64 - rect.left();
             let y = _event.client_y() as f64 - rect.top();
             let msg = format!("x: {}, y: {}", x, y);
-            web_sys::console::log_2(&msg.into(), &"WebAssemblyMan".into());
-            input = true;
+            web_sys::console::log_1(&msg.into());
+            set_wait_for_input(false);
         }) as Box<dyn FnMut(_)>);
         self.canvas
             .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
-        alert(&"before loop");
-        async fn wait_for_input() {
-            alert(&"your turn");
-        }
-        let future = wait_for_input();
-        futures::executor::block_on(future);
-        alert(&"after loop");
+
+        async {
+            #[wasm_bindgen(inline_js = "export async function wait_for_input() {
+            const kms = () => new Promise(resolve => setTimeout(()=>resolve(), 100));
+            while (window.waiting_for_input){
+                await kms();
+            }                
+        }")]
+            extern "C" {
+                fn wait_for_input();
+            }
+            wait_for_input().await;
+        };
         closure.forget();
         (1, game.current_player().chip_options[0])
     }
