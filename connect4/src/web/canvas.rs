@@ -90,7 +90,13 @@ impl Canvas {
 
     pub fn draw_chip(&self, chip: crate::game::ChipDescrip, x: usize, y: usize) {
         let colour = format!("#{:x}", chip.fg_color);
-        self.draw_circle(x as f64, y as f64, 25.0, colour, "black".into());
+        self.draw_circle(
+            x as f64 * 20.0,
+            y as f64 * 20.0,
+            25.0,
+            colour,
+            "black".into(),
+        );
     }
 
     pub fn draw(&self) {
@@ -195,8 +201,10 @@ impl GameIO for Canvas {
         //
         //
         let mut input = false;
+        alert(&"about to ask for input");
 
         let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
+            alert(&"hmmm");
             let x = _event.client_x() as f64 - rect.left();
             let y = _event.client_y() as f64 - rect.top();
             let msg = format!("x: {}, y: {}", x, y);
@@ -205,7 +213,9 @@ impl GameIO for Canvas {
         }) as Box<dyn FnMut(_)>);
         self.canvas
             .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
+        alert(&"before loop");
         while !input {}
+        alert(&"after loop");
         closure.forget();
         (1, game.current_player().chip_options[0])
     }
