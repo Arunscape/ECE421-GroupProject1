@@ -49,7 +49,7 @@ impl Component for App {
             <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
-                        AppRoute::Connect4Computer => html!{<canvas id="canvas" height="480" width="640" style="outline: black 3px solid;"/>},
+                        AppRoute::Connect4Computer => html!{<canvas id="canvas" height="475" width="640" style="outline: black 3px solid;"/>},
                     }
                 })
             />

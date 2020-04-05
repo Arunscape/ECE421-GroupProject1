@@ -99,7 +99,7 @@ impl Canvas {
         };
         self.draw_circle(
             x as f64 * 75.0 + 100.0,
-            y as f64 * 75.0 + 50.0,
+            self.canvas.height() as f64 - (y as f64 * 75.0 + 50.0),
             25.0,
             colour.into(),
             "black".into(),
