@@ -1,8 +1,8 @@
 use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
 
-mod connect;
 mod bitboard;
+mod connect;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct AIConfig {
@@ -28,7 +28,7 @@ pub const HARD_AI: AIConfig = AIConfig {
 pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip) {
     if ai_conf == HARD_AI {
         if crate::games::is_connect4(game) {
-            return connect::get_best_move(game)
+            return connect::get_best_move(game);
         } else if crate::games::is_toto(game) {
             // toto specific hard AI
         }
@@ -57,14 +57,21 @@ pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, Chip
         .get_board()
         .get_valid_moves()
         .iter()
-        .flat_map(|&mov| game.current_player().chip_options.iter().map(move |&c| (mov, c)))
+        .flat_map(|&mov| {
+            game.current_player()
+                .chip_options
+                .iter()
+                .map(move |&c| (mov, c))
+        })
         .map(|(mov, c)| (test_move(mov, c, &mut game.clone(), ai_conf), mov, c))
         .collect();
 
-    potentials.sort_by(|a, b| if is_max {
-        (b.0).partial_cmp(&a.0).unwrap()
-    } else {
-        (a.0).partial_cmp(&b.0).unwrap()
+    potentials.sort_by(|a, b| {
+        if is_max {
+            (b.0).partial_cmp(&a.0).unwrap()
+        } else {
+            (a.0).partial_cmp(&b.0).unwrap()
+        }
     });
 
     // println!("{:?}", potentials);
@@ -210,14 +217,11 @@ mod tests {
         ai.carlo_iter += 1;
         let time = time!(get_best_move(&mut game, ai));
 
-
         println!("This test is supposed to fail. It is for keeping track of performance");
         unsafe {
             println!(
                 "Took {}µs for depth of {}. Searched {} iterations",
-                time,
-                HARD_AI.minmax_depth,
-                COUNT
+                time, HARD_AI.minmax_depth, COUNT
             );
         }
         assert!(false);

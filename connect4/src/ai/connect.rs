@@ -13,21 +13,21 @@ pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
 
 fn solve(bb: &mut BitBoard) -> isize {
     // null window search to maximize alpha beta pruning
-    let mut min = - (((bb.size() - bb.get_turns()) / 2) as isize);
+    let mut min = -(((bb.size() - bb.get_turns()) / 2) as isize);
     let mut max = ((bb.size() + 1 - bb.get_turns()) / 2) as isize;
     while min < max {
         let mut mid = min + (max - min) / 2;
         if mid <= 0 && min / 2 < mid {
             mid = min / 2;
-        } else if mid >= 0 && max/2 > mid {
+        } else if mid >= 0 && max / 2 > mid {
             mid = max / 2;
         }
 
         unsafe {
             COUNT = 0;
         }
-        let score = negamax(bb, mid, mid+1);
-        println!("got {} from window ({})-({})", score, mid, mid+1);
+        let score = negamax(bb, mid, mid + 1);
+        println!("got {} from window ({})-({})", score, mid, mid + 1);
         if score <= mid {
             max = score;
         } else {
@@ -150,10 +150,7 @@ mod test {
         let time = time!(solve(&mut BitBoard::from_game(&game)));
         println!("This test is supposed to fail. It is for keeping track of performance");
         unsafe {
-            println!(
-                "Took {}µs. Searched {} iterations",
-                time, COUNT
-            );
+            println!("Took {}µs. Searched {} iterations", time, COUNT);
         }
         assert!(false);
     }

@@ -92,7 +92,11 @@ impl BitBoard {
     }
 
     pub fn get_valid_moves(&self) -> Vec<usize> {
-        [3, 4, 2, 5, 1, 6, 0].iter().map(|x| *x).filter(|&x| self.can_play(x)).collect()
+        [3, 4, 2, 5, 1, 6, 0]
+            .iter()
+            .map(|x| *x)
+            .filter(|&x| self.can_play(x))
+            .collect()
     }
 
     pub fn play(&mut self, col: usize) {
@@ -420,14 +424,18 @@ mod tests {
         crate::io::draw_term_board(game.get_board());
         println!("Unpacked Board:");
         crate::io::draw_term_board(unpack_board(bb.key()).get_board());
-        println!("{:#051b} : Key\n{:#051b} : Mask\n{:#051b} : Pos",
-                 bb.key(), bb.mask, bb.position);
+        println!(
+            "{:#051b} : Key\n{:#051b} : Mask\n{:#051b} : Pos",
+            bb.key(),
+            bb.mask,
+            bb.position
+        );
     }
 
     #[test]
     fn test_check_win_4() {
         let game = make_game(vec![
-            0, 0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5
+            0, 0, 2, 1, 3, 4, 5, 2, 2, 3, 4, 5, 1, 0, 2, 4, 5, 6, 6, 5,
         ]);
         crate::io::draw_term_board(game.get_board());
         let bb = BitBoard::from_game(&game);
@@ -439,27 +447,19 @@ mod tests {
         crate::io::draw_term_board(game.get_board());
         assert!(!BitBoard::from_game(&game).is_winning_move(0));
 
-        let game = make_game(vec![
-            1, 2, 1, 2, 1, 2
-        ]);
+        let game = make_game(vec![1, 2, 1, 2, 1, 2]);
         crate::io::draw_term_board(game.get_board());
         assert!(BitBoard::from_game(&game).is_winning_move(1));
 
-        let game = make_game(vec![
-            1, 2, 1, 2, 1, 2,
-        ]);
+        let game = make_game(vec![1, 2, 1, 2, 1, 2]);
         debug_print(&game);
         assert!(BitBoard::from_game(&game).is_winning_move(1));
 
-        let game = make_game(vec![
-            1, 2, 1, 2, 1, 2, 3
-        ]);
+        let game = make_game(vec![1, 2, 1, 2, 1, 2, 3]);
         crate::io::draw_term_board(game.get_board());
         assert!(BitBoard::from_game(&game).is_winning_move(2));
 
-        let game = make_game(vec![
-            1, 2, 1, 2, 1, 2
-        ]);
+        let game = make_game(vec![1, 2, 1, 2, 1, 2]);
         crate::io::draw_term_board(game.get_board());
         assert!(!BitBoard::from_game(&game).is_winning_move(3));
         assert!(!BitBoard::from_game(&game).is_winning_move(4));

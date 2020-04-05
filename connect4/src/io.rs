@@ -1,5 +1,5 @@
-use super::game::{ChipDescrip, Board, Game, BoardState, Player};
-use std::io::{Write, stdin, stdout};
+use super::game::{Board, BoardState, ChipDescrip, Game, Player};
+use std::io::{stdin, stdout, Write};
 
 pub fn draw_term_board(game: &Board) {
     let io = TermIO::new();
@@ -34,10 +34,7 @@ pub struct TermIO {
 
 impl TermIO {
     pub fn new() -> Self {
-        Self {
-            fg: RST,
-            bg: RST,
-        }
+        Self { fg: RST, bg: RST }
     }
 
     fn paint(fg: usize, bg: usize) {
@@ -79,7 +76,7 @@ impl GameIO for TermIO {
         }
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);
-        (1..game.width).for_each(|i| print!(" {}", i+1));
+        (1..game.width).for_each(|i| print!(" {}", i + 1));
         print!(" ");
         Self::endpaint();
         println!();
@@ -94,7 +91,7 @@ impl GameIO for TermIO {
         }
         fn get_num_in_range(lb: usize, ub: usize) -> usize {
             print!("Enter a number in range [{},{}]: ", lb, ub);
-            if let Ok(v) = read_line().parse::<usize>(){
+            if let Ok(v) = read_line().parse::<usize>() {
                 if v >= lb && v <= ub {
                     return v;
                 }
@@ -102,7 +99,10 @@ impl GameIO for TermIO {
             get_num_in_range(lb, ub)
         }
 
-        println!("Player {} turn.", game.get_turn() % game.get_player_count() + 1);
+        println!(
+            "Player {} turn.",
+            game.get_turn() % game.get_player_count() + 1
+        );
 
         let player = game.current_player();
         let ch = if player.chip_options.len() == 1 {

@@ -2,7 +2,7 @@
 pub struct ChipDescrip {
     pub bg_color: usize,
     pub fg_color: usize,
-    pub graphic: char
+    pub graphic: char,
 }
 
 #[derive(Debug)]

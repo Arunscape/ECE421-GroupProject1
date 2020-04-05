@@ -1,6 +1,6 @@
-use crate::game::{check_linear_pattern, Checker, ChipDescrip, Board, Game, Player, PlayerType};
-use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
 use crate::ai::*;
+use crate::game::{check_linear_pattern, Board, Checker, ChipDescrip, Game, Player, PlayerType};
+use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
 use std::rc::Rc;
 
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
@@ -17,30 +17,30 @@ pub fn wrap_4_check(chip: ChipDescrip, chip_inner: ChipDescrip) -> Checker {
 
 pub fn is_connect4(game: &Game) -> bool {
     // TODO: this doesn't ensure that the win conditions match
-    game.get_board().width == 7 &&
-        game.get_board().height == 6 &&
-        game.get_player_count() == 2 &&
-        game.get_player(0).win_conditions.len() == 1 &&
-        game.get_player(1).win_conditions.len() == 1 &&
-        game.get_player(0).chip_options.len() == 1 &&
-        game.get_player(1).chip_options.len() == 1 &&
-        game.get_player(0).chip_options[0] == red &&
-        game.get_player(1).chip_options[0] == yellow
+    game.get_board().width == 7
+        && game.get_board().height == 6
+        && game.get_player_count() == 2
+        && game.get_player(0).win_conditions.len() == 1
+        && game.get_player(1).win_conditions.len() == 1
+        && game.get_player(0).chip_options.len() == 1
+        && game.get_player(1).chip_options.len() == 1
+        && game.get_player(0).chip_options[0] == red
+        && game.get_player(1).chip_options[0] == yellow
 }
 
 pub fn is_toto(game: &Game) -> bool {
     // TODO: this doesn't ensure that the win conditions match
-    game.get_board().width == 6 &&
-        game.get_board().height == 4 &&
-        game.get_player_count() == 2 &&
-        game.get_player(0).win_conditions.len() == 1 &&
-        game.get_player(1).win_conditions.len() == 1 &&
-        game.get_player(0).chip_options.len() == 2 &&
-        game.get_player(1).chip_options.len() == 2 &&
-        game.get_player(0).chip_options[0] == chip_t &&
-        game.get_player(0).chip_options[1] == chip_o &&
-        game.get_player(1).chip_options[0] == chip_t &&
-        game.get_player(1).chip_options[1] == chip_o
+    game.get_board().width == 6
+        && game.get_board().height == 4
+        && game.get_player_count() == 2
+        && game.get_player(0).win_conditions.len() == 1
+        && game.get_player(1).win_conditions.len() == 1
+        && game.get_player(0).chip_options.len() == 2
+        && game.get_player(1).chip_options.len() == 2
+        && game.get_player(0).chip_options[0] == chip_t
+        && game.get_player(0).chip_options[1] == chip_o
+        && game.get_player(1).chip_options[0] == chip_t
+        && game.get_player(1).chip_options[1] == chip_o
 }
 
 pub const red: ChipDescrip = ChipDescrip {
@@ -208,17 +208,13 @@ pub fn connect4_3player() -> Game {
     Game::new(board, players)
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
-    fn test_is_connect4() {
-    }
+    fn test_is_connect4() {}
 
     #[test]
-    fn test_is_toto() {
-    }
-
+    fn test_is_toto() {}
 }
