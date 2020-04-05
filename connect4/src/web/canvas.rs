@@ -1,8 +1,8 @@
 use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
+use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use futures::Future;
-
+use wasm_bindgen_futures::JsFuture;
 static mut waiting_for_input: bool = true;
 
 #[wasm_bindgen]
@@ -201,15 +201,9 @@ impl GameIO for Canvas {
     fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
         let rect = self.canvas.get_bounding_client_rect();
         // wait for user input
-        //
-        //
-        #[wasm_bindgen(
-            inline_js = "export function set_wait_for_input(x){window.waiting_for_input=x; console.log(window);}"
-        )]
-        extern "C" {
-            fn set_wait_for_input(x: bool);
+        unsafe {
+            waiting_for_input = true;
         }
-        set_wait_for_input(true);
         //alert(&"about to ask for input");
 
         let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
@@ -217,20 +211,37 @@ impl GameIO for Canvas {
             let y = _event.client_y() as f64 - rect.top();
             let msg = format!("x: {}, y: {}", x, y);
             web_sys::console::log_1(&msg.into());
-            set_wait_for_input(false);
+            unsafe {
+                waiting_for_input = false;
+            }
         }) as Box<dyn FnMut(_)>);
         self.canvas
             .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
 
+        #[wasm_bindgen(
+            inline_js = "export function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}"
+        )]
+        extern "C" {
+            fn sleep(ms: i32) -> Promise;
+        }
         async {
-            #[wasm_bindgen(inline_js = "export async function wait_for_input() {
-            const kms = () => new Promise(resolve => setTimeout(()=>resolve(), 100));
-            while (window.waiting_for_input){
-                await kms();
-            }                
-        }")]
-            extern "C" {
-                fn wait_for_input();
+            pub async fn timer(ms: i32) -> Result<(), JsValue> {
+                let promise = Promise::new(&mut |yes, _| {
+                    let win = web_sys::window().unwrap();
+                    win.set_timeout_with_callback_and_timeout_and_arguments_0(&yes, ms)
+                        .unwrap();
+                });
+                let js_fut = JsFuture::from(promise);
+                js_fut.await?;
+                Ok(())
+            }
+
+            async fn wait_for_input() {
+                unsafe {
+                    while waiting_for_input {
+                        timer(100).await;
+                    }
+                }
             }
             wait_for_input().await;
         };
