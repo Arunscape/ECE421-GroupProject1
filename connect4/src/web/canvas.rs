@@ -193,17 +193,20 @@ impl GameIO for Canvas {
         let rect = self.canvas.get_bounding_client_rect();
         // wait for user input
         //
+        //
+        let mut input = false;
 
         let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
             let x = _event.client_x() as f64 - rect.left();
             let y = _event.client_y() as f64 - rect.top();
             let msg = format!("x: {}, y: {}", x, y);
             web_sys::console::log_2(&msg.into(), &"WebAssemblyMan".into());
+            input = true;
         }) as Box<dyn FnMut(_)>);
         self.canvas
             .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
-
-        //closure.forget();
+        while !input {}
+        closure.forget();
         (1, game.current_player().chip_options[0])
     }
 
