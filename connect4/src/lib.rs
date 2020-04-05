@@ -42,6 +42,8 @@ pub fn run_app() -> Result<(), JsValue> {
     let c = web::canvas::Canvas::new("#canvas", 20, 20);
 
     c.draw_gameboard(game.get_board());
+    let mut game = crate::games::connect4_ai();
+    crate::play(&mut game, c);
 
     Ok(())
 }

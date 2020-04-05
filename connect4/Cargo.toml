@@ -25,6 +25,10 @@ features = [
   'Element',
   'HtmlCanvasElement',
   'Window',
+  'DomRect',
+  'MouseEvent',
+  'console',
+  'EventListener',
 ]
 
 [lib]

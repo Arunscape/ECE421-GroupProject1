@@ -190,7 +190,21 @@ impl GameIO for Canvas {
     }
 
     fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
-        unimplemented!();
+        let rect = self.canvas.get_bounding_client_rect();
+        // wait for user input
+        //
+
+        let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
+            let x = _event.client_x() as f64 - rect.left();
+            let y = _event.client_y() as f64 - rect.top();
+            let msg = format!("x: {}, y: {}", x, y);
+            web_sys::console::log_2(&msg.into(), &"WebAssemblyMan".into());
+        }) as Box<dyn FnMut(_)>);
+        self.canvas
+            .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
+
+        //closure.forget();
+        (1, game.current_player().chip_options[0])
     }
 
     fn display_gameover(&self, ending: BoardState) {
