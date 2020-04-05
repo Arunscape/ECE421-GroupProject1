@@ -214,7 +214,11 @@ impl GameIO for Canvas {
         self.canvas
             .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
         alert(&"before loop");
-        while !input {}
+        async fn wait_for_input() {
+            alert(&"your turn");
+        }
+        let future = wait_for_input();
+        futures::executor::block_on(future);
         alert(&"after loop");
         closure.forget();
         (1, game.current_player().chip_options[0])
