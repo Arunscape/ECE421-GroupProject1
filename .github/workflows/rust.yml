@@ -13,6 +13,7 @@ jobs:
       run: |
         cd connect4
         cargo install wasm-pack
+        npm i -g rollup
         ./web
 #    - name: Build
 #      run: cargo build --verbose --manifest-path=connect4/Cargo.toml
