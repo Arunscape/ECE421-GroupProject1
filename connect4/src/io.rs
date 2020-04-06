@@ -8,7 +8,7 @@ pub fn draw_term_board(game: &Board) {
 
 pub trait GameIO {
     fn draw_board(&self, game: &Board);
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip);
+    fn get_move(&mut self, game: &Game) -> (usize, ChipDescrip);
     fn display_gameover(&self, ending: BoardState);
 }
 
@@ -82,7 +82,7 @@ impl GameIO for TermIO {
         println!();
     }
 
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
+    fn get_move(&mut self, game: &Game) -> (usize, ChipDescrip) {
         fn read_line() -> String {
             let mut buffer = String::new();
             stdout().flush().expect("Failed to flush");

@@ -6,7 +6,7 @@ pub mod io;
 use game::Game;
 use io::{GameIO, TermIO};
 
-pub fn play(game: &mut Game, io: impl GameIO) {
+pub fn play(game: &mut Game, mut io: impl GameIO) {
     let mut is_over = false;
     while !is_over {
         io.draw_board(game.get_board());

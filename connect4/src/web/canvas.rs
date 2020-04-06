@@ -17,6 +17,7 @@ pub struct Canvas {
     scaled_height: u32,
     width: u32,
     height: u32,
+    future_move: Option<futures::channel::oneshot::Sender<usize>>,
 }
 
 impl Canvas {
@@ -29,26 +30,46 @@ impl Canvas {
             .map_err(|_| ())
             .unwrap();
 
-        let context = canvas
-            .get_context("2d")
-            .unwrap()
-            .unwrap()
-            .dyn_into::<web_sys::CanvasRenderingContext2d>()
-            .unwrap();
+        let context = Arc::new(
+            canvas
+                .get_context("2d")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::CanvasRenderingContext2d>()
+                .unwrap(),
+        );
 
         context.begin_path();
 
         let scaled_width = canvas.width() / width;
         let scaled_height = canvas.height() / height;
 
-        Canvas {
+        let my_canvas = Canvas {
             canvas,
             context,
             scaled_width,
             scaled_height,
             width,
             height,
-        }
+            future_move: None,
+        };
+        let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+            let rect = my_canvas.canvas.get_bounding_client_rect();
+            let x = event.client_x() as f64 - rect.left();
+            let y = event.client_y() as f64 - rect.top();
+            let msg = format!("x: {}, y: {}", x, y);
+            web_sys::console::log_1(&msg.into());
+            // if let Some(m) = my_canvas.future_move {
+            //     m.send(0);
+            // }
+        }) as Box<dyn FnMut(_)>);
+        my_canvas
+            .canvas
+            .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
+
+        closure.forget();
+
+        my_canvas
     }
 
     pub fn draw_mask(&self, width: usize, height: usize) {
@@ -202,55 +223,13 @@ impl GameIO for Canvas {
         }
     }
 
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
-        let rect = self.canvas.get_bounding_client_rect();
+    fn get_move(&mut self, game: &Game) -> (usize, ChipDescrip) {
         // wait for user input
-        unsafe {
-            waiting_for_input = true;
-        }
         //alert(&"about to ask for input");
-
-        let closure = Closure::wrap(Box::new(move |_event: web_sys::MouseEvent| {
-            let x = _event.client_x() as f64 - rect.left();
-            let y = _event.client_y() as f64 - rect.top();
-            let msg = format!("x: {}, y: {}", x, y);
-            web_sys::console::log_1(&msg.into());
-            unsafe {
-                waiting_for_input = false;
-            }
-        }) as Box<dyn FnMut(_)>);
-        self.canvas
-            .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
-
-        #[wasm_bindgen(
-            inline_js = "export function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}"
-        )]
-        extern "C" {
-            fn sleep(ms: i32) -> Promise;
-        }
-        async {
-            pub async fn timer(ms: i32) -> Result<(), JsValue> {
-                let promise = Promise::new(&mut |yes, _| {
-                    let win = web_sys::window().unwrap();
-                    win.set_timeout_with_callback_and_timeout_and_arguments_0(&yes, ms)
-                        .unwrap();
-                });
-                let js_fut = JsFuture::from(promise);
-                js_fut.await?;
-                Ok(())
-            }
-
-            async fn wait_for_input() {
-                unsafe {
-                    while waiting_for_input {
-                        timer(100).await;
-                    }
-                }
-            }
-            wait_for_input().await;
-        };
-        closure.forget();
-        (1, game.current_player().chip_options[0])
+        let (p, c) = futures::channel::oneshot::channel::<usize>();
+        self.future_move = Some(p);
+        let user_move = futures::executor::block_on(c).unwrap();
+        (user_move, game.current_player().chip_options[0])
     }
 
     fn display_gameover(&self, ending: BoardState) {
