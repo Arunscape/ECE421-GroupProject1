@@ -28,9 +28,7 @@ jobs:
       run: |
         cd connect4
         cargo install wasm-pack
-        npm i -g rollup
-        npm i -g serve
-        ./web
+        wasm-pack build --target web
 #    - name: Build
 #      run: cargo build --verbose --manifest-path=connect4/Cargo.toml
 #    - name: Run tests
