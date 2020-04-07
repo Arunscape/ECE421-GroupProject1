@@ -4,10 +4,10 @@ const COLOR_BLUE: &'static str = "blue";
 const COLOR_RED: &'static str = "red";
 const COLOR_YELLOW: &'static str = "yellow";
 
-const CHIP_RADIUS: f64 = 25.0;
+const CHIP_RADIUS: f64 = 60.0;
 const CHIP_DIAMETER: f64 = 2.0 * CHIP_RADIUS;
-const CHIP_SEPERATION: f64 = 25.0;
-const BOARD_MARGIN_X: f64 = 50.0;
+const CHIP_SEPERATION: f64 = 53.0;
+const BOARD_MARGIN_X: f64 = 348.0;
 const BOARD_MARGIN_Y: f64 = 0.0;
 
 pub fn draw_chip(canvas: &Canvas, board_height: f64, chip: crate::game::ChipDescrip, x: usize, y: usize) {
@@ -65,9 +65,6 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
     canvas.context.restore();
 }
 
-// TODO: rename this to draw_gameboard or something
-// also, change the use of thie function from lib.rs to
-// the new name
 pub fn draw_gameboard(canvas: &Canvas, board: &crate::game::Board) {
     draw_board_mask(canvas, board.width, board.height);
 
@@ -90,17 +87,17 @@ pub fn draw(canvas: &Canvas) {
     // TODO: implement the finite state machine drawing
     /*
         match self.state {
-        State::GetMove => {
-        call draw game board
-        call function to highlight column on which a player is moused over or, to show a ghost chip where it would go if they clicked, or something that gives feedback to show they can click to select a move.
-    },
-        State::DrawBoard => {
-        call draw game board
-        call function that draws an animation of a chip falling down, or appearing into the spot
-    },
-        State::GameOver => {
-        call function that draws a game over message and shows who wins
-    }
+            State::GetMove => {
+            call draw game board
+            call function to highlight column on which a player is moused over or, to show a ghost chip where it would go if they clicked, or something that gives feedback to show they can click to select a move.
+        },
+            State::DrawBoard => {
+            call draw game board
+            call function that draws an animation of a chip falling down, or appearing into the spot
+        },
+            State::GameOver => {
+            call function that draws a game over message and shows who wins
+        }
     }
          */
 }

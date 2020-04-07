@@ -1,9 +1,9 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-pub mod webio;
 mod canvas;
 mod controller;
+pub mod webio;
 pub use webio::WebIO;
 
 #[derive(Switch, Debug, Clone)]
@@ -52,7 +52,7 @@ impl Component for App {
             <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
-                        AppRoute::Connect4Computer => html!{<canvas id="canvas" height="475" width="640" style="outline: black 3px solid;"/>},
+                        AppRoute::Connect4Computer => html!{<canvas id="canvas" height="1080" width="1960" style="outline: black 3px solid; height: 500px; width: 900px;"/>},
                     }
                 })
             />

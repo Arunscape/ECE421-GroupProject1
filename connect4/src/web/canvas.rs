@@ -6,8 +6,6 @@ use wasm_bindgen::JsCast;
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
     pub context: web_sys::CanvasRenderingContext2d,
-    scaled_width: u32,
-    scaled_height: u32,
     width: u32,
     height: u32,
 }
@@ -31,14 +29,9 @@ impl Canvas {
 
         context.begin_path();
 
-        let scaled_width = canvas.width() / width;
-        let scaled_height = canvas.height() / height;
-
         Canvas {
             canvas,
             context,
-            scaled_width,
-            scaled_height,
             width,
             height,
         }
