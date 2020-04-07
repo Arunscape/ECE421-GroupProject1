@@ -1,7 +1,10 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-pub mod canvas;
+pub mod webio;
+mod canvas;
+mod controller;
+pub use webio::WebIO;
 
 #[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
