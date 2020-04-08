@@ -4,7 +4,7 @@ pub mod games;
 pub mod io;
 
 use game::Game;
-use io::{GameIO, TermIO};
+pub use io::{GameIO, TermIO};
 
 pub fn play(game: &mut Game, io: impl GameIO) {
     let mut is_over = false;

@@ -1,4 +1,6 @@
-use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
+use connect4_lib::{
+    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
+};
 use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -75,7 +77,7 @@ impl Canvas {
     // TODO: rename this to draw_gameboard or something
     // also, change the use of thie function from lib.rs to
     // the new name
-    pub fn draw_gameboard(&self, board: &crate::game::Board) {
+    pub fn draw_gameboard(&self, board: &game::Board) {
         self.draw_mask(board.width, board.height);
         // TODO: for each chip in board.chips,
         // call draw circle to draw the chip
@@ -91,10 +93,10 @@ impl Canvas {
         self.context.restore();
     }
 
-    pub fn draw_chip(&self, chip: crate::game::ChipDescrip, x: usize, y: usize) {
+    pub fn draw_chip(&self, chip: game::ChipDescrip, x: usize, y: usize) {
         let colour = match chip.fg_color {
-            crate::io::RED => "red",
-            crate::io::YEL => "yellow",
+            io::RED => "red",
+            io::YEL => "yellow",
             _ => unreachable!(),
         };
         self.draw_circle(

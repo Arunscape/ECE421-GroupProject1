@@ -1,5 +1,5 @@
 [package]
-name = "connect4"
+name = "connect4-web"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
@@ -17,6 +17,7 @@ rayon = "1.3.0"
 yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
+connect4-lib = { path="../connect4-lib" }
 
 [dependencies.web-sys]
 web-sys = "*"

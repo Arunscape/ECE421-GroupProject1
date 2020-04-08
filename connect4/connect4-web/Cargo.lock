@@ -74,9 +74,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8100e46ff92eb85bf6dc2930c73f2a4f7176393c84a9446b3d501e1b354e7b34"
 
 [[package]]
-name = "connect4"
+name = "connect4-lib"
 version = "0.1.0"
 dependencies = [
+ "rand",
+ "rayon",
+]
+
+[[package]]
+name = "connect4-web"
+version = "0.1.0"
+dependencies = [
+ "connect4-lib",
  "js-sys",
  "rand",
  "rayon",
