@@ -11,4 +11,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build Lib
-      run: cargo build --verbose --release --manifest-path=connect4/connect4-lib/Cargo.toml
+      run: cargo build +nightly --verbose --release --manifest-path=connect4/connect4-lib/Cargo.toml

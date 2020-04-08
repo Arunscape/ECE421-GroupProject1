@@ -14,5 +14,5 @@ jobs:
     - name: Build WASM
       run: |
         cd connect4
-        cargo install wasm-pack
+        cargo +nightly install wasm-pack
         wasm-pack build --target web
