@@ -11,21 +11,19 @@ rustflags = ["-Ctarget-cpu=native"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-yew = { version = "0.14.2", features = ["web_sys"] }
-wasm-bindgen = "0.2.59"
+yew = { version = "0.14.3", features = ["web_sys"] }
+wasm-bindgen = "0.2.60"
 rand = "0.7.3"
 rayon = "1.3.0"
 yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
-rocket_contrib = "0.4.4"
-rocket = "0.4.4"
 mongodb = "0.9.2"
 bson = "0.14.1"
 jsonwebtoken = "7.1.0"
 
 [dependencies.web-sys]
-web-sys = "0.3.36"
+web-sys = "*"
 features = [
   'CanvasRenderingContext2d',
   'Document',
@@ -37,6 +35,7 @@ features = [
   'console',
   'EventListener',
 ]
+version = "0.3.37"
 
 [lib]
 name="connect_game"
@@ -51,3 +50,12 @@ path="src/main.rs"
 [[bin]]
 name="server"
 path="src/server/main.rs"
+
+[dependencies.rocket_contrib]
+version = "0.4.4"
+default-features = false
+features = ["json"]
+
+[dependencies.rocket]
+version = "*"
+default-features = false
