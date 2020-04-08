@@ -1,4 +1,4 @@
-use connect4::games::*;
+use connect4_lib::games::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -15,5 +15,5 @@ fn main() {
     } else {
         connect4()
     };
-    connect4::play(&mut game, connect4::io::TermIO::new())
+    connect4_lib::play(&mut game, connect4_lib::io::TermIO::new())
 }
