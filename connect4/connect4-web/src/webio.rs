@@ -1,4 +1,4 @@
-use crate::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
+use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
 use super::canvas::Canvas;
 use super::controller;
 use super::{request_animation_frame, seconds};

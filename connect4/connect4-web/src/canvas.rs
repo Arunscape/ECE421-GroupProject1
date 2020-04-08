@@ -1,4 +1,7 @@
-use crate::{game::Board, game::ChipDescrip};
+use connect4_lib::{
+    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
+};
+use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -46,7 +49,6 @@ impl Canvas {
         self.context.fill();
         self.context.restore();
     }
-
 
     pub fn clear(&self) {
         self.context.clear_rect(

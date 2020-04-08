@@ -10,10 +10,10 @@ const CHIP_SEPERATION: f64 = 53.0;
 const BOARD_MARGIN_X: f64 = 348.0;
 const BOARD_MARGIN_Y: f64 = 0.0;
 
-pub fn draw_chip(canvas: &Canvas, board_height: f64, chip: crate::game::ChipDescrip, x: usize, y: usize) {
+pub fn draw_chip(canvas: &Canvas, board_height: f64, chip: connect4_lib::game::ChipDescrip, x: usize, y: usize) {
     let colour = match chip.fg_color {
-        crate::io::RED => COLOR_RED,
-        crate::io::YEL => COLOR_YELLOW,
+        connect4_lib::io::RED => COLOR_RED,
+        connect4_lib::io::YEL => COLOR_YELLOW,
         _ => unreachable!(),
     };
     canvas.draw_circle(
@@ -65,7 +65,7 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
     canvas.context.restore();
 }
 
-pub fn draw_gameboard(canvas: &Canvas, board: &crate::game::Board) {
+pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
     draw_board_mask(canvas, board.width, board.height);
 
     let chips = board.get_layout();

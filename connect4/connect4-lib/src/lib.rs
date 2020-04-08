@@ -2,10 +2,9 @@ pub mod ai;
 pub mod game;
 pub mod games;
 pub mod io;
-mod web;
 
 use game::Game;
-use io::{GameIO, TermIO};
+pub use io::{GameIO, TermIO};
 
 pub fn play(game: &mut Game, io: impl GameIO) {
     let mut is_over = false;
@@ -31,17 +30,5 @@ pub fn play(game: &mut Game, io: impl GameIO) {
     // for debugging
     game.print_moves();
     println!();
-}
-
-
-use wasm_bindgen::prelude::*;
-#[wasm_bindgen]
-pub fn run_app() -> Result<(), JsValue> {
-    yew::start_app::<web::App>();
-
-    let mut game = crate::games::connect4_ai();
-    web::WebIO::play_with_game_loop(game);
-
-    Ok(())
 }
 

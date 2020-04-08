@@ -1,3 +1,18 @@
+use connect4_lib::game::Game;
+use connect4_lib::games;
+use connect4_lib::io::{GameIO, TermIO};
+
+use wasm_bindgen::prelude::*;
+#[wasm_bindgen]
+pub fn run_app() -> Result<(), JsValue> {
+    yew::start_app::<App>();
+
+    let mut game = crate::games::connect4_ai();
+    WebIO::play_with_game_loop(game);
+
+    Ok(())
+}
+
 use yew::prelude::*;
 use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
