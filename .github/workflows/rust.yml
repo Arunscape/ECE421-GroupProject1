@@ -16,7 +16,8 @@ on:
     paths:
       - 'connect4/connect4-web'
 jobs:
-  Build WASM
+  Build WASM:
+    runs-on: ubuntu-latest
         #- uses: actions/checkout@v2
         #- name: Build WASM
     steps:
