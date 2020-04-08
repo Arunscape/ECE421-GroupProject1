@@ -1,0 +1,14 @@
+name: Connect 4 Lib
+
+on:
+  push:
+    paths:
+      - 'connect4/connect4-lib/**'
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build Lib
+      run: cargo build --verbose --release --manifest-path=connect4/connect4-lib/Cargo.toml

@@ -1,0 +1,18 @@
+name: Connect 4 WASM
+
+on:
+  push:
+    paths:
+      - 'connect4/connect4-web/**'
+jobs:
+  Build WASM:
+    runs-on: ubuntu-latest
+        #- uses: actions/checkout@v2
+        #- name: Build WASM
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build WASM
+      run: |
+        cd connect4
+        cargo install wasm-pack
+        wasm-pack build --target web
