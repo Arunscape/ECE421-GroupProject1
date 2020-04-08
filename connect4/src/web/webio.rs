@@ -40,8 +40,15 @@ impl WebIO {
 
     pub fn do_game_iteration(&self, delta: f64) {
         console_log!("delta {}", delta);
-        controller::draw_gameboard(&self.canvas, &self.game.get_board())
+        self.do_iteration_inputs(delta);
+        self.do_iteration_updates(delta);
+        self.do_iteration_renders(delta);
+    }
 
+    pub fn do_iteration_inputs(&self, delta: f64) {}
+    pub fn do_iteration_updates(&self, delta: f64) {}
+    pub fn do_iteration_renders(&self, delta: f64) {
+        controller::draw_gameboard(&self.canvas, &self.game.get_board());
     }
 
     pub fn play_with_game_loop(game: Game) {
@@ -55,7 +62,6 @@ impl WebIO {
             let curTime = seconds();
             let delta = curTime - time;
             time = curTime;
-
             webio.do_game_iteration(delta);
 
             request_animation_frame(f.borrow().as_ref().unwrap());
