@@ -3,7 +3,7 @@ name: Rust
 on:
   push:
     paths:
-      - 'connect4/connect4-lib'
+      - 'connect4/connect4-lib/**'
 
 jobs:
   Build Lib:
