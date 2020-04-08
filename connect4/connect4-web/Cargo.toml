@@ -1,9 +1,8 @@
 [package]
-name = "connect4"
+name = "connect4-web"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
-default-run="connect_game"
 
 [target.x86_64-unknown-linux-gnu]
 rustflags = ["-Ctarget-cpu=native"]
@@ -11,16 +10,17 @@ rustflags = ["-Ctarget-cpu=native"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-yew = { version = "0.14.2", features = ["web_sys"] }
-wasm-bindgen = "0.2.59"
+yew = { version = "0.14.3", features = ["web_sys"] }
+wasm-bindgen = "0.2.60"
 rand = "0.7.3"
 rayon = "1.3.0"
 yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
+connect4-lib = { path="../connect4-lib" }
 
 [dependencies.web-sys]
-web-sys = "0.3.36"
+web-sys = "*"
 features = [
   'CanvasRenderingContext2d',
   'Document',
@@ -32,13 +32,10 @@ features = [
   'console',
   'EventListener',
 ]
+version = "0.3.37"
 
 [lib]
 name="connect_game"
 path="src/lib.rs"
-# crate-type = ["cdylib"] # this breaks connect_game binaries
+# uncomment this when we need to build web
 crate-type = ["cdylib", "rlib"]
-
-[[bin]]
-name="connect_game"
-path="src/main.rs"
