@@ -40,6 +40,8 @@ impl WebIO {
 
     pub fn do_game_iteration(&self, delta: f64) {
         console_log!("delta {}", delta);
+        controller::draw_gameboard(&self.canvas, &self.game.get_board())
+
     }
 
     pub fn play_with_game_loop(game: Game) {
