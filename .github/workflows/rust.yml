@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Build Lib
       run: cargo build --verbose --release --manifest-path=connect4/connect4-lib/Cargo.toml
 
 on:
@@ -23,6 +24,7 @@ jobs:
         #- name: Build WASM
     steps:
     - uses: actions/checkout@v1
+    - name: Build WASM
       run: |
         cd connect4
         cargo install wasm-pack
@@ -42,4 +44,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Build Server
       run: cargo build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
