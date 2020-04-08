@@ -1,5 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 mod canvas;
 mod controller;
@@ -58,4 +60,30 @@ impl Component for App {
             />
         }
     }
+}
+fn window() -> web_sys::Window {
+    web_sys::window().expect("no global `window` exists")
+}
+
+fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window()
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
+fn document() -> web_sys::Document {
+    window()
+        .document()
+        .expect("should have a document on window")
+}
+
+fn body() -> web_sys::HtmlElement {
+    document().body().expect("document should have a body")
+}
+
+fn seconds() -> f64 {
+    window()
+        .performance()
+        .expect("performance should be available")
+        .now() / 1000.0
 }

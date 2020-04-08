@@ -603,9 +603,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.50"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78a7a12c167809363ec3bd7329fc0a3369056996de43c4b37ef3cd54a6ce4867"
+checksum = "da07b57ee2623368351e9a0488bb0b261322a15a6e0ae53e243cbdc0f4208da9"
 dependencies = [
  "itoa",
  "ryu",
@@ -751,9 +751,9 @@ dependencies = [
 
 [[package]]
 name = "yew"
-version = "0.14.2"
+version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20c1d343cdf3d625752fd4d9fef73e1b6b2b8a08b00c832b0fc4a47f3b10fbef"
+checksum = "2e48bc6b264e30362e5d420cd6aa2cd24dd4c9131284bc24afc0a41c28c125f3"
 dependencies = [
  "anyhow",
  "anymap",
@@ -782,9 +782,9 @@ dependencies = [
 
 [[package]]
 name = "yew-macro"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb25d91f16265dd1643497ac3252be6c21c169d9cf3babcae32325c74200499f"
+checksum = "074c652331c32cf6431b0c5c4b6cb6fbb2168a1be6022e51b32c95fefb70153c"
 dependencies = [
  "boolinator",
  "lazy_static",
