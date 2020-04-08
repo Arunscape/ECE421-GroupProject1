@@ -11,4 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build Server
-      run: cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
+      run: |
+        rustup default nightly
+        cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
