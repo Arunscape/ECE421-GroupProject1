@@ -2,17 +2,28 @@ use mongodb::{Client, options::ClientOptions};
 //use bson::{doc, bson, to_bson};
 use bson::*;
 use  bson::ordered::OrderedDocument;
+use connect4_lib::{
+    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
+};
 
 
+
+#[derive(Serialize, Deserialize, Debug)]
+enum Gender {
+    Male,
+    Female,
+}
+
+use serde::{Serialize, Deserialize};
+#[derive(Serialize, Deserialize, Debug)]
+struct Person {
+    gen: Gender,
+    name: String,
+    age: isize,
+    phones: Vec<String>,
+}
 //
-//struct Person {
-//    name: String,
-//    age: u8,
-//    phones: Vec<String>,
-//}
 //
-//
-//use serde::ser::{Serialize, Serializer};
 //// This is what #[derive(Serialize)] would generate.
 //impl Serialize for Person {
 //    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -28,12 +39,6 @@ use  bson::ordered::OrderedDocument;
 //}
 //
 
-use connect4_lib::{
-    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
-};
-
-
-
 static databaseName: &str = "Connect4DB";
 
 pub fn add_chip() -> Result<(), mongodb::error::Error> {
@@ -46,13 +51,14 @@ pub fn add_chip() -> Result<(), mongodb::error::Error> {
 //    	println!("{}", db_name);
 //	}
 
-//
-//    let p = Person {
-//        name: "Alex".to_string(),
-//        age:22,
-//        phones:vec!["cell".to_string()]
-//    };
-    let p = game::ChipDescrip{bg_color:1, fg_color:1, graphic:'f'};
+
+    let p = Person {
+        gen: Gender::Male,
+        name: "Alex".to_string(),
+        age:22,
+        phones:vec!["cell".to_string()]
+    };
+    //let p = game::ChipDescrip{bg_color:1, fg_color:1, graphic:'f'};
 
 	let db = client.database(databaseName);
 	let collection = db.collection("players");
