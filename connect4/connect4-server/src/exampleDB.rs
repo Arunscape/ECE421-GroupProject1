@@ -8,14 +8,14 @@ use connect4_lib::{
 
 
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 enum Gender {
     Male,
     Female,
 }
 
 use serde::{Serialize, Deserialize};
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 struct Person {
     gen: Gender,
     name: String,
@@ -64,6 +64,18 @@ pub fn add_chip() -> Result<(), mongodb::error::Error> {
 	let collection = db.collection("players");
     let doc = to_bson(&p)?.as_document().unwrap().clone();
     collection.insert_one(doc, None)?;
+
+    let extractedDoc = collection
+        .find_one(doc!{"name":"Alex"}, None)?.unwrap();
+
+    let extractedBson = Bson::Document(extractedDoc);
+    if let Ok(mut person) = from_bson(extractedBson) {
+        if p != person {
+            panic!("can't deserialize person to original ");
+        }
+
+    }
+
 
 	Ok(())
 }
