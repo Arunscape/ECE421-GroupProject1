@@ -62,9 +62,7 @@ pub fn add_chip() -> Result<(), mongodb::error::Error> {
 
 	let db = client.database(databaseName);
 	let collection = db.collection("players");
-    let ser = to_bson(&p)?;
-    let mut doc = OrderedDocument::new();
-    doc.insert_bson("key".to_string(), ser);
+    let doc = to_bson(&p)?.as_document().unwrap().clone();
     collection.insert_one(doc, None)?;
 
 	Ok(())
