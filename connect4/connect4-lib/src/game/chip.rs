@@ -1,4 +1,7 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+use serde::{Serialize, Deserialize};
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ChipDescrip {
     pub bg_color: usize,
     pub fg_color: usize,
@@ -32,3 +35,4 @@ impl Chip {
         self.descrip = c;
     }
 }
+
