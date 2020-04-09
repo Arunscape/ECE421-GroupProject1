@@ -7,6 +7,8 @@ use rocket::response::NamedFile;
 use rocket_contrib::serve::StaticFiles;
 use std::io;
 
+mod exampleDB;
+
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]
 fn signin() -> &'static str {
@@ -42,5 +44,6 @@ fn rocket() -> rocket::Rocket {
 }
 
 fn main() {
+	//exampleDB::db_info();
     rocket().launch();
 }
