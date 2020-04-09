@@ -5,7 +5,7 @@ extern crate rocket;
 
 use rocket::response::NamedFile;
 use rocket_contrib::serve::StaticFiles;
-use std::io;
+use std::{io, path::PathBuf};
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]
@@ -37,8 +37,34 @@ fn getgame() -> &'static str {
     "getgame"
 }
 
+#[get("/")]
+fn index() -> io::Result<NamedFile> {
+    let path = std::env::current_dir()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("connect4-web/index.html");
+    NamedFile::open(path)
+}
+
+// allow html to reference any file with path /static under folder "static"
+#[get("/<_file..>", rank = 10)] // use rank here to allow other api endpoint available as well
+fn files(_file: PathBuf) -> io::Result<NamedFile> {
+    let path = std::env::current_dir()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("connect4-web/index.html");
+    NamedFile::open(path)
+}
+
 fn rocket() -> rocket::Rocket {
-    rocket::ignite().mount("/", routes![signin, playmove, refresh, creategame, getgame])
+    rocket::ignite()
+        .mount(
+            "/api",
+            routes![signin, playmove, refresh, creategame, getgame],
+        )
+        .mount("/", routes![index, files])
 }
 
 fn main() {
