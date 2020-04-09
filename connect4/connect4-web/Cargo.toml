@@ -18,6 +18,8 @@ yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
 connect4-lib = { path="../connect4-lib" }
+web_logger = "0.2.0"
+wee_alloc = "0.4.5"
 
 [dependencies.web-sys]
 web-sys = "*"

@@ -54,7 +54,7 @@ fn not_found<'a>(req: &Request) -> Option<NamedFile> {
     NamedFile::open(path).ok()
 }
 
-#[get("/<file..>", rank = 9)]
+#[get("/<file..>")]
 fn files(file: PathBuf) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
@@ -62,6 +62,17 @@ fn files(file: PathBuf) -> Option<NamedFile> {
         .unwrap()
         .join("connect4-web")
         .join(file);
+    println!("{:?}", path);
+    NamedFile::open(path).ok()
+}
+
+#[get("/connect4-computer")]
+fn connect4human() -> Option<NamedFile> {
+    let path = std::env::current_dir()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("connect4-web/index.html");
     println!("{:?}", path);
     NamedFile::open(path).ok()
 }
@@ -79,7 +90,7 @@ fn rocket() -> rocket::Rocket {
         )
         .mount("/", StaticFiles::from(path))
         .register(catchers![not_found])
-        .mount("/", routes![files])
+        .mount("/", routes![files, connect4human])
 }
 
 fn main() {
