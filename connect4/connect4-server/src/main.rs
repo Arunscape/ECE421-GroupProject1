@@ -44,6 +44,6 @@ fn rocket() -> rocket::Rocket {
 }
 
 fn main() {
-	//exampleDB::db_info();
+	//exampleDB::add_chip();
     rocket().launch();
 }

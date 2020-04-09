@@ -1,16 +1,42 @@
 use mongodb::{Client, options::ClientOptions};
-use bson::{doc, bson};
+//use bson::{doc, bson, to_bson};
+use bson::*;
+use  bson::ordered::OrderedDocument;
 
 
-
+//
+//struct Person {
+//    name: String,
+//    age: u8,
+//    phones: Vec<String>,
+//}
+//
+//
+//use serde::ser::{Serialize, Serializer};
+//// This is what #[derive(Serialize)] would generate.
+//impl Serialize for Person {
+//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//    where
+//        S: Serializer,
+//    {
+//        let mut s = serializer.serialize_struct("Person", 3)?;
+//        s.serialize_field("name", &self.name)?;
+//        s.serialize_field("age", &self.age)?;
+//        s.serialize_field("phones", &self.phones)?;
+//        s.end()
+//    }
+//}
+//
 
 use connect4_lib::{
     game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
 };
 
+
+
 static databaseName: &str = "Connect4DB";
 
-pub fn lab4_example_code() -> Result<(), mongodb::error::Error> {
+pub fn add_chip() -> Result<(), mongodb::error::Error> {
 	let mut client_options =
 		 ClientOptions::parse("mongodb://localhost:27017")?;
 	//client_options.app_name = Some("My App".to_string());
@@ -20,25 +46,37 @@ pub fn lab4_example_code() -> Result<(), mongodb::error::Error> {
 //    	println!("{}", db_name);
 //	}
 
+//
+//    let p = Person {
+//        name: "Alex".to_string(),
+//        age:22,
+//        phones:vec!["cell".to_string()]
+//    };
+    let p = game::ChipDescrip{bg_color:1, fg_color:1, graphic:'f'};
 
-    let serializedGame = doc!
-
-	// Get a handle to a database.
 	let db = client.database(databaseName);
-	// List the names of the collections in that database.
-	for collection_name in db.list_collection_names(None)? {
-	    println!("{}", collection_name);
-	}
+	let collection = db.collection("players");
+    let ser = to_bson(&p)?;
+    let mut doc = OrderedDocument::new();
+    doc.insert_bson("key".to_string(), ser);
+    collection.insert_one(doc, None)?;
 
-	// Get a handle to a collection in the database.
-	let collection = db.collection("games");
-
-	let docs = vec![
-	doc! { "title": "1984", "author": "George Orwell" },
-	doc! { "title": "Animal Farm", "author": "George Orwell" },
-	doc! { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald" },
-	];
-	// Insert some documents into the "mydb.books" collection.
-	//collection.insert_many(docs, None)?;
 	Ok(())
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn db_chip_test() {
+        match add_chip() {
+            Ok(()) => assert!(true),
+            Err(x) => {
+            println!("{:?}", x);
+            assert!(false);},
+        }
+    }
+
 }
