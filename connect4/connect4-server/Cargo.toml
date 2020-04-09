@@ -22,6 +22,7 @@ path="src/main.rs"
 version = "0.4.4"
 #default-features = false
 #features = ["json"]
+features = ["handlebars_templates", "tera_templates"]
 
 [dependencies.rocket]
 version = "0.4.4"

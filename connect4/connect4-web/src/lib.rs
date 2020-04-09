@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use connect4_lib::game::Game;
 use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
