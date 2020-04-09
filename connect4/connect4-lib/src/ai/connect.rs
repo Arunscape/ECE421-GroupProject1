@@ -3,7 +3,7 @@ use super::bitboard::BitBoard;
 use crate::game::{ChipDescrip, Game};
 use crate::io::{GameIO, TermIO};
 
-pub fn get_best_move(game: &mut Game) -> (usize, ChipDescrip) {
+pub fn get_best_move(game: &mut Game) -> (isize, ChipDescrip) {
     let chip = game.current_player().chip_options[0];
     let mov = game.get_board().get_valid_moves()[0];
     let bb = BitBoard::from_game(game);

@@ -44,29 +44,29 @@ pub fn is_toto(game: &Game) -> bool {
 }
 
 pub const red: ChipDescrip = ChipDescrip {
-    bg_color: BLK + BRIGHTEN,
-    fg_color: RED,
+    bg_color: BLK as isize + BRIGHTEN as isize,
+    fg_color: RED as isize,
     graphic: FILLED,
 };
 pub const yellow: ChipDescrip = ChipDescrip {
-    bg_color: BLK + BRIGHTEN,
-    fg_color: YEL,
+    bg_color: BLK as isize+ BRIGHTEN as isize,
+    fg_color: YEL as isize,
     graphic: FILLED,
 };
 pub const blue: ChipDescrip = ChipDescrip {
-    bg_color: BLK + BRIGHTEN,
-    fg_color: BLU,
+    bg_color: BLK as isize+ BRIGHTEN as isize,
+    fg_color: BLU as isize,
     graphic: FILLED,
 };
 
 pub const chip_t: ChipDescrip = ChipDescrip {
-    bg_color: BLK + BRIGHTEN,
-    fg_color: RED,
+    bg_color: BLK as isize+ BRIGHTEN as isize,
+    fg_color: RED as isize,
     graphic: 't',
 };
 pub const chip_o: ChipDescrip = ChipDescrip {
-    bg_color: BLK + BRIGHTEN,
-    fg_color: YEL,
+    bg_color: BLK as isize + BRIGHTEN as isize,
+    fg_color: YEL as isize,
     graphic: 'o',
 };
 
