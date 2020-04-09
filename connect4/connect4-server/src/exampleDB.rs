@@ -41,7 +41,27 @@ struct Person {
 
 static databaseName: &str = "Connect4DB";
 
-pub fn add_chip() -> Result<(), mongodb::error::Error> {
+//fn get_doc_from<T>(object: T) -> Result<bson::Document,()>
+//    where T: Serialize {
+//    match to_bson(&object) {
+//        Ok(bson) => {
+//            Ok(
+//            bson.as_document()
+//            .expect("Object to Bson is not a Document")
+//            .clone()
+//            )
+//            }
+//        Err(_) => Err(()),
+//    }
+//    //to_bson(object)?.as_document().unwrap().clone()
+//}
+//
+//fn object_from_doc<'a, T>(thing: bson::Document) -> T
+//    where T: Deserialize<'a> {
+//    from_bson(Bson::Document(thing))?
+//}
+//
+pub fn add_person() -> Result<(), mongodb::error::Error> {
 	let mut client_options =
 		 ClientOptions::parse("mongodb://localhost:27017")?;
 	//client_options.app_name = Some("My App".to_string());
@@ -86,8 +106,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn db_chip_test() {
-        match add_chip() {
+    fn db_person_test() {
+        match add_person() {
             Ok(()) => assert!(true),
             Err(x) => {
             println!("{:?}", x);
