@@ -25,3 +25,8 @@ jobs:
         rustup default nightly
         rustup component add rustfmt
         cargo +nightly fmt --check --manifest-path=connect4/connect4-server/Cargo.toml
+    - name: Clippy
+      run: |
+        rustup default nightly
+        rustup component add clippy
+        cargo +nightly fmt --check --manifest-path=connect4/connect4-server/Cargo.toml
