@@ -1,8 +1,4 @@
-
-
-
 use mongodb::{options::ClientOptions, Client};
-//use bson::{doc, bson, to_bson};
 use bson::ordered::OrderedDocument;
 use bson::*;
 use serde::{Deserialize, Serialize};
@@ -20,7 +16,7 @@ fn new_db(db_name: &str) -> Option<mongodb::Database> {
 }
 
 fn connect_to_db(db_name: &str) -> Result<mongodb::Database, mongodb::error::Error> {
-    let mut client_options =
+    let client_options =
         ClientOptions::parse(DATABASE_LOCATION)?;
     let client = Client::with_options(client_options)?;
     let db = client.database(db_name);
@@ -37,10 +33,10 @@ fn bson_to_object<'a, T>(thing: bson::ordered::OrderedDocument)
 }
 
 
-fn object_to_doc<T>(object: T) -> Option<bson::Document>
+fn object_to_doc<T>(object: &T) -> Option<bson::Document>
     where T: Serialize {
     //to_bson(object)?.as_document().unwrap().clone()
-    match to_bson(&object) {
+    match to_bson(object) {
         Err(_) => None,
         Ok(bson) => Some(
             bson.as_document()
@@ -59,7 +55,7 @@ fn docs_to_objects<'a, T>(docs_vector: Vec<bson::Document>)
     .collect()
 }
 
-fn query_collection_for_docs(db: mongodb::Database, coll_name: &str, query: bson::Document)
+fn query_collection_for_docs(db: &mongodb::Database, coll_name: &str, query: bson::Document)
     -> Vec<bson::Document> {
 
     //let v = Vec::<bson::Document>::new();
@@ -78,11 +74,12 @@ fn query_collection_for_docs(db: mongodb::Database, coll_name: &str, query: bson
     }
 }
 
-//// if length of doc vecror is 0
-//fn exists_any_in(db, collection, query) -> bool {}
-//
-//fn insert_new_doc(db, collection, doc) -> Result {}
-//
+fn exists_any_in(db: &mongodb::Database, coll_name: &str, q: bson::Document)
+    -> bool {
+    query_collection_for_docs(db, coll_name, q).len() != 0
+}
+
+
 
 
 
@@ -90,11 +87,53 @@ fn query_collection_for_docs(db: mongodb::Database, coll_name: &str, query: bson
 mod test {
     use super::*;
 
-    #[test]
-    fn db_in_collection_test() {
-    }
 
     #[test]
-    fn db_sign_in_test() {
+    fn db_query_and_exists_test() {
+		#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+		enum Gender {
+		    Male,
+		    Female,
+		}
+
+		use serde::{Deserialize, Serialize};
+		#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+		struct Person {
+		    gen: Gender,
+		    name: String,
+		    age: isize,
+		    phones: Vec<String>,
+		}
+	    let p = Person {
+	        gen: Gender::Male,
+	        name: "Alex".to_string(),
+	        age: 22,
+	        phones: vec!["cell".to_string()],
+	    };
+
+        let collection_name = "testymctestface";
+        let db = new_db(DATABASE_NAME)
+            .expect("No mongo, is it running?");
+
+	    let doc = object_to_doc(&p)
+            .expect("Object shuould convert to doc?");
+
+        // TODO: handle result
+        db.collection(collection_name).insert_one(doc, None);
+
+        assert!(exists_any_in(
+            &db, collection_name, doc!{"name":"Alex"}));
+
+        let matches = query_collection_for_docs(
+            &db, collection_name, doc!{"name":"Alex"});
+
+
+        let extracted_p: Person = bson_to_object(matches[0].clone())
+            .expect("Cant extract person");
+        assert!(extracted_p.name == "Alex");
+
+
     }
+
 }
+
