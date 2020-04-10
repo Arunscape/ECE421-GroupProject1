@@ -49,18 +49,18 @@ pub const red: ChipDescrip = ChipDescrip {
     graphic: FILLED,
 };
 pub const yellow: ChipDescrip = ChipDescrip {
-    bg_color: BLK as isize+ BRIGHTEN as isize,
+    bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: YEL as isize,
     graphic: FILLED,
 };
 pub const blue: ChipDescrip = ChipDescrip {
-    bg_color: BLK as isize+ BRIGHTEN as isize,
+    bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: BLU as isize,
     graphic: FILLED,
 };
 
 pub const chip_t: ChipDescrip = ChipDescrip {
-    bg_color: BLK as isize+ BRIGHTEN as isize,
+    bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: RED as isize,
     graphic: 't',
 };

@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use crate::ai::AIConfig;
+use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 
 pub mod chip;

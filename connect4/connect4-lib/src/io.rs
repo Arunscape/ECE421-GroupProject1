@@ -70,7 +70,7 @@ impl GameIO for TermIO {
                 drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
             }
             print!(" ");
-            if (i + 1) % game.width as usize== 0 {
+            if (i + 1) % game.width as usize == 0 {
                 drawer.print_with_color('\n', RST, RST);
             }
         }
