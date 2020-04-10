@@ -14,9 +14,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
-mod exampleDB;
 mod jwtHelper;
 mod player;
+mod dbhelper;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]

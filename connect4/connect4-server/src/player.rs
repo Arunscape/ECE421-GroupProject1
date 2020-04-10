@@ -1,52 +1,51 @@
-use mongodb::{options::ClientOptions, Client};
-//use bson::{doc, bson, to_bson};
 use crate::jwtHelper::*;
-use bson::ordered::OrderedDocument;
-use bson::*;
-use connect4_lib::{
-    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
-};
+use crate::dbhelper::*;
+use bson::doc;
+use serde::{Deserialize, Serialize};
 
-static databaseName: &str = "Connect4DB";
-static jwtLifetimeSeconds: u64 = 5;
 
-// return mongodb database object associated with databaseName
-// database
-fn get_db(db_name: &str) -> Result<mongodb::Database, mongodb::error::Error> {
-    let mut client_options = ClientOptions::parse("mongodb://localhost:27017")?;
-    let client = Client::with_options(client_options)?;
-    let db = client.database(db_name);
-    Ok(db)
-}
-
-// bool if the document is in collection_name collection for the
-// databaseName database
-fn in_collection(collection_name: &str, doc: bson::Document) -> bool {
-    if let Ok(db) = get_db(databaseName) {
-        match db.collection(collection_name).find(doc, None) {
-            Ok(mut cursor) => match cursor.next() {
-                Some(_) => true,
-                None => false,
-            },
-            Err(_) => {
-                return false;
-            }
-        }
-    } else {
-        // some error getting DB
-        false
-    }
+#[derive(Debug, Serialize, Deserialize)]
+struct User {
+    username: String,
+    password: String,
 }
 
 // given username and password, possibly sign in for JWT token
-fn sign_in(username: &str, _password: &str) -> Option<String> {
-    if in_collection("players", doc! {"username": username.to_string()}) {
-        return None;
+fn sign_in(username: &str, password: &str) -> Option<String> {
+
+    // TODO: how do i indent this?
+    let user_doc = object_to_doc( &User{
+            username: username.to_string(),
+            password: password.to_string(), })
+        .expect("Should be able to Doc Users?");
+
+    // can connect to DB
+    if let Some(db) = new_db(DATABASE_NAME) {
+        // not in db, add then JWT
+        if !exists_any_in(&db, USER_COLLECTION_NAME,
+            doc!{"username": username.to_owned()}) {
+
+            // TODO: error handle insertion
+            db.collection(USER_COLLECTION_NAME)
+            .insert_one(user_doc, None);
+
+		    return Some(gen_jwt_token(
+		        ClaimPayload::username(username.to_string()),
+		        JWT_LIFETIME_SECONDS,
+		    ))
+        }
+
+        // They exist in the database
+        if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
+		    return Some(gen_jwt_token(
+		        ClaimPayload::username(username.to_string()),
+		        JWT_LIFETIME_SECONDS,
+		    ))
+        }
+
     }
-    Some(gen_jwt_token(
-        ClaimPayload::username(username.to_string()),
-        jwtLifetimeSeconds,
-    ))
+    None
+
 }
 
 #[cfg(test)]
@@ -55,17 +54,16 @@ mod test {
 
     #[test]
     #[ignore]
-    fn db_in_collection_test() {
-        assert!(in_collection("players", doc! {}));
-        assert!(!in_collection("players", doc! {"YEET":"NOTIN"}));
-    }
-
-    #[test]
-    #[ignore]
     fn db_sign_in_test() {
-        match sign_in("Alex", "Yeet") {
-            Some(_) => assert!(true),
-            None => assert!(false),
-        }
+        let token = sign_in("Alex", "Yeet")
+            .expect("Alex shouldn't be in the DB yet");
+
+        // TODO: verify that Alex
+        let token = sign_in("Alex", "Yeet")
+            .expect("Alex must sign in again");
+
+        // this isnt Alex's password!!
+        let token = sign_in("Alex" , "Yote");
+        assert!(token == None);
     }
 }
