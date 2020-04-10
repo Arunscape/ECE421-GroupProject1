@@ -12,11 +12,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
+#[derive(Clone)]
 enum GameState {
     GetMove,
     WaitingForRemote,
     WaitingForLocal,
-    PlayingMove,
+    PlayingMove(Box<GameState>),
     GameOver,
 }
 
@@ -57,14 +58,12 @@ impl WebIO {
             }
         }
 
-        if let Some(mut falling) = self.falling_loc {
-            falling.2 += delta * controller::GRAVITY;
-            falling.1 += delta * falling.2;
-            let is_done = (falling.1 / controller::COLUMN_WIDTH) < self.game.get_board().last_move_loc().1 as f64;
-            self.falling_loc = Some(falling);
-            if is_done {
-                self.game_state = GameState::GetMove;
-                self.falling_loc = None;
+        if let GameState::PlayingMove(next) = self.game_state.clone() {
+            if let Some(falling) = self.falling_loc {
+                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
+                if let None = self.falling_loc {
+                    self.game_state = *next;
+                }
             }
         }
     }
@@ -101,7 +100,7 @@ impl WebIO {
                     controller::highlight_column(&self.canvas, col);
                 }
             }
-            GameState::PlayingMove => {
+            GameState::PlayingMove(_) => {
                 if let Some(fall) = self.falling_loc {
                     controller::animate_falling_piece(
                         &self.canvas,
@@ -129,7 +128,7 @@ impl WebIO {
         let move_type = self.game.current_player().chip_options[0];
         let res = self.game.play(col, move_type);
 
-        self.game_state = GameState::PlayingMove;
+        self.game_state = GameState::PlayingMove(Box::from(GameState::GetMove));
         self.falling_loc = Some((col, 1100.0, 0.0)); // TODO: no magic numbers
     }
 
