@@ -89,6 +89,7 @@ mod test {
 
 
     #[test]
+    #[ignore]
     fn db_query_and_exists_test() {
 		#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 		enum Gender {
