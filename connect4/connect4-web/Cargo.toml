@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
 
-[target.x86_64-unknown-linux-gnu]
-rustflags = ["-Ctarget-cpu=native"]
+[build]
+target = "wasm32-unknown-unknown"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -39,5 +39,4 @@ version = "0.3.37"
 [lib]
 name="connect_game"
 path="src/lib.rs"
-# uncomment this when we need to build web
 crate-type = ["cdylib", "rlib"]

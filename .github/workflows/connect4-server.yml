@@ -16,3 +16,7 @@ jobs:
         cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
     - name: Test
       run: cargo +nightly test --no-fail-fast --release --manifest-path=connect4/connect4-server/Cargo.toml
+  Lint:
+    run: |
+      rustup component add rustfmt
+      cargo +nightly fmt --check --manifest-path=connect4/connect4-server/Cargo.toml

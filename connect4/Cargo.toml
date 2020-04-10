@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "connect4-lib",
+  "connect4-server",
+  "connect4-web",
+]
