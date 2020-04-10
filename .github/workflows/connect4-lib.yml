@@ -22,11 +22,13 @@ jobs:
     - uses: actions/checkout@v1
     - name: Lint
       run: |
+        cd connect4/connect4-lib
         rustup default nightly
         rustup component add rustfmt
-        cargo +nightly fmt -- --check --manifest-path=connect4/connect4-lib/Cargo.toml
+        cargo +nightly fmt -- --check
     - name: Clippy
       run: |
+        cd connect4/connect4-lib
         rustup default nightly
         rustup component add clippy
-        cargo +nightly clippy --manifest-path=connect4/connect4-lib/Cargo.toml
+        cargo +nightly clippy
