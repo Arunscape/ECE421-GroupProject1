@@ -1,0 +1,14 @@
+name: Rust Black Tree
+
+on:
+  push:
+    paths:
+      - 'rust_black_tree/**'
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build Server
+      run: cargo build --verbose --release --manifest-path=rust_black_tree/Cargo.toml
