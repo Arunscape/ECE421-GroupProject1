@@ -60,6 +60,9 @@ impl Component for Model {
     fn view(&self) -> VNode {
         html! {
             <div>
+                <Navbar/>
+                <div style="margin-left:390px;margin-right:40px">
+                // TODO remove these examples
                 <nav class="menu",>
                     <RouterButton<AppRoute> route=AppRoute::A(AllowMissing(None))> {"Go to A"} </RouterButton<AppRoute>>
                     <RouterAnchor<AppRoute> route=AppRoute::B(BRoute::None)> {"Go to B"} </RouterAnchor<AppRoute>>
@@ -69,8 +72,6 @@ impl Component for Model {
                     <RouterButton<AppRoute> route=AppRoute::E("world".to_string())> {"Go to E (hello world)"} </RouterButton<AppRoute>>
                     <RouterButton<AppRoute> route=AppRoute::PageNotFound(Permissive(Some("nope".to_string())))> {"Go to bad path"} </RouterButton<AppRoute>>
                 </nav>
-                <Navbar/>
-                <div>
                     <Router<AppRoute>
                         render = Router::render(|switch: AppRoute| {
                             match switch {
