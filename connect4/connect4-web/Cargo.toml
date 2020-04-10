@@ -40,3 +40,6 @@ version = "0.3.37"
 name="connect_game"
 path="src/lib.rs"
 crate-type = ["cdylib", "rlib"]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.10"
