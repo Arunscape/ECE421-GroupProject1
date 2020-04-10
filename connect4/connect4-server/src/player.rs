@@ -5,8 +5,10 @@ use bson::*;
 use connect4_lib::{
     game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
 };
+use crate::jwtHelper::*;
 
 static databaseName: &str = "Connect4DB";
+static jwtLifetimeSeconds: u64 = 5;
 
 // return mongodb database object associated with databaseName
 // database
@@ -36,6 +38,27 @@ fn in_collection(collection_name: &str, doc: bson::Document) -> bool {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+// given username and password, possibly sign in for JWT token
+fn sign_in(username: &str, _password: &str) -> Option<String> {
+
+    if in_collection(
+        "players",
+        doc!{"username": username.to_string()})
+    {
+        return None;
+    }
+    Some(
+        gen_jwt_token(
+            ClaimPayload::username(username.to_string()),
+            jwtLifetimeSeconds)
+    )
+}
+
+
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -45,5 +68,14 @@ mod test {
     fn db_in_collection_test() {
         assert!(in_collection("players", doc! {}));
         assert!(!in_collection("players", doc! {"YEET":"NOTIN"}));
+    }
+
+    #[test]
+    #[ignore]
+    fn db_sign_in_test() {
+        match sign_in("Alex", "Yeet") {
+            Some(_) => assert!(true),
+            None => assert!(false),
+        }
     }
 }
