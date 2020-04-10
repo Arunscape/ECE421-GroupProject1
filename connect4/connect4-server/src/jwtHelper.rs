@@ -23,14 +23,14 @@ struct Claims {
 }
 
 fn since_epoch_seconds() -> u64 {
-	match SystemTime::now().duration_since(UNIX_EPOCH) {
-	    Ok(n) => n.as_secs(),
-	    Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-	}
+    match SystemTime::now().duration_since(UNIX_EPOCH) {
+        Ok(n) => n.as_secs(),
+        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+    }
 }
 
 
-fn get_jwt_token(my_claims: Claims) -> String {
+fn jwt_token_from_claims(my_claims: Claims) -> String {
     let key = b"TODO:probablyshouldhidethis";
     match encode(
         &Header::default(),
@@ -60,20 +60,29 @@ fn is_valid_jwt_token(token: String)
     }
 }
 
+fn gen_jwt_token(payload: ClaimPayload, expires_in_seconds: u64) -> String {
+
+    let my_claims = Claims {
+        data: payload,
+        exp: (since_epoch_seconds() + expires_in_seconds) as usize,
+    };
+    let token = jwt_token_from_claims(my_claims);
+    token
+}
+
+
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
     fn valid_jwt_test() {
-	    let my_claims = Claims {
-	        data: ClaimPayload::message("asdf".to_owned()),
-	        exp: (since_epoch_seconds() + 2) as usize,
-	    };
+        let token = gen_jwt_token(
+            ClaimPayload::message("cats".to_owned()),
+            2
+        );
 
-	    let token = get_jwt_token(my_claims);
-
-	    thread::sleep(time::Duration::from_millis( 1 * 1000));
+        thread::sleep(time::Duration::from_millis( 1 * 1000));
 
         match is_valid_jwt_token(token) {
             Ok(_) => assert!(true),
@@ -83,18 +92,16 @@ mod test {
 
     #[test]
     fn invalid_jwt_test() {
-	    let my_claims = Claims {
-	        data: ClaimPayload::number(420),
-	        exp: (since_epoch_seconds() + 1) as usize,
-	    };
+        let token = gen_jwt_token(
+            ClaimPayload::message("cats".to_owned()),
+            2
+        );
 
-	    let token = get_jwt_token(my_claims);
-
-	    thread::sleep(time::Duration::from_millis( 2 * 1000));
+        thread::sleep(time::Duration::from_millis( 1 * 1000));
 
         match is_valid_jwt_token(token) {
-            Ok(_) => assert!(false),
-            Err(_) => assert!(true),
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
         }
     }
 
