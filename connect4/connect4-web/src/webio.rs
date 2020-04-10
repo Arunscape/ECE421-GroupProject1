@@ -24,10 +24,17 @@ macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
+enum GameState {
+    GetMove,
+    WaitingForRemote,
+    PlayingMove,
+    GameOver,
+}
 
 pub struct WebIO {
     canvas: Canvas,
-    game: Game
+    game: Game,
+    game_state: GameState,
 }
 
 impl WebIO {
@@ -35,6 +42,7 @@ impl WebIO {
         Self {
             game,
             canvas: Canvas::new("#canvas", 200, 200),
+            game_state: GetMove,
         }
     }
 

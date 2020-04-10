@@ -11,6 +11,7 @@ pub struct Canvas {
     pub context: web_sys::CanvasRenderingContext2d,
     width: u32,
     height: u32,
+    press_count: usize,
 }
 
 impl Canvas {
@@ -37,7 +38,12 @@ impl Canvas {
             context,
             width,
             height,
+            press_count: 0,
         }
+    }
+
+    pub fn isMousePressed() -> bool {
+        press_count > 0
     }
 
     pub fn draw_circle(&self, x: f64, y: f64, r: f64, fill: String, stroke: String) {

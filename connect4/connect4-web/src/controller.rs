@@ -83,21 +83,3 @@ pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
     }
 }
 
-pub fn draw(canvas: &Canvas) {
-    // TODO: implement the finite state machine drawing
-    /*
-        match self.state {
-            State::GetMove => {
-            call draw game board
-            call function to highlight column on which a player is moused over or, to show a ghost chip where it would go if they clicked, or something that gives feedback to show they can click to select a move.
-        },
-            State::DrawBoard => {
-            call draw game board
-            call function that draws an animation of a chip falling down, or appearing into the spot
-        },
-            State::GameOver => {
-            call function that draws a game over message and shows who wins
-        }
-    }
-         */
-}
