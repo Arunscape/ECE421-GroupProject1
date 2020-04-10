@@ -1,16 +1,15 @@
-use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
 use super::canvas::Canvas;
 use super::controller;
 use super::{request_animation_frame, seconds};
+use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
-use std::time::{Duration, Instant};
 use std::cell::RefCell;
 use std::rc::Rc;
-
+use std::time::{Duration, Instant};
 
 #[wasm_bindgen]
 extern "C" {
@@ -42,18 +41,23 @@ impl WebIO {
         Self {
             game,
             canvas: Canvas::new("#canvas", 200, 200),
-            game_state: GetMove,
+            game_state: GameState::GetMove,
         }
     }
 
     pub fn do_game_iteration(&self, delta: f64) {
-        console_log!("delta {}", delta);
         self.do_iteration_inputs(delta);
         self.do_iteration_updates(delta);
         self.do_iteration_renders(delta);
     }
 
-    pub fn do_iteration_inputs(&self, delta: f64) {}
+    pub fn do_iteration_inputs(&self, delta: f64) {
+        if self.canvas.is_mouse_pressed() {
+            let loc = self.canvas.get_mouse_loc();
+            let pos = controller::canvas_loc_to_column(&self.canvas, loc.0, loc.1, self.game.get_board());
+            console_log!("{} -> {:?}", loc.0, pos);
+        }
+    }
     pub fn do_iteration_updates(&self, delta: f64) {}
     pub fn do_iteration_renders(&self, delta: f64) {
         controller::draw_gameboard(&self.canvas, &self.game.get_board());
@@ -78,4 +82,3 @@ impl WebIO {
         request_animation_frame(g.borrow().as_ref().unwrap());
     }
 }
-

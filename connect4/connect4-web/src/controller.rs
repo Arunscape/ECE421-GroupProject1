@@ -9,6 +9,7 @@ const CHIP_DIAMETER: f64 = 2.0 * CHIP_RADIUS;
 const CHIP_SEPERATION: f64 = 53.0;
 const BOARD_MARGIN_X: f64 = 348.0;
 const BOARD_MARGIN_Y: f64 = 0.0;
+const COLUMN_WIDTH: f64 = CHIP_DIAMETER + CHIP_SEPERATION; // also height of the square around a circle
 
 pub fn draw_chip(canvas: &Canvas, board_height: f64, chip: connect4_lib::game::ChipDescrip, x: usize, y: usize) {
     let colour = match chip.fg_color {
@@ -17,12 +18,12 @@ pub fn draw_chip(canvas: &Canvas, board_height: f64, chip: connect4_lib::game::C
         _ => unreachable!(),
     };
     canvas.draw_circle(
-        x as f64 * (CHIP_DIAMETER + CHIP_SEPERATION)
+        x as f64 * (COLUMN_WIDTH)
             + BOARD_MARGIN_X
             + CHIP_RADIUS
             + CHIP_SEPERATION,
         board_height
-            - (y as f64 * (CHIP_DIAMETER + CHIP_SEPERATION)
+            - (y as f64 * (COLUMN_WIDTH)
                 + BOARD_MARGIN_Y
                 + CHIP_RADIUS
                 + CHIP_SEPERATION),
@@ -41,11 +42,11 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
     for y in 0..height {
         for x in 0..width {
             canvas.context.arc(
-                (CHIP_DIAMETER + CHIP_SEPERATION) * x as f64
+                (COLUMN_WIDTH) * x as f64
                     + BOARD_MARGIN_X
                     + CHIP_RADIUS
                     + CHIP_SEPERATION,
-                (CHIP_DIAMETER + CHIP_SEPERATION) * y as f64
+                (COLUMN_WIDTH) * y as f64
                     + BOARD_MARGIN_Y
                     + CHIP_RADIUS
                     + CHIP_SEPERATION,
@@ -54,8 +55,8 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
                 2.0 * std::f64::consts::PI,
             );
             canvas.context.rect(
-                (CHIP_DIAMETER + CHIP_SEPERATION) * x as f64 + BOARD_MARGIN_X + square,
-                (CHIP_DIAMETER + CHIP_SEPERATION) * y as f64,
+                (COLUMN_WIDTH) * x as f64 + BOARD_MARGIN_X + square,
+                (COLUMN_WIDTH) * y as f64,
                 -square,
                 square,
             );
@@ -75,7 +76,7 @@ pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
         let y = board.height - y - 1;
         let i = x + y * board.width;
 
-        let board_height = CHIP_SEPERATION + (CHIP_DIAMETER + CHIP_SEPERATION) * (board.height as f64);
+        let board_height = CHIP_SEPERATION + (COLUMN_WIDTH) * (board.height as f64);
         match chips[i] {
             Some(chip) => draw_chip(canvas, board_height, chip, x, y),
             None => {}
@@ -83,3 +84,14 @@ pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
     }
 }
 
+pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &connect4_lib::game::Board) -> Option<usize> {
+    let visual_width = canvas.canvas.get_bounding_client_rect().width();
+    let render_width = canvas.canvas.width() as f64;
+    let x = render_width * (x as f64) / visual_width;
+    let cx = (x - BOARD_MARGIN_X - CHIP_SEPERATION / 2.0) / COLUMN_WIDTH;
+    if cx < 0.0 || cx >= board.width as f64 {
+        None
+    } else {
+        Some(cx as usize)
+    }
+}
