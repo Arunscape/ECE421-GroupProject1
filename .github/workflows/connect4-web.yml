@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build WASM
+    - name: Build_WASM
       run: |
         rustup default nightly
         cd connect4/connect4-web
