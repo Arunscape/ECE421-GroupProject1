@@ -107,7 +107,7 @@ mod test {
         let mut game = crate::games::connect4();
         for mov in moves {
             let chip = game.current_player().chip_options[0];
-            game.play(mov, chip);
+            game.play(mov as isize, chip);
         }
         game
     }
