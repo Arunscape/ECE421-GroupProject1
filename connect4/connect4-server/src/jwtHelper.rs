@@ -43,7 +43,7 @@ fn jwt_token_from_claims(my_claims: Claims) -> String {
 }
 
 
-fn is_valid_jwt_token(token: String)
+fn claims_from_jwt_token(token: String)
     -> Result<Claims, ()> {
     let key = b"TODO:probablyshouldhidethis";
     let validation = Validation {
@@ -84,7 +84,7 @@ mod test {
 
         thread::sleep(time::Duration::from_millis( 1 * 1000));
 
-        match is_valid_jwt_token(token) {
+        match claims_from_jwt_token(token) {
             Ok(_) => assert!(true),
             Err(_) => assert!(false),
         }
@@ -99,7 +99,7 @@ mod test {
 
         thread::sleep(time::Duration::from_millis( 1 * 1000));
 
-        match is_valid_jwt_token(token) {
+        match claims_from_jwt_token(token) {
             Ok(_) => assert!(true),
             Err(_) => assert!(false),
         }
@@ -113,7 +113,7 @@ mod test {
 
         thread::sleep(time::Duration::from_millis( 1 * 1000));
 
-        match is_valid_jwt_token(token) {
+        match claims_from_jwt_token(token) {
             Ok(claims) => {
                 match claims.data {
                     ClaimPayload::message(s) => assert!(s == "cats"),
