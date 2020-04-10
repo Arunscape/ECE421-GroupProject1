@@ -104,5 +104,26 @@ mod test {
             Err(_) => assert!(false),
         }
     }
+    #[test]
+    fn jwt_payload_test() {
+        let token = gen_jwt_token(
+            ClaimPayload::message("cats".to_owned()),
+            2
+        );
+
+        thread::sleep(time::Duration::from_millis( 1 * 1000));
+
+        match is_valid_jwt_token(token) {
+            Ok(claims) => {
+                match claims.data {
+                    ClaimPayload::message(s) => assert!(s == "cats"),
+                    _ => assert!(false),
+                }
+            },
+            Err(_) => assert!(false),
+        }
+    }
+
+
 
 }
