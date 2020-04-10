@@ -39,7 +39,7 @@ fn jwt_token_from_claims(my_claims: Claims) -> String {
     }
 }
 
-fn claims_from_jwt_token(token: String) -> Result<Claims, ()> {
+pub fn claims_from_jwt_token(token: String) -> Result<Claims, ()> {
     let key = b"TODO:probablyshouldhidethis";
     let validation = Validation {
         //sub: Some("b@b.com".to_string()), // more validation here
