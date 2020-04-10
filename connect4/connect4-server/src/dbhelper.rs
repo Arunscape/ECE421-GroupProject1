@@ -3,19 +3,20 @@ use bson::ordered::OrderedDocument;
 use bson::*;
 use serde::{Deserialize, Serialize};
 
-static DATABASE_NAME: &str = "Connect4DB";
-static JWT_LIFETIME_SECONDS: u64 = 86400; // done day
-static DATABASE_LOCATION: &str = "mongodb://localhost:27017";
+pub static DATABASE_NAME: &str = "Connect4DB";
+pub static JWT_LIFETIME_SECONDS: u64 = 86400; // done day
+pub static DATABASE_LOCATION: &str = "mongodb://localhost:27017";
+pub static USER_COLLECTION_NAME: &str = "users";
 
 // error handling wrapper for db connect
-fn new_db(db_name: &str) -> Option<mongodb::Database> {
+pub fn new_db(db_name: &str) -> Option<mongodb::Database> {
     match connect_to_db(DATABASE_NAME) {
         Ok(db) => Some(db),
         Err(_) => None, // TODO: error handle
     }
 }
 
-fn connect_to_db(db_name: &str) -> Result<mongodb::Database, mongodb::error::Error> {
+pub fn connect_to_db(db_name: &str) -> Result<mongodb::Database, mongodb::error::Error> {
     let client_options =
         ClientOptions::parse(DATABASE_LOCATION)?;
     let client = Client::with_options(client_options)?;
@@ -23,7 +24,7 @@ fn connect_to_db(db_name: &str) -> Result<mongodb::Database, mongodb::error::Err
     Ok(db)
 }
 
-fn bson_to_object<'a, T>(thing: bson::ordered::OrderedDocument)
+pub fn bson_to_object<'a, T>(thing: bson::ordered::OrderedDocument)
      -> Option<T>
     where T: Deserialize<'a> {
     match from_bson(Bson::Document(thing)) {
@@ -33,7 +34,7 @@ fn bson_to_object<'a, T>(thing: bson::ordered::OrderedDocument)
 }
 
 
-fn object_to_doc<T>(object: &T) -> Option<bson::Document>
+pub fn object_to_doc<T>(object: &T) -> Option<bson::Document>
     where T: Serialize {
     //to_bson(object)?.as_document().unwrap().clone()
     match to_bson(object) {
@@ -46,7 +47,7 @@ fn object_to_doc<T>(object: &T) -> Option<bson::Document>
 }
 
 
-fn docs_to_objects<'a, T>(docs_vector: Vec<bson::Document>)
+pub fn docs_to_objects<'a, T>(docs_vector: Vec<bson::Document>)
     -> Vec<T>
     where T: Deserialize<'a> {
     docs_vector.iter()
@@ -55,7 +56,7 @@ fn docs_to_objects<'a, T>(docs_vector: Vec<bson::Document>)
     .collect()
 }
 
-fn query_collection_for_docs(db: &mongodb::Database, coll_name: &str, query: bson::Document)
+pub fn query_collection_for_docs(db: &mongodb::Database, coll_name: &str, query: bson::Document)
     -> Vec<bson::Document> {
 
     //let v = Vec::<bson::Document>::new();
@@ -74,7 +75,7 @@ fn query_collection_for_docs(db: &mongodb::Database, coll_name: &str, query: bso
     }
 }
 
-fn exists_any_in(db: &mongodb::Database, coll_name: &str, q: bson::Document)
+pub fn exists_any_in(db: &mongodb::Database, coll_name: &str, q: bson::Document)
     -> bool {
     query_collection_for_docs(db, coll_name, q).len() != 0
 }
