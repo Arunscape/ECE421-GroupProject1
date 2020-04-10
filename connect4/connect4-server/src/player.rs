@@ -1,11 +1,11 @@
 use mongodb::{options::ClientOptions, Client};
 //use bson::{doc, bson, to_bson};
+use crate::jwtHelper::*;
 use bson::ordered::OrderedDocument;
 use bson::*;
 use connect4_lib::{
     game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
 };
-use crate::jwtHelper::*;
 
 static databaseName: &str = "Connect4DB";
 static jwtLifetimeSeconds: u64 = 5;
@@ -38,26 +38,16 @@ fn in_collection(collection_name: &str, doc: bson::Document) -> bool {
     }
 }
 
-<<<<<<< HEAD
-=======
-
 // given username and password, possibly sign in for JWT token
 fn sign_in(username: &str, _password: &str) -> Option<String> {
-
-    if in_collection(
-        "players",
-        doc!{"username": username.to_string()})
-    {
+    if in_collection("players", doc! {"username": username.to_string()}) {
         return None;
     }
-    Some(
-        gen_jwt_token(
-            ClaimPayload::username(username.to_string()),
-            jwtLifetimeSeconds)
-    )
+    Some(gen_jwt_token(
+        ClaimPayload::username(username.to_string()),
+        jwtLifetimeSeconds,
+    ))
 }
-
-
 
 #[cfg(test)]
 mod test {
