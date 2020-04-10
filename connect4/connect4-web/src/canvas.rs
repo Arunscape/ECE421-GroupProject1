@@ -78,7 +78,7 @@ impl Canvas {
     // also, change the use of thie function from lib.rs to
     // the new name
     pub fn draw_gameboard(&self, board: &game::Board) {
-        self.draw_mask(board.width, board.height);
+        self.draw_mask(board.width(), board.height());
         // TODO: for each chip in board.chips,
         // call draw circle to draw the chip
     }
@@ -192,10 +192,10 @@ impl GameIO for Canvas {
         self.draw_gameboard(board);
         let chips = board.get_layout();
         for i in 0..chips.len() {
-            let x = i % board.width;
-            let y = i / board.width;
-            let y = board.height - y - 1;
-            let i = x + y * board.width;
+            let x = i % board.width();
+            let y = i / board.width();
+            let y = board.height() - y - 1;
+            let i = x + y * board.width();
 
             match chips[i] {
                 Some(chip) => self.draw_chip(chip, x, y),
@@ -204,7 +204,7 @@ impl GameIO for Canvas {
         }
     }
 
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
+    fn get_move(&self, game: &Game) -> (isize, ChipDescrip) {
         let rect = self.canvas.get_bounding_client_rect();
         // wait for user input
         unsafe {

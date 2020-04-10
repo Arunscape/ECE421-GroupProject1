@@ -204,6 +204,12 @@ impl Board {
         let y = self.get_col_height(x) - 1;
         self.layout[(x + y * self.width) as usize] = None;
     }
+    pub fn height(&self) -> usize {
+        self.height as usize
+    }
+    pub fn width(&self) -> usize {
+        self.width as usize
+    }
 }
 
 pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
