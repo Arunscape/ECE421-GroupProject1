@@ -14,3 +14,5 @@ jobs:
       run: |
         rustup default nightly
         cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
+    - name: Test
+      run: cargo +nightly test --no-fail-fast --release --manifest-path=connect4/connect4-server/Cargo.toml

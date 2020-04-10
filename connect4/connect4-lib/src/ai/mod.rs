@@ -1,6 +1,6 @@
 use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 mod bitboard;
 mod connect;
@@ -208,6 +208,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_timing() {
         let mut game = make_game(vec![]);
 

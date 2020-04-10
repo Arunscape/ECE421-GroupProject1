@@ -144,6 +144,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn time_test() {
         let game = make_game(vec![]);
 
