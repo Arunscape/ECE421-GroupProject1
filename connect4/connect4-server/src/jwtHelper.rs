@@ -9,8 +9,16 @@ use std::{thread, time};
 
 
 #[derive(Debug, Serialize, Deserialize)]
+enum ClaimPayload {
+    // dummy example payloads
+    message(String),
+    number(i32),
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    sub: String, // extra data fields
+    data: ClaimPayload, // extra data fields
     exp: usize,
 }
 
@@ -59,7 +67,7 @@ mod test {
     #[test]
     fn valid_jwt_test() {
 	    let my_claims = Claims {
-	        sub: "asdf".to_owned(),
+	        data: ClaimPayload::message("asdf".to_owned()),
 	        exp: (since_epoch_seconds() + 2) as usize,
 	    };
 
@@ -76,7 +84,7 @@ mod test {
     #[test]
     fn invalid_jwt_test() {
 	    let my_claims = Claims {
-	        sub: "asdf".to_owned(),
+	        data: ClaimPayload::number(420),
 	        exp: (since_epoch_seconds() + 1) as usize,
 	    };
 
