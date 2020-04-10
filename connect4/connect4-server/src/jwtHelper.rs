@@ -9,9 +9,9 @@ use std::{thread, time};
 
 
 #[derive(Debug, Serialize, Deserialize)]
-enum ClaimPayload {
+pub enum ClaimPayload {
     // dummy example payloads
-    message(String),
+    username(String),
     number(i32),
 }
 
@@ -60,7 +60,7 @@ fn claims_from_jwt_token(token: String)
     }
 }
 
-fn gen_jwt_token(payload: ClaimPayload, expires_in_seconds: u64) -> String {
+pub fn gen_jwt_token(payload: ClaimPayload, expires_in_seconds: u64) -> String {
 
     let my_claims = Claims {
         data: payload,
@@ -78,7 +78,7 @@ mod test {
     #[test]
     fn valid_jwt_test() {
         let token = gen_jwt_token(
-            ClaimPayload::message("cats".to_owned()),
+            ClaimPayload::username("cats".to_owned()),
             2
         );
 
@@ -93,7 +93,7 @@ mod test {
     #[test]
     fn invalid_jwt_test() {
         let token = gen_jwt_token(
-            ClaimPayload::message("cats".to_owned()),
+            ClaimPayload::username("cats".to_owned()),
             2
         );
 
@@ -107,7 +107,7 @@ mod test {
     #[test]
     fn jwt_payload_test() {
         let token = gen_jwt_token(
-            ClaimPayload::message("cats".to_owned()),
+            ClaimPayload::username("cats".to_owned()),
             2
         );
 
@@ -116,7 +116,7 @@ mod test {
         match claims_from_jwt_token(token) {
             Ok(claims) => {
                 match claims.data {
-                    ClaimPayload::message(s) => assert!(s == "cats"),
+                    ClaimPayload::username(s) => assert!(s == "cats"),
                     _ => assert!(false),
                 }
             },
