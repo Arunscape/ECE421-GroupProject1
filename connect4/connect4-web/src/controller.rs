@@ -90,7 +90,6 @@ fn calculate_draw_height(board_height: usize) -> f64 {
 pub fn draw_game_pieces(canvas: &Canvas,
                         board: &Board,
                         chips: &[Chip]) {
-    console_log!("{:?}", chips);
     let mut heights = vec![0; board.width];
     for c in chips {
         let x = c.get_x();
