@@ -52,19 +52,42 @@ fn is_valid_jwt_token(token: String)
     }
 }
 
-fn example_usage() {
-    let my_claims = Claims {
-        sub: "asdf".to_owned(),
-         exp: (since_epoch_seconds() + 6) as usize,
-    };
+#[cfg(test)]
+mod test {
+    use super::*;
 
-    let token = get_jwt_token(my_claims);
+    #[test]
+    fn valid_jwt_test() {
+	    let my_claims = Claims {
+	        sub: "asdf".to_owned(),
+	        exp: (since_epoch_seconds() + 2) as usize,
+	    };
 
-    thread::sleep(time::Duration::from_millis( 5 * 1000));
+	    let token = get_jwt_token(my_claims);
 
-    if let Ok(claim) = is_valid_jwt_token(token) {
-        println!("{:?}", claim);
-    } else {
-        println!("not a valid thing");
+	    thread::sleep(time::Duration::from_millis( 1 * 1000));
+
+        match is_valid_jwt_token(token) {
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
+        }
     }
+
+    #[test]
+    fn invalid_jwt_test() {
+	    let my_claims = Claims {
+	        sub: "asdf".to_owned(),
+	        exp: (since_epoch_seconds() + 1) as usize,
+	    };
+
+	    let token = get_jwt_token(my_claims);
+
+	    thread::sleep(time::Duration::from_millis( 2 * 1000));
+
+        match is_valid_jwt_token(token) {
+            Ok(_) => assert!(false),
+            Err(_) => assert!(true),
+        }
+    }
+
 }

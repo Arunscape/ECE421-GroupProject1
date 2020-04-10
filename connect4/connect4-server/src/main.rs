@@ -8,6 +8,7 @@ use rocket_contrib::serve::StaticFiles;
 use std::{io, path::PathBuf};
 
 mod exampleDB;
+mod jwtHelper;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]
