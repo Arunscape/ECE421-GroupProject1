@@ -48,6 +48,7 @@ impl Component for AModel {
                                         None => html!{<canvas id="canvas" height="475" width="640" style="outline: black 3px solid;"/>}
                                     }
                                 }
+                                {format!("{:?}", self.props.route)}
                                 </div>
                             </div>
                         }

@@ -25,6 +25,8 @@ pub fn run_app() -> Result<(), JsValue> {
 mod a_component;
 mod b_component;
 mod c_component;
+mod navbar;
+use navbar::Navbar;
 
 use yew::prelude::*;
 
@@ -67,6 +69,7 @@ impl Component for Model {
                     <RouterButton<AppRoute> route=AppRoute::E("world".to_string())> {"Go to E (hello world)"} </RouterButton<AppRoute>>
                     <RouterButton<AppRoute> route=AppRoute::PageNotFound(Permissive(Some("nope".to_string())))> {"Go to bad path"} </RouterButton<AppRoute>>
                 </nav>
+                <Navbar/>
                 <div>
                     <Router<AppRoute>
                         render = Router::render(|switch: AppRoute| {
@@ -79,7 +82,15 @@ impl Component for Model {
                                 AppRoute::C => html!{<CModel />},
                                 AppRoute::E(string) => html!{format!("hello {}", string)},
                                 AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
-                                AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)}
+                                AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)},
+                                AppRoute::HowToConnect4 => html!{"Todo, put howtoconnect4 page here"},
+                                AppRoute::Connect4Computer => html!{"Todo, put connect4computer page here"},
+                                AppRoute::Connect4Human => html!{"Todo, put connect4human page here"},
+                                AppRoute::HowToToot => html!{"Todo, put howtotoot page here"},
+                                AppRoute::TootOttoComputer => html!{"Todo, put tootcomputer page here"},
+                                AppRoute::TootOttoHuman => html!{"Todo, put toothuman page here"},
+                                AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
+                                AppRoute::Scores => html!{"Todo, put scores page here"},
                             }
                         })
                         redirect = Router::redirect(|route: Route| {
@@ -104,6 +115,22 @@ pub enum AppRoute {
     E(String),
     #[to = "/page-not-found"]
     PageNotFound(Permissive<String>),
+    #[to = "/HowToConnect4"]
+    HowToConnect4,
+    #[to = "/Connect4Computer"]
+    Connect4Computer,
+    #[to = "/Connect4Human"]
+    Connect4Human,
+    #[to = "/HowToToot"]
+    HowToToot,
+    #[to = "/TootOttoComputer"]
+    TootOttoComputer,
+    #[to = "/TootOttoHuman"]
+    TootOttoHuman,
+    #[to = "/ScoreBoard"]
+    ScoreBoard,
+    #[to = "/Scores"]
+    Scores,
 }
 
 #[derive(Debug, Switch, PartialEq, Clone, Copy)]
