@@ -14,6 +14,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
+mod exampleDB;
+mod jwtHelper;
+
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]
 fn signin() -> &'static str {
@@ -94,5 +97,6 @@ fn rocket() -> rocket::Rocket {
 }
 
 fn main() {
+	//exampleDB::add_chip();
     rocket().launch();
 }

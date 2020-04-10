@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use crate::ai::AIConfig;
 use std::rc::Rc;
 
@@ -6,16 +7,17 @@ pub use chip::*;
 
 pub type Checker = Rc<dyn Fn(&Game) -> bool>;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PlayerType {
     Local,
     AI(AIConfig),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Player {
     pub player_type: PlayerType,
     pub chip_options: Vec<ChipDescrip>,
+    #[serde(skip_serializing, skip_deserializing)]
     pub win_conditions: Vec<Checker>,
 }
 
@@ -31,7 +33,7 @@ impl std::fmt::Debug for Player {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum BoardState {
     Invalid,
     Win(isize),
@@ -39,9 +41,9 @@ pub enum BoardState {
     Ongoing,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Game {
-    turn: usize,
+    turn: isize,
     board: Board,
     players: Vec<Player>,
 }
@@ -63,12 +65,12 @@ impl Game {
         &mut self.board
     }
 
-    pub fn play_no_check(&mut self, col: usize, color: ChipDescrip) {
+    pub fn play_no_check(&mut self, col: isize, color: ChipDescrip) {
         self.board.insert(Chip::new(col, color));
         self.turn += 1;
     }
 
-    pub fn play(&mut self, col: usize, color: ChipDescrip) -> BoardState {
+    pub fn play(&mut self, col: isize, color: ChipDescrip) -> BoardState {
         let y = self.board.get_col_height(col);
         if y + 1 > self.board.height || col > self.board.width {
             BoardState::Invalid
@@ -100,7 +102,7 @@ impl Game {
         }
     }
 
-    pub fn get_turn(&self) -> usize {
+    pub fn get_turn(&self) -> isize {
         self.turn
     }
 
@@ -128,14 +130,14 @@ impl Game {
     }
 
     pub fn current_player(&self) -> &Player {
-        &self.players[self.turn % self.players.len()]
+        &self.players[self.turn as usize % self.players.len()]
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Board {
-    pub width: usize,
-    pub height: usize,
+    pub width: isize,
+    pub height: isize,
     pub chips: Vec<Chip>,
     layout: Vec<Option<ChipDescrip>>,
 }
@@ -145,7 +147,7 @@ impl Clone for Board {
         let mut x = Self {
             width: self.width,
             height: self.height,
-            layout: vec![None; self.width * self.height],
+            layout: vec![None; (self.width * self.height) as usize],
             chips: Vec::new(),
         };
         for chip in &self.chips {
@@ -156,37 +158,37 @@ impl Clone for Board {
 }
 
 impl Board {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(width: isize, height: isize) -> Self {
         Self {
             width,
             height,
             chips: Vec::new(),
-            layout: vec![None; height * width],
+            layout: vec![None; (height * width) as usize],
         }
     }
 
     fn insert(&mut self, chip: Chip) {
         let y = self.get_col_height(chip.get_x());
-        self.layout[chip.get_x() + y * self.width] = Some(chip.get_descrip());
+        self.layout[(chip.get_x() + y * self.width) as usize] = Some(chip.get_descrip());
         self.chips.push(chip);
     }
 
-    pub fn get_col_height(&self, x: usize) -> usize {
+    pub fn get_col_height(&self, x: isize) -> isize {
         for y in 0..self.height {
-            if self.layout[x + y * self.width].is_none() {
+            if self.layout[(x + y * self.width) as usize].is_none() {
                 return y;
             }
         }
         self.height
     }
 
-    pub fn get_valid_moves(&self) -> Vec<usize> {
+    pub fn get_valid_moves(&self) -> Vec<isize> {
         (0..self.width)
             .filter(|x| self.get_col_height(*x) < self.height)
             .collect()
     }
 
-    pub fn last_move_loc(&self) -> (usize, usize) {
+    pub fn last_move_loc(&self) -> (isize, isize) {
         let x = self.chips[self.chips.len() - 1].get_x();
         (x, self.get_col_height(x) - 1)
     }
@@ -200,7 +202,7 @@ impl Board {
         let x = chip.expect("Should never undo no moves").get_x();
 
         let y = self.get_col_height(x) - 1;
-        self.layout[x + y * self.width] = None;
+        self.layout[(x + y * self.width) as usize] = None;
     }
 }
 
@@ -208,7 +210,7 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
     let lay = game.get_board_layout();
     let width = game.board.width;
     let height = game.board.height;
-    let len = pattern.len();
+    let len = pattern.len() as isize;
     assert!(len <= width);
     assert!(len <= height);
 
@@ -217,16 +219,14 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         y: isize,
         dx: isize,
         dy: isize,
-        len: usize,
-        width: usize,
-        height: usize,
+        len: isize,
+        width: isize,
+        height: isize,
         pattern: &Vec<ChipDescrip>,
         lay: &Vec<Option<ChipDescrip>>,
     ) -> bool {
         //let idx = |i| ((x + dx * i as isize) + (y + dy * i as isize) * (width as isize));
-        let idx = |x, y| x as usize + y as usize * width;
-        let width = width as isize;
-        let height = height as isize;
+        let idx = |x, y| (x + y * width) as usize;
         let mut x = x;
         let mut y = y;
         let mut matched = 0;
@@ -234,7 +234,7 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         while x >= 0 && x < width && y >= 0 && y < height {
             match lay[idx(x, y)] {
                 _ if matched == len => return true,
-                Some(chip) if chip == pattern[matched] => {
+                Some(chip) if chip == pattern[matched as usize] => {
                     matched += 1;
                 }
                 _ => {
@@ -255,12 +255,10 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
     let mut res = false;
 
     let (x, y) = game.get_board().last_move_loc();
-    let x = x as isize;
-    let y = y as isize;
 
     let m = std::cmp::min(x, y);
-    let h = game.get_board().height as isize - 1;
-    let w = game.get_board().width as isize - 1;
+    let h = game.get_board().height - 1;
+    let w = game.get_board().width - 1;
     let m2 = std::cmp::min(x, h - y);
 
     res |= check_line(x, 0, 0, 1);
@@ -279,7 +277,7 @@ mod tests {
     use crate::io::{GameIO, TermIO};
 
     // specifically connect4
-    fn make_game(locs: &Vec<usize>) -> Game {
+    fn make_game(locs: &Vec<isize>) -> Game {
         let mut game = connect4();
         for x in locs {
             let col = game.current_player().chip_options[0];
@@ -288,7 +286,7 @@ mod tests {
         game
     }
 
-    fn make_game_toto(locs: &Vec<(usize, ChipDescrip)>) -> Game {
+    fn make_game_toto(locs: &Vec<(isize, ChipDescrip)>) -> Game {
         let mut game = toto();
         for (x, col) in locs {
             game.play(*x, *col);

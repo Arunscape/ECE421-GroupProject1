@@ -16,11 +16,11 @@ pub struct BitBoard {
 impl BitBoard {
     pub fn from_game(game: &Game) -> Self {
         let key = pack_board(game);
-        let (mask, pos) = decode_key(key, game.get_board().width, game.get_board().height);
+        let (mask, pos) = decode_key(key, game.get_board().width as usize , game.get_board().height as usize );
         let mut bb = Self {
             mask: mask,
             position: pos,
-            turns: game.get_turn(),
+            turns: game.get_turn() as usize,
         };
         if game.get_turn() % 2 == 1 {
             bb.position ^= bb.mask;
@@ -179,11 +179,11 @@ impl BitBoard {
 pub fn pack_board(game: &Game) -> u64 {
     assert!((1 + game.get_board().height) * game.get_board().width < 64);
     let lay = game.get_board_layout();
-    let pack_column = |col| lay.iter().skip(col).step_by(game.get_board().width);
+    let pack_column = |col| lay.iter().skip(col).step_by(game.get_board().width as usize);
     let mut res = 0;
     let bit_width = 1 + game.get_board().height;
     for col in 0..game.get_board().width {
-        let col = pack_column(col);
+        let col = pack_column(col as usize);
         let mut l = col.len();
         let mut bit_col = 0;
         for (i, val) in col.enumerate() {

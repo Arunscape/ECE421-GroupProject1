@@ -1,13 +1,14 @@
 use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
+use serde::{Serialize, Deserialize};
 
 mod bitboard;
 mod connect;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AIConfig {
-    carlo_iter: usize,
-    minmax_depth: usize,
+    carlo_iter: isize,
+    minmax_depth: isize,
 }
 
 pub const EASY_AI: AIConfig = AIConfig {
@@ -25,7 +26,7 @@ pub const HARD_AI: AIConfig = AIConfig {
     minmax_depth: 6,
 };
 
-pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip) {
+pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (isize, ChipDescrip) {
     if ai_conf == HARD_AI {
         if crate::games::is_connect4(game) {
             return connect::get_best_move(game);
@@ -38,12 +39,12 @@ pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (usize, ChipDescrip)
     (mov, chip)
 }
 
-const MINMAX_SHIFT: usize = 14;
+const MINMAX_SHIFT: isize = 14;
 // returns board evaluation and next best move
-pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, ChipDescrip) {
+pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, isize, ChipDescrip) {
     let is_max = game.get_turn() % 2 == 0;
 
-    fn test_move(mov: usize, chip: ChipDescrip, game: &mut Game, ai_conf: AIConfig) -> isize {
+    fn test_move(mov: isize, chip: ChipDescrip, game: &mut Game, ai_conf: AIConfig) -> isize {
         game.play(mov, chip);
         let mut score = minmax_search(game, ai_conf.minmax_depth) << MINMAX_SHIFT;
         if score == 0 {
@@ -53,7 +54,7 @@ pub fn evaluate_board(game: &mut Game, ai_conf: AIConfig) -> (isize, usize, Chip
         score
     }
 
-    let mut potentials: Vec<(isize, usize, ChipDescrip)> = game
+    let mut potentials: Vec<(isize, isize, ChipDescrip)> = game
         .get_board()
         .get_valid_moves()
         .iter()
@@ -121,11 +122,11 @@ fn monte_carlo_search(game: &mut Game, ai_conf: AIConfig) -> isize {
     score
 }
 
-static mut COUNT: usize = 0;
+static mut COUNT: isize = 0;
 // specifically a 2 player AI
 // returns < 0 if player 2 wins
 // returns > 0 if player 1 wins
-fn minmax_search(game: &mut Game, depth: usize) -> isize {
+fn minmax_search(game: &mut Game, depth: isize) -> isize {
     unsafe {
         COUNT += 1;
     }
@@ -177,7 +178,7 @@ mod tests {
         }};
     }
 
-    fn make_game(moves: Vec<usize>) -> Game {
+    fn make_game(moves: Vec<isize>) -> Game {
         let mut game = crate::games::connect4_ai();
         for mov in moves {
             let chip = game.current_player().chip_options[0];

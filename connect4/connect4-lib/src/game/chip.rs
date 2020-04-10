@@ -1,26 +1,29 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+use serde::{Serialize, Deserialize};
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ChipDescrip {
-    pub bg_color: usize,
-    pub fg_color: usize,
+    pub bg_color: isize,
+    pub fg_color: isize,
     pub graphic: char,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Chip {
-    x: usize,
+    x: isize,
     descrip: ChipDescrip,
 }
 
 impl Chip {
-    pub fn new(x: usize, descrip: ChipDescrip) -> Self {
+    pub fn new(x: isize, descrip: ChipDescrip) -> Self {
         Self { x, descrip }
     }
 
-    pub fn get_x(&self) -> usize {
+    pub fn get_x(&self) -> isize {
         self.x
     }
 
-    pub fn set_x(&mut self, x: usize) {
+    pub fn set_x(&mut self, x: isize) {
         self.x = x;
     }
 
@@ -32,3 +35,4 @@ impl Chip {
         self.descrip = c;
     }
 }
+

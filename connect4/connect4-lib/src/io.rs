@@ -8,28 +8,28 @@ pub fn draw_term_board(game: &Board) {
 
 pub trait GameIO {
     fn draw_board(&self, game: &Board);
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip);
+    fn get_move(&self, game: &Game) -> (isize, ChipDescrip);
     fn display_gameover(&self, ending: BoardState);
 }
 
 pub const EMPTY: char = '◻';
 pub const FILLED: char = '◼';
-pub const BRIGHTEN: usize = 60;
-pub const FG: usize = 30;
-pub const BG: usize = 40;
-pub const BLK: usize = 0;
-pub const RED: usize = 1;
-pub const GRN: usize = 2;
-pub const YEL: usize = 3;
-pub const BLU: usize = 4;
-pub const MAG: usize = 5;
-pub const CYN: usize = 6;
-pub const WHT: usize = 7;
-pub const RST: usize = 9;
+pub const BRIGHTEN: isize = 60;
+pub const FG: isize = 30;
+pub const BG: isize = 40;
+pub const BLK: isize = 0;
+pub const RED: isize = 1;
+pub const GRN: isize = 2;
+pub const YEL: isize = 3;
+pub const BLU: isize = 4;
+pub const MAG: isize = 5;
+pub const CYN: isize = 6;
+pub const WHT: isize = 7;
+pub const RST: isize = 9;
 
 pub struct TermIO {
-    fg: usize,
-    bg: usize,
+    fg: isize,
+    bg: isize,
 }
 
 impl TermIO {
@@ -37,7 +37,7 @@ impl TermIO {
         Self { fg: RST, bg: RST }
     }
 
-    fn paint(fg: usize, bg: usize) {
+    fn paint(fg: isize, bg: isize) {
         let esc = char::from(0x1b);
         print!("{}[{};{}m", esc, fg + FG, bg + BG)
     }
@@ -46,7 +46,7 @@ impl TermIO {
         print!("{}[0m", esc)
     }
 
-    fn print_with_color(&mut self, s: char, fg: usize, bg: usize) {
+    fn print_with_color(&mut self, s: char, fg: isize, bg: isize) {
         if fg != self.fg || bg == self.fg {
             Self::paint(fg, bg);
             self.fg = fg;
@@ -60,29 +60,29 @@ impl GameIO for TermIO {
         let mut drawer = Self { fg: 0, bg: 0 };
         let chips = game.get_layout();
         for i in 0..chips.len() {
-            let x = i % game.width;
-            let y = i / game.width;
-            let y = game.height - y - 1;
-            let i = x + y * game.width;
+            let x = i % game.width as usize;
+            let y = i / game.width as usize;
+            let y = game.height as usize - y - 1;
+            let i = x + y * game.width as usize;
             if let Some(chip) = chips[i] {
                 drawer.print_with_color(chip.graphic, chip.fg_color, chip.bg_color);
             } else {
                 drawer.print_with_color(EMPTY, WHT, BLK + BRIGHTEN);
             }
             print!(" ");
-            if (i + 1) % game.width == 0 {
+            if (i + 1) % game.width as usize== 0 {
                 drawer.print_with_color('\n', RST, RST);
             }
         }
 
         drawer.print_with_color('1', WHT, BLK + BRIGHTEN);
-        (1..game.width).for_each(|i| print!(" {}", i + 1));
+        (1..game.width as usize).for_each(|i| print!(" {}", i + 1));
         print!(" ");
         Self::endpaint();
         println!();
     }
 
-    fn get_move(&self, game: &Game) -> (usize, ChipDescrip) {
+    fn get_move(&self, game: &Game) -> (isize, ChipDescrip) {
         fn read_line() -> String {
             let mut buffer = String::new();
             stdout().flush().expect("Failed to flush");
@@ -101,7 +101,7 @@ impl GameIO for TermIO {
 
         println!(
             "Player {} turn.",
-            game.get_turn() % game.get_player_count() + 1
+            game.get_turn() as usize % game.get_player_count() as usize + 1
         );
 
         let player = game.current_player();
@@ -130,8 +130,8 @@ impl GameIO for TermIO {
             get_chip_type(player)
         };
 
-        let val = get_num_in_range(1, game.get_board().width) - 1;
-        (val, ch)
+        let val = get_num_in_range(1, game.get_board().width as usize) - 1;
+        (val as isize, ch)
     }
 
     fn display_gameover(&self, ending: BoardState) {
