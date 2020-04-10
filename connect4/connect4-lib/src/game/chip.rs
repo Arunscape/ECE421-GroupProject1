@@ -1,3 +1,5 @@
+use super::Board;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChipDescrip {
     pub bg_color: usize,

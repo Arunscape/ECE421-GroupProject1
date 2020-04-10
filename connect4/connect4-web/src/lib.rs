@@ -13,6 +13,20 @@ pub fn run_app() -> Result<(), JsValue> {
     Ok(())
 }
 
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(a: &str);
+}
+
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+
 use yew::prelude::*;
 use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
