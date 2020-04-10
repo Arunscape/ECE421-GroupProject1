@@ -16,6 +16,7 @@ use std::{io, path::PathBuf};
 
 mod exampleDB;
 mod jwtHelper;
+mod player;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin")]
