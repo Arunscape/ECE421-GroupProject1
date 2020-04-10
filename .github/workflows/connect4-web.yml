@@ -18,6 +18,9 @@ jobs:
     - name: Test
       run: wasm-pack test --chrome --firefox
   Lint:
-    run: |
-      rustup component add rustfmt
-      cargo +nightly fmt --check --manifest-path=connect4/connect4-web/Cargo.toml
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint
+      run: |
+        rustup component add rustfmt
+        cargo +nightly fmt --check --manifest-path=connect4/connect4-web/Cargo.toml
