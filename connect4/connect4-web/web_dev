@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+wasm-pack build --dev --target web
+rollup ./main.js --format iife --file ./pkg/bundle.js
+cargo run --manifest-path=../connect4-server/Cargo.toml
