@@ -132,7 +132,7 @@ impl Component for Model {
                                 AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
                                 AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)},
                                 AppRoute::HowToConnect4 => html!{"Todo, put howtoconnect4 page here"},
-                                AppRoute::Connect4Computer => html!{"Todo, put connect4computer page here"},
+                                AppRoute::Connect4Computer => html!{<WebIOComponent/>},
                                 AppRoute::Connect4Human => html!{"Todo, put connect4human page here"},
                                 AppRoute::HowToToot => html!{"Todo, put howtotoot page here"},
                                 AppRoute::TootOttoComputer => html!{"Todo, put tootcomputer page here"},

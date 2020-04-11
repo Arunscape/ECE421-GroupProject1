@@ -147,7 +147,9 @@ impl WebIO {
         let res = self.game.play(col, move_type);
 
         self.game_state = match res {
-            BoardState::Ongoing => GameState::PlayingMove(Box::from(GameState::GetMove)),
+            BoardState::Ongoing => {
+                GameState::PlayingMove(Box::from(GameState::GetMove))
+            },
             BoardState::Invalid => self.game_state.clone(),
             BoardState::Draw => GameState::GameOver(res),
             BoardState::Win(_) => GameState::GameOver(res),
