@@ -4,13 +4,13 @@ use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
 use std::rc::Rc;
 
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
-    let check = move |game: &Game| -> bool { check_linear_pattern(&vec![chip; 4], game) };
+    let check = move |game: &Game| -> bool { check_linear_pattern(&[chip; 4], game) };
     Rc::from(check)
 }
 
 pub fn wrap_4_check(chip: ChipDescrip, chip_inner: ChipDescrip) -> Checker {
     let check = move |game: &Game| -> bool {
-        check_linear_pattern(&vec![chip, chip_inner, chip_inner, chip], game)
+        check_linear_pattern(&[chip, chip_inner, chip_inner, chip], game)
     };
     Rc::from(check)
 }

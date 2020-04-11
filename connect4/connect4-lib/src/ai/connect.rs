@@ -1,7 +1,5 @@
-use super::bitboard;
 use super::bitboard::BitBoard;
 use crate::game::{ChipDescrip, Game};
-use crate::io::{GameIO, TermIO};
 
 pub fn get_best_move(game: &mut Game) -> (isize, ChipDescrip) {
     let chip = game.current_player().chip_options[0];
@@ -42,7 +40,7 @@ static mut COUNT: usize = 0;
 fn negamax(bb: &BitBoard, alpha: isize, beta: isize) -> isize {
     unsafe {
         COUNT += 1;
-        if COUNT > 10000000 {
+        if COUNT > 10_000_000 {
             return 0;
         }
     }
