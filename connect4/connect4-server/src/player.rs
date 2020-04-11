@@ -11,7 +11,7 @@ pub struct User {
 }
 
 // given username and password, possibly sign in for JWT token
-fn sign_in(username: &str, password: &str) -> Option<String> {
+pub fn sign_in(username: &str, password: &str) -> Option<String> {
 
     // TODO: how do i indent this?
     let user_doc = object_to_doc( &User{
