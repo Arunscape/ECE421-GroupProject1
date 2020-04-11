@@ -79,15 +79,6 @@ impl WebIO {
             }
         }
 
-        if let GameState::PlayingMove(next) = self.game_state.clone() {
-            if let Some(falling) = self.falling_loc {
-                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
-                if let None = self.falling_loc {
-                    self.game_state = *next;
-                }
-            }
-        }
-
         if let GameState::WaitingForLocal = self.game_state.clone() {
             let (loc, ty) = match self.game.current_player().player_type {
                 PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
@@ -97,9 +88,19 @@ impl WebIO {
             };
             self.play_move(loc, ty);
         }
+
+        if let GameState::PlayingMove(next) = self.game_state.clone() {
+            if let Some(falling) = self.falling_loc {
+                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
+                if let None = self.falling_loc {
+                    self.game_state = *next;
+                }
+            }
+        }
     }
 
     fn do_iteration_renders(&self, delta: f64) {
+        console_log!("Rendering State: {:?}", self.game_state);
         self.canvas.clear();
         match self.game_state {
             GameState::WaitingForRemote => {
