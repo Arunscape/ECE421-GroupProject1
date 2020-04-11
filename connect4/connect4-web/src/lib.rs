@@ -6,8 +6,8 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
-mod coms;
 mod components;
+mod coms;
 mod controller;
 
 use crate::components::webio::WebIOComponent;
@@ -27,7 +27,6 @@ pub fn run_app() -> Result<(), JsValue> {
     App::<Model>::new().mount_to_body();
 
     yew::run_loop();
-
 
     Ok(())
 }

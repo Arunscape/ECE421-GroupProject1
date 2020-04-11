@@ -1,13 +1,12 @@
+use super::super::coms;
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
-use wasm_bindgen_futures::JsFuture;
-use serde::{Serialize, Deserialize};
 use yew_router::prelude::*;
-use wasm_bindgen::JsValue;
-use super::super::coms;
 
-
-pub struct Signin{
+pub struct Signin {
     link: ComponentLink<Self>,
     hm: String,
 }
@@ -61,27 +60,22 @@ impl Component for Signin {
                 coms::test_request();
                 self.hm = String::from("I was clicked!");
                 true
-            },
+            }
             _ => false,
         }
     }
-    
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
         true
     }
 
     fn view(&self) -> VNode {
-
-        
-
-
         html! {
-            <div>
-            <h1>{"/Signin"}</h1>
-            <button onclick=self.link.callback(|_| Msg::ButtonClick)>{self.hm.to_string()}
-            </button>
-            </div>
-            }
+        <div>
+        <h1>{"/Signin"}</h1>
+        <button onclick=self.link.callback(|_| Msg::ButtonClick)>{self.hm.to_string()}
+        </button>
+        </div>
+        }
     }
 }

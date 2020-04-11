@@ -8,7 +8,6 @@ use wasm_bindgen::JsCast;
 use std::cell::Cell;
 use std::rc::Rc;
 
-
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
     pub context: web_sys::CanvasRenderingContext2d,
@@ -104,6 +103,4 @@ impl Canvas {
             self.canvas.height().into(),
         );
     }
-
 }
-

@@ -1,5 +1,5 @@
-use crate::log;
 use crate::canvas::Canvas;
+use crate::log;
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
@@ -151,7 +151,6 @@ pub fn message(canvas: &Canvas, msg: String) {
     canvas.context.set_font("100px Arial");
     canvas.context.fill_text(&msg, 10.0, 150.0);
 }
-
 
 pub fn get_chip_fall(board: &Board) -> f64 {
     COLUMN_WIDTH * ((board.height + 1) as f64)

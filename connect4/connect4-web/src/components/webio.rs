@@ -1,9 +1,11 @@
 use crate::canvas::Canvas;
-use crate::log;
 use crate::controller;
+use crate::log;
 use crate::window;
 use crate::{request_animation_frame, seconds};
-use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, game::PlayerType, GameIO};
+use connect4_lib::{
+    game::Board, game::BoardState, game::ChipDescrip, game::Game, game::PlayerType, GameIO,
+};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -73,27 +75,28 @@ impl WebIO {
                 if self.canvas.is_mouse_pressed() && self.over_column.is_some() {
                     self.play_local_move();
                 }
-            },
+            }
             GameState::GameOver(_) => {
                 if self.canvas.is_mouse_pressed() {
                     self.finish();
                 }
-            },
+            }
             GameState::WaitingForLocal => {
                 let (loc, ty) = match self.game.current_player().player_type {
                     PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
                     PlayerType::AI(ai) => {
                         connect4_lib::ai::get_best_move(&mut self.game.clone(), ai)
-                    },
+                    }
                 };
                 self.play_move(loc, ty);
-            },
+            }
             GameState::WaitingForRemote => {
                 self.sync_board();
-            },
+            }
             GameState::PlayingMove(next) => {
                 if let Some(falling) = self.falling_loc {
-                    self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
+                    self.falling_loc =
+                        controller::update_falling_piece(self.game.get_board(), falling, delta);
                     if let None = self.falling_loc {
                         self.game_state = *next;
                     }
@@ -176,11 +179,9 @@ impl WebIO {
         }
     }
 
-    fn sync_board(&mut self) {
-    }
+    fn sync_board(&mut self) {}
 
-    fn send_move(&mut self) {
-    }
+    fn send_move(&mut self) {}
 
     fn play_local_move(&mut self) {
         let col = self
@@ -194,16 +195,15 @@ impl WebIO {
         let res = self.game.play(loc, ty);
         self.determine_state_after_move(res);
         self.send_move();
-        self.falling_loc = Some((loc, controller::get_chip_fall(self.game.get_board()), 0.0)); // TODO: no magic numbers
+        self.falling_loc = Some((loc, controller::get_chip_fall(self.game.get_board()), 0.0));
+        // TODO: no magic numbers
     }
 
     fn determine_state_after_move(&mut self, res: BoardState) {
         self.game_state = match res {
-            BoardState::Ongoing => {
-                match self.game.current_player().player_type {
-                    PlayerType::Local => GameState::PlayingMove(Box::from(GameState::GetMove)),
-                    PlayerType::AI(_) => GameState::PlayingMove(Box::from(GameState::WaitingForLocal)),
-                }
+            BoardState::Ongoing => match self.game.current_player().player_type {
+                PlayerType::Local => GameState::PlayingMove(Box::from(GameState::GetMove)),
+                PlayerType::AI(_) => GameState::PlayingMove(Box::from(GameState::WaitingForLocal)),
             },
             BoardState::Invalid => self.game_state.clone(),
             BoardState::Draw => GameState::GameOver(res),
@@ -263,7 +263,7 @@ impl Component for WebIOComponent {
 
     fn view(&self) -> Html {
         let back_callback = self.link.callback(|_| WebIOMsg::Back);
-        html!{
+        html! {
             <div>
                 <div>
                   <button onclick=back_callback> { "Back" } </button>

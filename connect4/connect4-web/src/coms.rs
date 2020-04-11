@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
 use crate::log;
@@ -21,7 +21,9 @@ pub fn test_request() {
         let request = request?;
 
         let tok = "None";
-        request.headers().set("Authorization", &format!("Bearer {}", tok))?;
+        request
+            .headers()
+            .set("Authorization", &format!("Bearer {}", tok))?;
 
         let window = web_sys::window().unwrap();
         let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
@@ -39,8 +41,8 @@ pub fn test_request() {
     }
     log("Calling Test request");
     async fn test() {
-      let val = with_errors().await;
-      log(&format!("{:?}", val));
+        let val = with_errors().await;
+        log(&format!("{:?}", val));
     }
     spawn_local(test());
 }
