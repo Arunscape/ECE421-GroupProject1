@@ -17,12 +17,12 @@ pub struct PlayMove {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GameData {
-    roomcode: String,
-    board_state: BoardState,
-    users: Vec<String>,
+    pub roomcode: String,
+    pub board_state: BoardState,
+    pub users: Vec<String>,
 
     #[serde(flatten)]
-    game: Game,
+    pub game: Game,
 }
 
 pub struct GameDataResponse {
