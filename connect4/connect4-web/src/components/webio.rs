@@ -12,6 +12,7 @@ use yew::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 #[derive(Clone, Debug)]
@@ -79,15 +80,6 @@ impl WebIO {
             }
         }
 
-        if let GameState::PlayingMove(next) = self.game_state.clone() {
-            if let Some(falling) = self.falling_loc {
-                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
-                if let None = self.falling_loc {
-                    self.game_state = *next;
-                }
-            }
-        }
-
         if let GameState::WaitingForLocal = self.game_state.clone() {
             let (loc, ty) = match self.game.current_player().player_type {
                 PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
@@ -97,9 +89,23 @@ impl WebIO {
             };
             self.play_move(loc, ty);
         }
+
+        if let GameState::WaitingForRemote = self.game_state.clone() {
+            self.sync_board();
+        }
+
+        if let GameState::PlayingMove(next) = self.game_state.clone() {
+            if let Some(falling) = self.falling_loc {
+                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
+                if let None = self.falling_loc {
+                    self.game_state = *next;
+                }
+            }
+        }
     }
 
     fn do_iteration_renders(&self, delta: f64) {
+        console_log!("Rendering State: {:?}", self.game_state);
         self.canvas.clear();
         match self.game_state {
             GameState::WaitingForRemote => {
@@ -172,6 +178,12 @@ impl WebIO {
         }
     }
 
+    fn sync_board(&mut self) {
+    }
+
+    fn send_move(&mut self) {
+    }
+
     fn play_local_move(&mut self) {
         let col = self
             .over_column
@@ -183,7 +195,8 @@ impl WebIO {
     fn play_move(&mut self, loc: isize, ty: ChipDescrip) {
         let res = self.game.play(loc, ty);
         self.determine_state_after_move(res);
-        self.falling_loc = Some((loc, 1100.0, 0.0)); // TODO: no magic numbers
+        self.send_move();
+        self.falling_loc = Some((loc, controller::get_chip_fall(self.game.get_board()), 0.0)); // TODO: no magic numbers
     }
 
     fn determine_state_after_move(&mut self, res: BoardState) {

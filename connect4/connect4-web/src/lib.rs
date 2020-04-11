@@ -17,11 +17,13 @@ use yew_router::prelude::*;
 
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
+    log("Starting Yew");
     yew::initialize();
     web_logger::init();
     App::<Model>::new().mount_to_body();
 
     yew::run_loop();
+
 
     Ok(())
 }

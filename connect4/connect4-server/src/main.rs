@@ -22,23 +22,24 @@ mod player;
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>", rank = 0)]
 fn signin(u: String, p: String) -> Option<String> {
+    println!("Signin called [{}, {}]", u, p);
     player::sign_in(u.as_str(), p.as_str())
 }
 
 /// /playmove: takes in description of move, gameid, and JWT, returns new gamestate
-#[get("/playmove")]
+#[put("/playmove")]
 fn playmove() -> &'static str {
     "playmove"
 }
 
 /// /refresh: takes in JWT returns new JWT
-#[get("/refresh")]
+#[post("/refresh")]
 fn refresh() -> &'static str {
     "refresh"
 }
 
 /// /creategame: takes in description of game, and JWT, returns gameid
-#[get("/creategame")]
+#[put("/creategame")]
 fn creategame() -> &'static str {
     "creategame"
 }
@@ -65,19 +66,8 @@ fn files(file: PathBuf) -> Option<NamedFile> {
         .unwrap()
         .parent()
         .unwrap()
-        .join("connect4-web")
+        .join("connect4-web/pkg")
         .join(file);
-    println!("{:?}", path);
-    NamedFile::open(path).ok()
-}
-
-#[get("/connect4-computer")]
-fn connect4human() -> Option<NamedFile> {
-    let path = std::env::current_dir()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("connect4-web/index.html");
     println!("{:?}", path);
     NamedFile::open(path).ok()
 }
@@ -93,12 +83,11 @@ fn rocket() -> rocket::Rocket {
             "/api",
             routes![signin, playmove, refresh, creategame, getgame],
         )
+        .mount("/pkg", routes![files])
         .mount("/", StaticFiles::from(path))
         .register(catchers![not_found])
-        .mount("/", routes![files, connect4human])
 }
 
 fn main() {
-    //exampleDB::add_chip();
     rocket().launch();
 }
