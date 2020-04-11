@@ -71,6 +71,7 @@ use yew::prelude::*;
 
 use yew_router::{prelude::*, Switch};
 
+use crate::storage::LocalStorage;
 use crate::{
     a_component::AModel,
     b_component::{BModel, BRoute},
@@ -97,6 +98,11 @@ impl Component for Model {
     }
 
     fn view(&self) -> VNode {
+        if let None = LocalStorage::get_token() {
+            if window().location().pathname().unwrap() != "/signin" {
+                window().location().set_href("/signin");
+            }
+        }
         html! {
             <div>
                 <Navbar/>

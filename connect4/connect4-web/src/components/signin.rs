@@ -1,3 +1,4 @@
+use super::super::window;
 use crate::{coms, storage::LocalStorage};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
@@ -73,6 +74,7 @@ impl Component for Signin {
                         Some(s) => LocalStorage::set_token(&s),
                         None => {}
                     };
+                    window().location().set_href("/");
                 }
                 spawn_local(handleSignin(self.username.clone(), self.password.clone()));
             }
