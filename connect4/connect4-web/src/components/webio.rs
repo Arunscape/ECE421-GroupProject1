@@ -12,6 +12,7 @@ use yew::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 #[derive(Clone, Debug)]
@@ -87,6 +88,10 @@ impl WebIO {
                 },
             };
             self.play_move(loc, ty);
+        }
+
+        if let GameState::WaitingForRemote = self.game_state.clone() {
+            self.sync_board();
         }
 
         if let GameState::PlayingMove(next) = self.game_state.clone() {
@@ -173,6 +178,12 @@ impl WebIO {
         }
     }
 
+    fn sync_board(&mut self) {
+    }
+
+    fn send_move(&mut self) {
+    }
+
     fn play_local_move(&mut self) {
         let col = self
             .over_column
@@ -184,7 +195,8 @@ impl WebIO {
     fn play_move(&mut self, loc: isize, ty: ChipDescrip) {
         let res = self.game.play(loc, ty);
         self.determine_state_after_move(res);
-        self.falling_loc = Some((loc, 1100.0, 0.0)); // TODO: no magic numbers
+        self.send_move();
+        self.falling_loc = Some((loc, controller::get_chip_fall(self.game.get_board()), 0.0)); // TODO: no magic numbers
     }
 
     fn determine_state_after_move(&mut self, res: BoardState) {
