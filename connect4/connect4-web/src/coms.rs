@@ -4,8 +4,8 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
-use serde::{Deserialize, Serialize};
 use connect4_lib::game::Chip;
+use serde::{Deserialize, Serialize};
 
 use crate::log;
 
@@ -27,7 +27,6 @@ struct SigninValue {
     tok: String,
 }
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
-
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     // TODO: convert from JsValue to actual value
     match js_json.map(|x| x.into_serde::<SigninValue>()) {
@@ -37,7 +36,7 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
             } else {
                 None
             }
-        },
+        }
         _ => None,
     }
 }
