@@ -70,9 +70,13 @@ impl Game {
         self.turn += 1;
     }
 
-    pub fn play(&mut self, col: isize, color: ChipDescrip) -> BoardState {
+    pub fn invalid_column(&self, col:isize) -> bool {
         let y = self.board.get_col_height(col);
-        if y + 1 > self.board.height || col > self.board.width {
+        y + 1 > self.board.height || col > self.board.width
+    }
+
+    pub fn play(&mut self, col: isize, color: ChipDescrip) -> BoardState {
+        if self.invalid_column(col) {
             BoardState::Invalid
         } else {
             self.play_no_check(col, color);
