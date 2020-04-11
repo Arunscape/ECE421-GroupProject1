@@ -168,19 +168,18 @@ mod test {
         get_game_by_roomcode(user2, &roomcode);
         let user2_sees = get_game_by_roomcode(user2, &roomcode).expect("GameData should exist");
         let user1_sees = get_game_by_roomcode(user1, &roomcode).expect("GameData should exist");
-        assert!(user2_sees.users== user1_sees.users);
-
+        assert!(user2_sees.users == user1_sees.users);
     }
 
     #[test]
     fn player_number_test() {
-	    let game: game::Game = games::connect4_3player();
-	    let mut new_game = GameData {
-	        roomcode: gen_valid_roomcode().to_owned(),
-	        board_state: game::BoardState::Ongoing,
-	        users: vec![],
-	        game: game,
-	    };
+        let game: game::Game = games::connect4_3player();
+        let mut new_game = GameData {
+            roomcode: gen_valid_roomcode().to_owned(),
+            board_state: game::BoardState::Ongoing,
+            users: vec![],
+            game: game,
+        };
 
         assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
         possibly_add_username_to_game(&mut new_game, "Alex");
@@ -189,8 +188,5 @@ mod test {
         assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
         possibly_add_username_to_game(&mut new_game, "Arun");
         assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
-
     }
-
-
 }
