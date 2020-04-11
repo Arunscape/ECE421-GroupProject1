@@ -51,11 +51,13 @@ impl GameData {
         }
     }
     // side effect: user is added to the game if they are not already
-    // BUG: this does not write game_data back to database
-    fn possibly_add_username_to_game(&mut self, username: &str) {
+    fn write_username(&mut self, username: &str) -> bool {
         match self.whats_my_player_number(username) {
-            Some(num) => { /*nothing to do here*/ }
-            None => self.users.push(username.to_string()),
+            Some(num) => false,
+            None => {
+                self.users.push(username.to_string());
+                true
+            },
         }
     }
 
@@ -160,7 +162,16 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-    game_data.possibly_add_username_to_game(username);
+    // possibly write the new username to the DB
+    if game_data.write_username(username) {
+        // update the DB
+        db.collection(GAME_COLLECTION_NAME).replace_one(
+            doc! {"roomcode": roomcode.to_string()},
+            object_to_doc(&game_data).expect("should go todoc??"),
+            None,
+        );
+    }
+
     Some(game_data)
 }
 
@@ -203,11 +214,11 @@ mod test {
         };
 
         assert_eq!(None, new_game.whats_my_player_number("Alex"));
-        new_game.possibly_add_username_to_game("Alex");
+        new_game.write_username("Alex");
         assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
-        new_game.possibly_add_username_to_game("Alex");
+        new_game.write_username("Alex");
         assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
-        new_game.possibly_add_username_to_game("Arun");
+        new_game.write_username("Arun");
         assert_eq!(Some(1), new_game.whats_my_player_number("Arun"));
     }
 }
