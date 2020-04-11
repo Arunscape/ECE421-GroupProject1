@@ -23,6 +23,7 @@ pub fn getgame() {}
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     // TODO: convert from JsValue to actual value
+    log("HEEEY");
     None
 }
 
@@ -32,7 +33,12 @@ fn build_url(postfix: &str) -> String {
     format!("http://{}/api/{}", SERVER_LOC, postfix)
 }
 
-async fn request(verb: &str, path: &str, body: Option<&str>, tok: Option<&str>) -> Result<JsValue, JsValue> {
+async fn request(
+    verb: &str,
+    path: &str,
+    body: Option<&str>,
+    tok: Option<&str>,
+) -> Result<JsValue, JsValue> {
     let mut opts = RequestInit::new();
     opts.method(verb);
     opts.mode(RequestMode::Cors);
@@ -48,9 +54,7 @@ async fn request(verb: &str, path: &str, body: Option<&str>, tok: Option<&str>) 
     }
     opts.body(body.map(|x| JsValue::from_str(x)).as_ref());
     if body.is_some() {
-        request
-            .headers()
-            .set("Content-Type", "application/json")?;
+        request.headers().set("Content-Type", "application/json")?;
     }
 
     let window = web_sys::window().unwrap();

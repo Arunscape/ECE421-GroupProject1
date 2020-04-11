@@ -4,7 +4,7 @@
 extern crate rocket;
 use rocket::http::{ContentType, Status};
 use rocket::response::status::NotFound;
-use rocket::response::{NamedFile, Redirect, content};
+use rocket::response::{content, NamedFile, Redirect};
 use rocket::Request;
 use rocket::Response;
 use rocket_contrib::serve::StaticFiles;
@@ -20,9 +20,12 @@ mod player;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
-fn signin(u: String, p: String) -> Option<String> {
+fn signin(u: String, p: String) -> content::Json<&'static str> {
     println!("Signin called [{}, {}]", u, p);
-    player::sign_in(u.as_str(), p.as_str())
+    match player::sign_in(u.as_str(), p.as_str()) {
+        Some(s) => content::Json("{ \"type\": \"some\" }"),
+        None => content::Json("{ \"type\": \"none\" }"),
+    }
 }
 
 /// /playmove: takes in description of move, gameid, and JWT, returns new gamestate

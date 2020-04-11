@@ -1,6 +1,7 @@
 use crate::{coms, storage::LocalStorage};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 use yew::{prelude::*, virtual_dom::VNode, InputData, Properties};
@@ -63,17 +64,17 @@ impl Component for Signin {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::ButtonClick => {
-                coms::test_request();
                 self.hm = String::from("Signing in...");
 
-                async {
-                    let token: Option<String> = coms::signin(&self.username, &self.password).await;
+                async fn handleSignin(username: String, password: String) {
+                    let token: Option<String> = coms::signin(&username, &password).await;
 
                     match token {
                         Some(s) => LocalStorage::set_token(&s),
                         None => {}
-                    }
-                };
+                    };
+                }
+                spawn_local(handleSignin(self.username.clone(), self.password.clone()));
             }
             Msg::UpdateUserName(s) => self.username = s,
             Msg::UpdatePassword(s) => self.password = s,
