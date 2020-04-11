@@ -202,12 +202,12 @@ mod test {
             game: game,
         };
 
-        assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
-        possibly_add_username_to_game(&mut new_game, "Alex");
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        possibly_add_username_to_game(&mut new_game, "Alex");
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        possibly_add_username_to_game(&mut new_game, "Arun");
-        assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
+        assert_eq!(None, new_game.whats_my_player_number("Alex"));
+        new_game.possibly_add_username_to_game("Alex");
+        assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
+        new_game.possibly_add_username_to_game("Alex");
+        assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
+        new_game.possibly_add_username_to_game("Arun");
+        assert_eq!(Some(1), new_game.whats_my_player_number("Arun"));
     }
 }
