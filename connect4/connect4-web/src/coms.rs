@@ -4,6 +4,7 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
+use serde::{Deserialize, Serialize};
 use connect4_lib::game::Chip;
 
 use crate::log;
@@ -20,10 +21,25 @@ pub fn test_request() {
 
 pub fn getgame() {}
 
+#[derive(Debug, Serialize, Deserialize)]
+struct SigninValue {
+    status: String,
+    tok: String,
+}
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
+
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     // TODO: convert from JsValue to actual value
-    None
+    match js_json.map(|x| x.into_serde::<SigninValue>()) {
+        Ok(Ok(v)) => {
+            if v.status == "success" {
+                Some(v.tok)
+            } else {
+                None
+            }
+        },
+        _ => None,
+    }
 }
 
 pub fn playmove(chip: &Chip) {}
@@ -66,5 +82,6 @@ async fn request(
     log(&format!("Got data: {:?}", resp));
     // Convert this other `Promise` into a rust `Future`.
     let res = JsFuture::from(resp.json()?).await?;
+    log(&format!("It was Okay"));
     Ok(res)
 }
