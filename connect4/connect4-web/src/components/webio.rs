@@ -68,37 +68,35 @@ impl WebIO {
             controller::canvas_loc_to_column(&self.canvas, loc.0, loc.1, self.game.get_board());
     }
     fn do_iteration_updates(&mut self, delta: f64) {
-        if self.canvas.is_mouse_pressed() && self.over_column.is_some() {
-            if let GameState::GetMove = self.game_state {
-                self.play_local_move();
-            }
-        }
-
-        if let GameState::GameOver(_) = self.game_state.clone() {
-            if self.canvas.is_mouse_pressed() {
-                self.finish();
-            }
-        }
-
-        if let GameState::WaitingForLocal = self.game_state.clone() {
-            let (loc, ty) = match self.game.current_player().player_type {
-                PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
-                PlayerType::AI(ai) => {
-                    connect4_lib::ai::get_best_move(&mut self.game.clone(), ai)
-                },
-            };
-            self.play_move(loc, ty);
-        }
-
-        if let GameState::WaitingForRemote = self.game_state.clone() {
-            self.sync_board();
-        }
-
-        if let GameState::PlayingMove(next) = self.game_state.clone() {
-            if let Some(falling) = self.falling_loc {
-                self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
-                if let None = self.falling_loc {
-                    self.game_state = *next;
+        match self.game_state.clone() {
+            GameState::GetMove => {
+                if self.canvas.is_mouse_pressed() && self.over_column.is_some() {
+                    self.play_local_move();
+                }
+            },
+            GameState::GameOver(_) => {
+                if self.canvas.is_mouse_pressed() {
+                    self.finish();
+                }
+            },
+            GameState::WaitingForLocal => {
+                let (loc, ty) = match self.game.current_player().player_type {
+                    PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
+                    PlayerType::AI(ai) => {
+                        connect4_lib::ai::get_best_move(&mut self.game.clone(), ai)
+                    },
+                };
+                self.play_move(loc, ty);
+            },
+            GameState::WaitingForRemote => {
+                self.sync_board();
+            },
+            GameState::PlayingMove(next) => {
+                if let Some(falling) = self.falling_loc {
+                    self.falling_loc = controller::update_falling_piece(self.game.get_board(), falling, delta);
+                    if let None = self.falling_loc {
+                        self.game_state = *next;
+                    }
                 }
             }
         }
