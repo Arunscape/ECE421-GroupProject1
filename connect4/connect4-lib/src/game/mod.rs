@@ -268,7 +268,7 @@ pub fn check_linear_pattern(pattern: &[ChipDescrip], game: &Game) -> bool {
 
     let m = std::cmp::min(x, y);
     let h = game.get_board().height - 1;
-    let w = game.get_board().width - 1;
+    let _w = game.get_board().width - 1;
     let m2 = std::cmp::min(x, h - y);
 
     res |= check_line(x, 0, 0, 1);
@@ -284,7 +284,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
     use crate::games::*;
-    use crate::io::{GameIO, TermIO};
+    //use crate::io::{GameIO, TermIO};
 
     // specifically connect4
     fn make_game(locs: &Vec<isize>) -> Game {
@@ -306,27 +306,27 @@ mod tests {
 
     #[test]
     fn test_hor_check() {
-        let pat = vec![red, red];
+        let pat = vec![RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 1, 2, 3, 0, 1, 2, 3, 0, 2, 1, 3])
         ));
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 6, 0])));
 
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
 
-        let pat = vec![chip_o, chip_t, chip_t, chip_o];
+        let pat = vec![O_CHIP, T_CHIP, T_CHIP, O_CHIP];
         let game = &make_game_toto(&vec![
-            (0, chip_t),
-            (1, chip_o),
-            (2, chip_t),
-            (3, chip_t),
-            (4, chip_t),
-            (0, chip_o),
-            (2, chip_t),
-            (3, chip_o),
-            (1, chip_t),
+            (0, T_CHIP),
+            (1, O_CHIP),
+            (2, T_CHIP),
+            (3, T_CHIP),
+            (4, T_CHIP),
+            (0, O_CHIP),
+            (2, T_CHIP),
+            (3, O_CHIP),
+            (1, T_CHIP),
         ]);
         crate::io::draw_term_board(game.get_board());
         assert!(check_linear_pattern(&pat, game));
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn test_ver_check() {
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0])));
         assert!(check_linear_pattern(
             &pat,
@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     fn test_dia_check() {
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
 
         assert!(check_linear_pattern(
             &pat,
@@ -356,7 +356,7 @@ mod tests {
             &make_game(&vec![0, 0, 0, 1, 1, 3, 2])
         ));
 
-        let pat = vec![red, red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -367,7 +367,7 @@ mod tests {
 
     #[test]
     fn test_dia_check2() {
-        let pat = vec![red, red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -375,7 +375,7 @@ mod tests {
             ])
         ));
 
-        let pat = vec![yellow, yellow, yellow, yellow];
+        let pat = vec![YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -383,7 +383,7 @@ mod tests {
             ])
         ));
 
-        let pat = vec![yellow, yellow, yellow, yellow];
+        let pat = vec![YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP];
         assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -394,7 +394,7 @@ mod tests {
 
     #[test]
     fn test_check_small() {
-        let pat = vec![red, red];
+        let pat = vec![RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0])));
 
         let game = make_game(&vec![2]);
