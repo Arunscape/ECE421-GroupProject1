@@ -2,10 +2,9 @@
 
 #[macro_use]
 extern crate rocket;
-
 use rocket::http::{ContentType, Status};
 use rocket::response::status::NotFound;
-use rocket::response::{NamedFile, Redirect};
+use rocket::response::{NamedFile, Redirect, content};
 use rocket::Request;
 use rocket::Response;
 use rocket_contrib::serve::StaticFiles;
@@ -28,26 +27,26 @@ fn signin(u: String, p: String) -> Option<String> {
 
 /// /playmove: takes in description of move, gameid, and JWT, returns new gamestate
 #[put("/playmove")]
-fn playmove() -> &'static str {
-    "playmove"
+fn playmove() -> content::Json<&'static str> {
+    content::Json("{ \"type\": \"playmove\" }")
 }
 
 /// /refresh: takes in JWT returns new JWT
 #[post("/refresh")]
-fn refresh() -> &'static str {
-    "refresh"
+fn refresh() -> content::Json<&'static str> {
+    content::Json("{ \"type\": \"refresh\" }")
 }
 
 /// /creategame: takes in description of game, and JWT, returns gameid
 #[put("/creategame")]
-fn creategame() -> &'static str {
-    "creategame"
+fn creategame() -> content::Json<&'static str> {
+    content::Json("{ \"type\": \"playmove\" }")
 }
 
 /// /getgame: takes in gameid, JWT, and returns gamestate
 #[get("/getgame")]
-fn getgame() -> &'static str {
-    "getgame"
+fn getgame() -> content::Json<&'static str> {
+    content::Json("{ \"type\": \"getgame\" }")
 }
 
 #[catch(404)]
