@@ -98,7 +98,7 @@ mod test {
     use super::*;
 
     #[test]
-    //#[ignore]
+    #[ignore]
     fn db_game_test() {
         let game: game::Game = games::connect4_3player();
         let roomcode = insert_new_game(game);
