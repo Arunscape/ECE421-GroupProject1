@@ -4,16 +4,16 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
-mod controller;
 mod components;
+mod controller;
 
 use crate::components::webio::WebIOComponent;
 
-use yew::prelude::*;
-use yew_router::prelude::*;
+use components::signin::SignIn;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
@@ -58,7 +58,8 @@ fn seconds() -> f64 {
     window()
         .performance()
         .expect("performance should be available")
-        .now() / 1000.0
+        .now()
+        / 1000.0
 }
 
 mod a_component;

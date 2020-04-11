@@ -14,13 +14,13 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
-mod jwtHelper;
-mod player;
 mod dbhelper;
 mod gamehelper;
+mod jwtHelper;
+mod player;
 
 /// /signin: takes username and password, returns JWT
-#[get("/signin/<u>/<p>")]
+#[get("/signin/<u>/<p>", rank = 0)]
 fn signin(u: String, p: String) -> Option<String> {
     player::sign_in(u.as_str(), p.as_str())
 }
@@ -59,7 +59,7 @@ fn not_found<'a>(req: &Request) -> Option<NamedFile> {
     NamedFile::open(path).ok()
 }
 
-#[get("/<file..>")]
+#[get("/<file..>", rank = 11)]
 fn files(file: PathBuf) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
