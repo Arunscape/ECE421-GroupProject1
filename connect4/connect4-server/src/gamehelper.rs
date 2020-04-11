@@ -74,6 +74,9 @@ pub fn update_game_with_play(
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
     if let Some(mut game_data) = get_game_by_roomcode(roomcode.as_str()) {
+        if !valid_play(&game_data, username, col, color) {
+            return None;
+        }
         // make the play
         game_data.board_state = game_data.game.play(col, color);
 
@@ -89,6 +92,10 @@ pub fn update_game_with_play(
     } else {
         None
     }
+}
+
+fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
+    true
 }
 
 pub fn get_game_by_roomcode(roomcode: &str) -> Option<GameData> {
