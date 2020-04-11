@@ -31,6 +31,25 @@ impl GameData {
             game: game,
         }
     }
+	fn valid_play(&self, username: &str, col: isize, color: game::ChipDescrip) -> bool {
+	    if let Some(player_num) = whats_my_player_number(&self, username) {
+	        let valid_turn_num = (self.game.get_turn() as usize
+	            % self.game.get_player_count()) as isize
+	            == player_num;
+	        let valid_chip = self
+	            .game
+	            .current_player()
+	            .chip_options
+	            .iter()
+	            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+	        let valid_col = !self.game.invalid_column(col);
+
+	        valid_turn_num && valid_chip && valid_col
+	    } else {
+	        // panic!("player isnt in DB for some reason?")
+	        false
+	    }
+	}
 }
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
@@ -81,7 +100,7 @@ pub fn update_game_with_play(
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
     if let Some(mut game_data) = get_game_data(username, roomcode) {
-        if !valid_play(&game_data, username, col, color) {
+        if !game_data.valid_play(username, col, color) {
             return None;
         }
         // make the play
@@ -101,25 +120,6 @@ pub fn update_game_with_play(
     }
 }
 
-fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-    if let Some(player_num) = whats_my_player_number(&game_data, username) {
-        let valid_turn_num = (game_data.game.get_turn() as usize
-            % game_data.game.get_player_count()) as isize
-            == player_num;
-        let valid_chip = game_data
-            .game
-            .current_player()
-            .chip_options
-            .iter()
-            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-        let valid_col = !game_data.game.invalid_column(col);
-
-        valid_turn_num && valid_chip && valid_col
-    } else {
-        // panic!("player isnt in DB for some reason?")
-        false
-    }
-}
 
 pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
