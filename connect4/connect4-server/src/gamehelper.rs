@@ -74,7 +74,7 @@ pub fn update_game_with_play(
     color: game::ChipDescrip,
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
-    if let Some(mut game_data) = get_game_by_roomcode(username, roomcode) {
+    if let Some(mut game_data) = get_game_data(username, roomcode) {
         if !valid_play(&game_data, username, col, color) {
             return None;
         }
@@ -115,7 +115,7 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
     }
 }
 
-pub fn get_game_by_roomcode(username: &str, roomcode: &str) -> Option<GameData> {
+pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
     let game_docs = query_collection_for_docs(
@@ -182,9 +182,9 @@ mod test {
         update_game_with_play(&roomcode, user1, 1, games::YELLOW_CHIP);
 
         // side effect: this adds user2 to the game
-        get_game_by_roomcode(user2, &roomcode);
-        let user2_sees = get_game_by_roomcode(user2, &roomcode).expect("GameData should exist");
-        let user1_sees = get_game_by_roomcode(user1, &roomcode).expect("GameData should exist");
+        get_game_data(user2, &roomcode);
+        let user2_sees = get_game_data(user2, &roomcode).expect("GameData should exist");
+        let user1_sees = get_game_data(user1, &roomcode).expect("GameData should exist");
         assert!(user2_sees.users == user1_sees.users);
     }
 
