@@ -169,7 +169,7 @@ mod test {
     use super::*;
 
     #[test]
-    //#[ignore]
+    #[ignore]
     fn db_insert_game_test() {
         let game: game::Game = games::connect4_3player();
         let roomcode = insert_new_game("Alex", game);
@@ -177,7 +177,7 @@ mod test {
     }
 
     #[test]
-    //#[ignore]
+    #[ignore]
     fn db_add_players_to_game_test() {
         let user1 = "Alex";
         let user2 = "Arun";
