@@ -48,6 +48,7 @@ pub struct GameData {
 }
 
 // given a connect4-lib style game, insert it into the DB
+// TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
     let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
@@ -73,7 +74,7 @@ pub fn update_game_with_play(
     color: game::ChipDescrip,
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
-    if let Some(mut game_data) = get_game_by_roomcode(roomcode.as_str()) {
+    if let Some(mut game_data) = get_game_by_roomcode(username, roomcode.as_str()) {
         if !valid_play(&game_data, username, col, color) {
             return None;
         }
@@ -98,7 +99,7 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
     true
 }
 
-pub fn get_game_by_roomcode(roomcode: &str) -> Option<GameData> {
+pub fn get_game_by_roomcode(username: &str, roomcode: &str) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
     let game_docs = query_collection_for_docs(
@@ -114,6 +115,7 @@ pub fn get_game_by_roomcode(roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
+    possibly_add_username_to_game(&mut game_data, username);
     Some(game_data)
 }
 
@@ -133,6 +135,14 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
     }
 }
 
+// side effect: user is added to the game if they are not already
+fn possibly_add_username_to_game(game_data: &mut GameData, username: &str) {
+    match whats_my_player_number(game_data, username) {
+        Some(num) => {/*nothing to do here*/},
+        None => game_data.users.push(username.to_string()),
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -141,7 +151,7 @@ mod test {
     #[ignore]
     fn db_game_test() {
         let game: game::Game = games::connect4_3player();
-        let roomcode = insert_new_game(game);
+        let roomcode = insert_new_game("Alex", game);
         update_game_with_play(roomcode, "Alex", 1, games::YELLOW_CHIP);
     }
 }
