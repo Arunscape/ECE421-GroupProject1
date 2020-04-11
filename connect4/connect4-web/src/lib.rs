@@ -4,29 +4,75 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
+mod controller;
+mod components;
+
+use crate::components::webio::WebIOComponent;
+
+use yew::prelude::*;
+use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+
+
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
     yew::initialize();
     web_logger::init();
     App::<Model>::new().mount_to_body();
 
-    let game = games::connect4();
-    let c = canvas::Canvas::new("#canvas", 20, 20);
-
-    let mut game = games::connect4_ai();
     yew::run_loop();
-    // todo hook up to a button press or something
-    connect4_lib::play(&mut game, c);
 
     Ok(())
+}
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(a: &str);
+}
+
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+fn window() -> web_sys::Window {
+    web_sys::window().expect("no global `window` exists")
+}
+
+fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window()
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
+fn document() -> web_sys::Document {
+    window()
+        .document()
+        .expect("should have a document on window")
+}
+
+fn body() -> web_sys::HtmlElement {
+    document().body().expect("document should have a body")
+}
+
+fn seconds() -> f64 {
+    window()
+        .performance()
+        .expect("performance should be available")
+        .now() / 1000.0
 }
 
 mod a_component;
 mod b_component;
 mod c_component;
 mod navbar;
+mod welcome;
 use navbar::Navbar;
+use welcome::Welcome;
 
 use yew::prelude::*;
 
@@ -75,6 +121,7 @@ impl Component for Model {
                     <Router<AppRoute>
                         render = Router::render(|switch: AppRoute| {
                             match switch {
+                                AppRoute::Root => html!{<Welcome/>},
                                 AppRoute::A(AllowMissing(route)) => html!{<AModel route = route />},
                                 AppRoute::B(route) => {
                                     let route: b_component::Props = route.into();
@@ -85,7 +132,7 @@ impl Component for Model {
                                 AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
                                 AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)},
                                 AppRoute::HowToConnect4 => html!{"Todo, put howtoconnect4 page here"},
-                                AppRoute::Connect4Computer => html!{"Todo, put connect4computer page here"},
+                                AppRoute::Connect4Computer => html!{<WebIOComponent/>},
                                 AppRoute::Connect4Human => html!{"Todo, put connect4human page here"},
                                 AppRoute::HowToToot => html!{"Todo, put howtotoot page here"},
                                 AppRoute::TootOttoComputer => html!{"Todo, put tootcomputer page here"},
@@ -106,31 +153,33 @@ impl Component for Model {
 
 #[derive(Debug, Switch, Clone)]
 pub enum AppRoute {
+    #[to = "/!"]
+    Root,
     #[to = "/a{*:inner}"]
     A(AllowMissing<ARoute>),
     #[to = "/b{*:inner}"]
     B(BRoute),
-    #[to = "/c"]
+    #[to = "/c!"]
     C,
     #[to = "/e/{string}"]
     E(String),
-    #[to = "/page-not-found"]
+    #[to = "/page-not-found!"]
     PageNotFound(Permissive<String>),
-    #[to = "/HowToConnect4"]
+    #[to = "/HowToConnect4!"]
     HowToConnect4,
-    #[to = "/Connect4Computer"]
+    #[to = "/Connect4Computer!"]
     Connect4Computer,
-    #[to = "/Connect4Human"]
+    #[to = "/Connect4Human!"]
     Connect4Human,
-    #[to = "/HowToToot"]
+    #[to = "/HowToToot!"]
     HowToToot,
-    #[to = "/TootOttoComputer"]
+    #[to = "/TootOttoComputer!"]
     TootOttoComputer,
-    #[to = "/TootOttoHuman"]
+    #[to = "/TootOttoHuman!"]
     TootOttoHuman,
-    #[to = "/ScoreBoard"]
+    #[to = "/ScoreBoard!"]
     ScoreBoard,
-    #[to = "/Scores"]
+    #[to = "/Scores!"]
     Scores,
 }
 

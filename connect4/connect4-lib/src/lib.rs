@@ -31,3 +31,4 @@ pub fn play(game: &mut Game, io: impl GameIO) {
     game.print_moves();
     println!();
 }
+
