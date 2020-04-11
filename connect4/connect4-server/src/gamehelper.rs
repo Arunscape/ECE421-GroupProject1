@@ -96,7 +96,23 @@ pub fn update_game_with_play(
 }
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-    true
+    if let Some(player_num) = whats_my_player_number(&game_data, username) {
+        let valid_turn_num = (game_data.game.get_turn() as usize
+            % game_data.game.get_player_count()) as isize
+            == player_num;
+        let valid_chip = game_data
+            .game
+            .current_player()
+            .chip_options
+            .iter()
+            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+        let valid_col = !game_data.game.invalid_column(col);
+
+        valid_turn_num && valid_chip && valid_col
+    } else {
+        // panic!("player isnt in DB for some reason?")
+        false
+    }
 }
 
 pub fn get_game_by_roomcode(username: &str, roomcode: &str) -> Option<GameData> {

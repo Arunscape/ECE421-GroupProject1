@@ -4,7 +4,7 @@
 extern crate rocket;
 use rocket::http::{ContentType, Status};
 use rocket::response::status::NotFound;
-use rocket::response::{NamedFile, Redirect, content};
+use rocket::response::{content, NamedFile, Redirect};
 use rocket::Request;
 use rocket::Response;
 use rocket_contrib::serve::StaticFiles;
