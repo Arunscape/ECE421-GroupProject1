@@ -26,7 +26,9 @@ mod a_component;
 mod b_component;
 mod c_component;
 mod navbar;
+mod welcome;
 use navbar::Navbar;
+use welcome::Welcome;
 
 use yew::prelude::*;
 
@@ -75,6 +77,7 @@ impl Component for Model {
                     <Router<AppRoute>
                         render = Router::render(|switch: AppRoute| {
                             match switch {
+                                AppRoute::Root => html!{<Welcome/>},
                                 AppRoute::A(AllowMissing(route)) => html!{<AModel route = route />},
                                 AppRoute::B(route) => {
                                     let route: b_component::Props = route.into();
@@ -106,31 +109,33 @@ impl Component for Model {
 
 #[derive(Debug, Switch, Clone)]
 pub enum AppRoute {
+    #[to = "/!"]
+    Root,
     #[to = "/a{*:inner}"]
     A(AllowMissing<ARoute>),
     #[to = "/b{*:inner}"]
     B(BRoute),
-    #[to = "/c"]
+    #[to = "/c!"]
     C,
     #[to = "/e/{string}"]
     E(String),
-    #[to = "/page-not-found"]
+    #[to = "/page-not-found!"]
     PageNotFound(Permissive<String>),
-    #[to = "/HowToConnect4"]
+    #[to = "/HowToConnect4!"]
     HowToConnect4,
-    #[to = "/Connect4Computer"]
+    #[to = "/Connect4Computer!"]
     Connect4Computer,
-    #[to = "/Connect4Human"]
+    #[to = "/Connect4Human!"]
     Connect4Human,
-    #[to = "/HowToToot"]
+    #[to = "/HowToToot!"]
     HowToToot,
-    #[to = "/TootOttoComputer"]
+    #[to = "/TootOttoComputer!"]
     TootOttoComputer,
-    #[to = "/TootOttoHuman"]
+    #[to = "/TootOttoHuman!"]
     TootOttoHuman,
-    #[to = "/ScoreBoard"]
+    #[to = "/ScoreBoard!"]
     ScoreBoard,
-    #[to = "/Scores"]
+    #[to = "/Scores!"]
     Scores,
 }
 
