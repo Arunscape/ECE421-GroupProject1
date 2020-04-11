@@ -41,7 +41,7 @@ fn gen_valid_roomcode() -> String {
 pub struct GameData {
     roomcode: String,
     board_state: game::BoardState,
-    users: Vec<User>,
+    users: Vec<String>,
 
     #[serde(flatten)]
     game: game::Game,
@@ -115,6 +115,22 @@ pub fn get_game_by_roomcode(roomcode: &str) -> Option<GameData> {
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
     Some(game_data)
+}
+
+fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
+    let res: Vec<usize> = game_data
+        .users
+        .iter()
+        .enumerate()
+        .filter(|(i, item)| item.as_str() == username)
+        .map(|(i, item)| i)
+        .collect();
+
+    if res.len() == 0 {
+        None
+    } else {
+        Some(res[0] as isize)
+    }
 }
 
 #[cfg(test)]
