@@ -20,7 +20,7 @@ mod jwtHelper;
 mod player;
 
 /// /signin: takes username and password, returns JWT
-#[get("/signin/<u>/<p>", rank = 0)]
+#[get("/signin/<u>/<p>", rank = 9)]
 fn signin(u: String, p: String) -> Option<String> {
     println!("Signin called [{}, {}]", u, p);
     player::sign_in(u.as_str(), p.as_str())
