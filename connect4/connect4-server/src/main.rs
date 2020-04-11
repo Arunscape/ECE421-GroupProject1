@@ -14,7 +14,6 @@ use std::fs::File;
 use std::{io, path::PathBuf};
 
 use connect4_coms::types::Signin;
-use serde::Serialize;
 
 mod dbhelper;
 mod gamehelper;
