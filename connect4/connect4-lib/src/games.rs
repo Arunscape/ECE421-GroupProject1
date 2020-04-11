@@ -210,7 +210,7 @@ pub fn connect4_3player() -> Game {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    //use super::*;
 
     #[test]
     fn test_is_connect4() {}

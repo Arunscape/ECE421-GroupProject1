@@ -165,7 +165,7 @@ fn minmax_search(game: &mut Game, depth: isize) -> isize {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::io::{GameIO, TermIO};
+    //use crate::io::{GameIO, TermIO};
 
     use std::time::Instant;
     macro_rules! time {
