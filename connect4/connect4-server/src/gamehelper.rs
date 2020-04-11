@@ -77,6 +77,8 @@ pub fn update_game_with_play(roomcode: String, col: isize, color: game::ChipDesc
     let game_docs = query_collection_for_docs(&db,
         GAME_COLLECTION_NAME,
         doc!{"roomcode": roomcode.to_owned()});
+
+    // TODO: add error handling, next line could panic
     // there should be 1 game docs...
 
     let mut game_data: GameData  = docs_to_objects::<GameData>(game_docs).remove(0);
@@ -92,6 +94,24 @@ pub fn update_game_with_play(roomcode: String, col: isize, color: game::ChipDesc
     new_state
 }
 
+pub fn get_game_by_roomcode(roomcode:String) -> Option<game::Game>{
+
+    let db = new_db(DATABASE_NAME)
+        .expect("No mongo, is it running?");
+
+    let game_docs = query_collection_for_docs(&db,
+        GAME_COLLECTION_NAME,
+        doc!{"roomcode": roomcode.to_owned()});
+
+    // sould only be one game doc
+    if game_docs.len() == 0 {
+        return None;
+    }
+
+    let mut game_data: GameData  = docs_to_objects::<GameData>(game_docs).remove(0);
+
+    Some(game_data.game)
+}
 
 #[cfg(test)]
 mod test {
