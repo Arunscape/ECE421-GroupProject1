@@ -75,7 +75,6 @@ mod navbar;
 mod welcome;
 use navbar::Navbar;
 use welcome::Welcome;
-
 use yew::prelude::*;
 
 use yew_router::{prelude::*, Switch};
@@ -124,6 +123,7 @@ impl Component for Model {
                         render = Router::render(|switch: AppRoute| {
                             match switch {
                                 AppRoute::Root => html!{<Welcome/>},
+                                AppRoute::Signin => html!{<Signin/>},
                                 AppRoute::A(AllowMissing(route)) => html!{<AModel route = route />},
                                 AppRoute::B(route) => {
                                     let route: b_component::Props = route.into();
@@ -157,6 +157,8 @@ impl Component for Model {
 pub enum AppRoute {
     #[to = "/!"]
     Root,
+    #[to = "/signin!"]
+    Signin,
     #[to = "/a{*:inner}"]
     A(AllowMissing<ARoute>),
     #[to = "/b{*:inner}"]

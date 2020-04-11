@@ -3,10 +3,13 @@ use yew::{prelude::*, virtual_dom::VNode, Properties};
 use wasm_bindgen_futures::JsFuture;
 use serde::{Serialize, Deserialize};
 use yew_router::prelude::*;
+use wasm_bindgen::JsValue;
+use super::super::coms;
 
 
 pub struct Signin{
     link: ComponentLink<Self>,
+    hm: String,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -48,12 +51,21 @@ impl Component for Signin {
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             link,
+            hm: String::from("click me!"),
         }
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        false
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            Msg::ButtonClick => {
+                coms::test_request();
+                self.hm = String::from("I was clicked!");
+                true
+            },
+            _ => false,
+        }
     }
+    
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
         true
@@ -65,8 +77,11 @@ impl Component for Signin {
 
 
         html! {
-            <button onclick=self.link.callback(|_| Msg::ButtonClick)>{"Click me"}
+            <div>
+            <h1>{"/Signin"}</h1>
+            <button onclick=self.link.callback(|_| Msg::ButtonClick)>{self.hm.to_string()}
             </button>
+            </div>
             }
     }
 }
