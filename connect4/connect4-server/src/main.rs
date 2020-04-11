@@ -59,7 +59,7 @@ fn not_found<'a>(req: &Request) -> Option<NamedFile> {
     NamedFile::open(path).ok()
 }
 
-#[get("/<file..>", rank=11)]
+#[get("/<file..>")]
 fn files(file: PathBuf) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
