@@ -31,25 +31,49 @@ impl GameData {
             game: game,
         }
     }
-	fn valid_play(&self, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-	    if let Some(player_num) = whats_my_player_number(&self, username) {
-	        let valid_turn_num = (self.game.get_turn() as usize
-	            % self.game.get_player_count()) as isize
-	            == player_num;
-	        let valid_chip = self
-	            .game
-	            .current_player()
-	            .chip_options
-	            .iter()
-	            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-	        let valid_col = !self.game.invalid_column(col);
+    fn valid_play(&self, username: &str, col: isize, color: game::ChipDescrip) -> bool {
+        if let Some(player_num) = self.whats_my_player_number(username) {
+            let valid_turn_num = (self.game.get_turn() as usize % self.game.get_player_count())
+                as isize
+                == player_num;
+            let valid_chip = self
+                .game
+                .current_player()
+                .chip_options
+                .iter()
+                .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+            let valid_col = !self.game.invalid_column(col);
 
-	        valid_turn_num && valid_chip && valid_col
-	    } else {
-	        // panic!("player isnt in DB for some reason?")
-	        false
-	    }
-	}
+            valid_turn_num && valid_chip && valid_col
+        } else {
+            // panic!("player isnt in DB for some reason?")
+            false
+        }
+    }
+    // side effect: user is added to the game if they are not already
+    // BUG: this does not write game_data back to database
+    fn possibly_add_username_to_game(&mut self, username: &str) {
+        match self.whats_my_player_number(username) {
+            Some(num) => { /*nothing to do here*/ }
+            None => self.users.push(username.to_string()),
+        }
+    }
+
+    fn whats_my_player_number(&self, username: &str) -> Option<isize> {
+        let res: Vec<usize> = self
+            .users
+            .iter()
+            .enumerate()
+            .filter(|(i, item)| item.as_str() == username)
+            .map(|(i, item)| i)
+            .collect();
+
+        if res.len() == 0 {
+            None
+        } else {
+            Some(res[0] as isize)
+        }
+    }
 }
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
@@ -120,7 +144,6 @@ pub fn update_game_with_play(
     }
 }
 
-
 pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
@@ -137,33 +160,8 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-    possibly_add_username_to_game(&mut game_data, username);
+    game_data.possibly_add_username_to_game(username);
     Some(game_data)
-}
-
-fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
-    let res: Vec<usize> = game_data
-        .users
-        .iter()
-        .enumerate()
-        .filter(|(i, item)| item.as_str() == username)
-        .map(|(i, item)| i)
-        .collect();
-
-    if res.len() == 0 {
-        None
-    } else {
-        Some(res[0] as isize)
-    }
-}
-
-// side effect: user is added to the game if they are not already
-// BUG: this does not write game_data back to database
-fn possibly_add_username_to_game(game_data: &mut GameData, username: &str) {
-    match whats_my_player_number(game_data, username) {
-        Some(num) => { /*nothing to do here*/ }
-        None => game_data.users.push(username.to_string()),
-    }
 }
 
 #[cfg(test)]
