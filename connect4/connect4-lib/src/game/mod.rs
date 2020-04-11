@@ -264,7 +264,7 @@ pub fn check_linear_pattern(pattern: &[ChipDescrip], game: &Game) -> bool {
 
     let m = std::cmp::min(x, y);
     let h = game.get_board().height - 1;
-    let w = game.get_board().width - 1;
+    let _w = game.get_board().width - 1;
     let m2 = std::cmp::min(x, h - y);
 
     res |= check_line(x, 0, 0, 1);
@@ -302,14 +302,14 @@ mod tests {
 
     #[test]
     fn test_hor_check() {
-        let pat = vec![red, red];
+        let pat = vec![RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![0, 1, 2, 3, 0, 1, 2, 3, 0, 2, 1, 3])
         ));
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 6, 0])));
 
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(!check_linear_pattern(&pat, &make_game(&vec![0, 2, 1])));
 
         let pat = vec![chip_o, chip_t, chip_t, chip_o];
@@ -330,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_ver_check() {
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0, 1, 0])));
         assert!(check_linear_pattern(
             &pat,
@@ -341,7 +341,7 @@ mod tests {
 
     #[test]
     fn test_dia_check() {
-        let pat = vec![red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP];
 
         assert!(check_linear_pattern(
             &pat,
@@ -352,7 +352,7 @@ mod tests {
             &make_game(&vec![0, 0, 0, 1, 1, 3, 2])
         ));
 
-        let pat = vec![red, red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -363,7 +363,7 @@ mod tests {
 
     #[test]
     fn test_dia_check2() {
-        let pat = vec![red, red, red, red];
+        let pat = vec![RED_CHIP, RED_CHIP, RED_CHIP, RED_CHIP];
         assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -371,7 +371,7 @@ mod tests {
             ])
         ));
 
-        let pat = vec![yellow, yellow, yellow, yellow];
+        let pat = vec![YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP];
         assert!(check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -379,7 +379,7 @@ mod tests {
             ])
         ));
 
-        let pat = vec![yellow, yellow, yellow, yellow];
+        let pat = vec![YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP, YELLOW_CHIP];
         assert!(!check_linear_pattern(
             &pat,
             &make_game(&vec![
@@ -390,7 +390,7 @@ mod tests {
 
     #[test]
     fn test_check_small() {
-        let pat = vec![red, red];
+        let pat = vec![RED_CHIP, RED_CHIP];
         assert!(check_linear_pattern(&pat, &make_game(&vec![0, 1, 0])));
 
         let game = make_game(&vec![2]);

@@ -86,7 +86,7 @@ impl GameIO for TermIO {
         fn read_line() -> String {
             let mut buffer = String::new();
             stdout().flush().expect("Failed to flush");
-            let res = stdin().read_line(&mut buffer);
+            let _res = stdin().read_line(&mut buffer);
             buffer.trim().to_string()
         }
         fn get_num_in_range(lb: usize, ub: usize) -> usize {

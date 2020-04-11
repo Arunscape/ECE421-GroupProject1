@@ -24,8 +24,8 @@ pub fn is_connect4(game: &Game) -> bool {
         && game.get_player(1).win_conditions.len() == 1
         && game.get_player(0).chip_options.len() == 1
         && game.get_player(1).chip_options.len() == 1
-        && game.get_player(0).chip_options[0] == red
-        && game.get_player(1).chip_options[0] == yellow
+        && game.get_player(0).chip_options[0] == RED_CHIP
+        && game.get_player(1).chip_options[0] == YELLOW_CHIP
 }
 
 pub fn is_toto(game: &Game) -> bool {
@@ -37,34 +37,34 @@ pub fn is_toto(game: &Game) -> bool {
         && game.get_player(1).win_conditions.len() == 1
         && game.get_player(0).chip_options.len() == 2
         && game.get_player(1).chip_options.len() == 2
-        && game.get_player(0).chip_options[0] == chip_t
-        && game.get_player(0).chip_options[1] == chip_o
-        && game.get_player(1).chip_options[0] == chip_t
-        && game.get_player(1).chip_options[1] == chip_o
+        && game.get_player(0).chip_options[0] == T_CHIP
+        && game.get_player(0).chip_options[1] == O_CHIP
+        && game.get_player(1).chip_options[0] == T_CHIP
+        && game.get_player(1).chip_options[1] == O_CHIP
 }
 
-pub const red: ChipDescrip = ChipDescrip {
+pub const RED_CHIP: ChipDescrip = ChipDescrip {
     bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: RED as isize,
     graphic: FILLED,
 };
-pub const yellow: ChipDescrip = ChipDescrip {
+pub const YELLOW_CHIP: ChipDescrip = ChipDescrip {
     bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: YEL as isize,
     graphic: FILLED,
 };
-pub const blue: ChipDescrip = ChipDescrip {
+pub const BLUE_CHIP: ChipDescrip = ChipDescrip {
     bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: BLU as isize,
     graphic: FILLED,
 };
 
-pub const chip_t: ChipDescrip = ChipDescrip {
+pub const T_CHIP: ChipDescrip = ChipDescrip {
     bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: RED as isize,
     graphic: 't',
 };
-pub const chip_o: ChipDescrip = ChipDescrip {
+pub const O_CHIP: ChipDescrip = ChipDescrip {
     bg_color: BLK as isize + BRIGHTEN as isize,
     fg_color: YEL as isize,
     graphic: 'o',
@@ -76,13 +76,13 @@ pub fn connect4_large_ai() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::AI(MID_AI),
-            chip_options: vec![red],
-            win_conditions: vec![four_in_a_row(red)],
+            chip_options: vec![RED_CHIP],
+            win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![yellow],
-            win_conditions: vec![four_in_a_row(yellow)],
+            chip_options: vec![YELLOW_CHIP],
+            win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
     ];
 
@@ -95,13 +95,13 @@ pub fn connect4_ai() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::AI(HARD_AI),
-            chip_options: vec![red],
-            win_conditions: vec![four_in_a_row(red)],
+            chip_options: vec![RED_CHIP],
+            win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![yellow],
-            win_conditions: vec![four_in_a_row(yellow)],
+            chip_options: vec![YELLOW_CHIP],
+            win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
     ];
 
@@ -114,13 +114,13 @@ pub fn connect4_ai_p2() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![red],
-            win_conditions: vec![four_in_a_row(red)],
+            chip_options: vec![RED_CHIP],
+            win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
             player_type: PlayerType::AI(HARD_AI),
-            chip_options: vec![yellow],
-            win_conditions: vec![four_in_a_row(yellow)],
+            chip_options: vec![YELLOW_CHIP],
+            win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
     ];
 
@@ -133,13 +133,13 @@ pub fn connect4() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![red],
-            win_conditions: vec![four_in_a_row(red)],
+            chip_options: vec![RED_CHIP],
+            win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![yellow],
-            win_conditions: vec![four_in_a_row(yellow)],
+            chip_options: vec![YELLOW_CHIP],
+            win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
     ];
 
@@ -152,13 +152,13 @@ pub fn toto_ai() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::AI(HARD_AI),
-            chip_options: vec![chip_t, chip_o],
-            win_conditions: vec![wrap_4_check(chip_t, chip_o)],
+            chip_options: vec![T_CHIP, O_CHIP],
+            win_conditions: vec![wrap_4_check(T_CHIP, O_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![chip_t, chip_o],
-            win_conditions: vec![wrap_4_check(chip_o, chip_t)],
+            chip_options: vec![T_CHIP, O_CHIP],
+            win_conditions: vec![wrap_4_check(O_CHIP, T_CHIP)],
         },
     ];
 
@@ -171,13 +171,13 @@ pub fn toto() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![chip_t, chip_o],
-            win_conditions: vec![wrap_4_check(chip_t, chip_o)],
+            chip_options: vec![T_CHIP, O_CHIP],
+            win_conditions: vec![wrap_4_check(T_CHIP, O_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![chip_t, chip_o],
-            win_conditions: vec![wrap_4_check(chip_o, chip_t)],
+            chip_options: vec![T_CHIP, O_CHIP],
+            win_conditions: vec![wrap_4_check(O_CHIP, T_CHIP)],
         },
     ];
 
@@ -190,18 +190,18 @@ pub fn connect4_3player() -> Game {
     let players = vec![
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![red],
-            win_conditions: vec![four_in_a_row(red)],
+            chip_options: vec![RED_CHIP],
+            win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![yellow],
-            win_conditions: vec![four_in_a_row(yellow)],
+            chip_options: vec![YELLOW_CHIP],
+            win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
         Player {
             player_type: PlayerType::Local,
-            chip_options: vec![blue],
-            win_conditions: vec![four_in_a_row(blue)],
+            chip_options: vec![BLUE_CHIP],
+            win_conditions: vec![four_in_a_row(BLUE_CHIP)],
         },
     ];
 
