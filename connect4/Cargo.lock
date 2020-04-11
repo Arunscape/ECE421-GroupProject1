@@ -271,6 +271,7 @@ dependencies = [
  "js-sys",
  "rand 0.7.3",
  "rayon",
+ "serde",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",

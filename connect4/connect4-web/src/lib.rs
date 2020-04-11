@@ -1,4 +1,6 @@
 #![recursion_limit = "1024"]
+#![feature(async_closure)]
+
 use connect4_lib::game::Game;
 use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
@@ -9,7 +11,7 @@ mod controller;
 
 use crate::components::webio::WebIOComponent;
 
-use components::signin::SignIn;
+use components::signin::Signin;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
