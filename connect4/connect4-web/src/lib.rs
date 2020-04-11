@@ -10,8 +10,9 @@ mod coms;
 mod controller;
 use crate::components::webio::WebIOComponent;
 use components::{a_component, b_component, c_component};
+mod storage;
 
-use components::{signin::Signin, navbar::Navbar, welcome::Welcome};
+use components::{navbar::Navbar, signin::Signin, welcome::Welcome};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
