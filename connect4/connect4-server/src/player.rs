@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 
 #[derive(Debug, Serialize, Deserialize)]
-struct User {
+pub struct User {
     username: String,
     password: String,
 }
