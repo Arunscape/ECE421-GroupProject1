@@ -71,23 +71,20 @@ pub fn update_game_with_play(
     col: isize,
     color: game::ChipDescrip,
 ) -> Option<GameData> {
-
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
     if let Some(mut game_data) = get_game_by_roomcode(roomcode.as_str()) {
-
         // make the play
-	    game_data.board_state = game_data.game.play(col, color);
+        game_data.board_state = game_data.game.play(col, color);
 
         // update the DB
-	    db.collection(GAME_COLLECTION_NAME).replace_one(
-	        doc! {"roomcode": roomcode.to_owned()},
-	        object_to_doc(&game_data).expect("should go todoc??"),
-	        None,
-	    );
+        db.collection(GAME_COLLECTION_NAME).replace_one(
+            doc! {"roomcode": roomcode.to_owned()},
+            object_to_doc(&game_data).expect("should go todoc??"),
+            None,
+        );
 
         // return updated data
         Some(game_data)
-
     } else {
         None
     }
