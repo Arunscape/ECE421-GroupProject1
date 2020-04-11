@@ -48,11 +48,11 @@ pub struct GameData {
 }
 
 // given a connect4-lib style game, insert it into the DB
-pub fn insert_new_game(game: game::Game) -> String {
+pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
     let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing, // is this default?
-        users: vec![],                          //TODO: add players...
+        users: vec![game_maker.to_string()],    //TODO: add players...
         game: game,
     };
 
