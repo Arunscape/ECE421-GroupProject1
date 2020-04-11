@@ -14,10 +14,10 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
-mod jwtHelper;
-mod player;
 mod dbhelper;
 mod gamehelper;
+mod jwtHelper;
+mod player;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
