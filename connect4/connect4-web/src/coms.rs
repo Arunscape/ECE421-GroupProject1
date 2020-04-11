@@ -23,7 +23,6 @@ pub fn getgame() {}
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     // TODO: convert from JsValue to actual value
-    log("HEEEY");
     None
 }
 

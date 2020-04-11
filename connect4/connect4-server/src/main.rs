@@ -20,11 +20,14 @@ mod player;
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
-fn signin(u: String, p: String) -> content::Json<&'static str> {
+fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
     match player::sign_in(u.as_str(), p.as_str()) {
-        Some(s) => content::Json("{ \"type\": \"some\" }"),
-        None => content::Json("{ \"type\": \"none\" }"),
+        Some(s) => {
+            let js = format!("{{ \"tok\": \"{}\", \"status\": \"success\" }}", s);
+            content::Json(js)
+        },
+        None => content::Json(String::from("{ \"tok\": \"\", \"status\": \"failed\" }")),
     }
 }
 
