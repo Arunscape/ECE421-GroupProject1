@@ -132,6 +132,10 @@ impl Game {
     pub fn current_player(&self) -> &Player {
         &self.players[self.turn as usize % self.players.len()]
     }
+
+    pub fn next_player(&self) -> &Player {
+        &self.players[(self.turn as usize + 1) % self.players.len()]
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

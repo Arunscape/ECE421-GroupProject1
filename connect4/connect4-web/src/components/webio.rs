@@ -3,7 +3,7 @@ use crate::log;
 use crate::controller;
 use crate::window;
 use crate::{request_animation_frame, seconds};
-use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, GameIO};
+use connect4_lib::{game::Board, game::BoardState, game::ChipDescrip, game::Game, game::PlayerType, GameIO};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum GameState {
     GetMove,
     WaitingForRemote,
@@ -32,20 +32,31 @@ pub struct WebIO {
     falling_loc: Option<(isize, f64, f64)>, // x, y, vy
 }
 
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
 impl WebIO {
     fn new(game: Game) -> Self {
-        Self {
+        let mut s = Self {
             game,
             canvas: Canvas::new("#canvas", 200, 200),
             game_state: GameState::GetMove,
             running: true,
             over_column: None,
             falling_loc: None,
-        }
+        };
+        s.game_state = match s.game.current_player().player_type {
+            PlayerType::Local => GameState::GetMove,
+            PlayerType::AI(ai_conf) => GameState::WaitingForLocal,
+        };
+        s
     }
 
     fn do_game_iteration(&mut self, delta: f64) {
         self.do_iteration_inputs(delta);
+        self.do_iteration_renders(delta);
         self.do_iteration_updates(delta);
         self.do_iteration_renders(delta);
     }
@@ -75,6 +86,16 @@ impl WebIO {
                     self.game_state = *next;
                 }
             }
+        }
+
+        if let GameState::WaitingForLocal = self.game_state.clone() {
+            let (loc, ty) = match self.game.current_player().player_type {
+                PlayerType::Local => panic!("This is wrong"), // TODO: this should never be here
+                PlayerType::AI(ai) => {
+                    connect4_lib::ai::get_best_move(&mut self.game.clone(), ai)
+                },
+            };
+            self.play_move(loc, ty);
         }
     }
 
@@ -128,9 +149,21 @@ impl WebIO {
                 );
             }
             GameState::GameOver(BoardState::Draw) => {
+                controller::draw_gameboard(&self.canvas, &self.game.get_board());
+                controller::draw_game_pieces(
+                    &self.canvas,
+                    &self.game.get_board(),
+                    &self.game.get_board().chips[..],
+                );
                 controller::message(&self.canvas, format!("Game Over: Draw :("));
             }
             GameState::GameOver(BoardState::Win(player)) => {
+                controller::draw_gameboard(&self.canvas, &self.game.get_board());
+                controller::draw_game_pieces(
+                    &self.canvas,
+                    &self.game.get_board(),
+                    &self.game.get_board().chips[..],
+                );
                 controller::message(&self.canvas, format!("Game Over: Player {} Wins!", player));
             }
             GameState::GameOver(_) => {
@@ -144,17 +177,27 @@ impl WebIO {
             .over_column
             .expect("play_local_move requires over_column");
         let move_type = self.game.current_player().chip_options[0];
-        let res = self.game.play(col, move_type);
+        self.play_move(col, move_type);
+    }
 
+    fn play_move(&mut self, loc: isize, ty: ChipDescrip) {
+        let res = self.game.play(loc, ty);
+        self.determine_state_after_move(res);
+        self.falling_loc = Some((loc, 1100.0, 0.0)); // TODO: no magic numbers
+    }
+
+    fn determine_state_after_move(&mut self, res: BoardState) {
         self.game_state = match res {
             BoardState::Ongoing => {
-                GameState::PlayingMove(Box::from(GameState::GetMove))
+                match self.game.current_player().player_type {
+                    PlayerType::Local => GameState::PlayingMove(Box::from(GameState::GetMove)),
+                    PlayerType::AI(_) => GameState::PlayingMove(Box::from(GameState::WaitingForLocal)),
+                }
             },
             BoardState::Invalid => self.game_state.clone(),
             BoardState::Draw => GameState::GameOver(res),
             BoardState::Win(_) => GameState::GameOver(res),
         };
-        self.falling_loc = Some((col, 1100.0, 0.0)); // TODO: no magic numbers
     }
 
     fn finish(&mut self) {
@@ -197,7 +240,7 @@ impl Component for WebIOComponent {
         Self { link }
     }
     fn mounted(&mut self) -> ShouldRender {
-        let game = connect4_lib::games::connect4();
+        let game = connect4_lib::games::connect4_ai();
         WebIO::play_with_game_loop(game);
         true
     }
