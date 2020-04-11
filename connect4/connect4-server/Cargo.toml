@@ -15,6 +15,7 @@ bson = "0.14.1"
 jsonwebtoken = "7.1.0"
 connect4-lib = { path="../connect4-lib" }
 serde = { version = "1.0", features = ["derive"] }
+rand = "0.7.3"
 
 [[bin]]
 name="server"
