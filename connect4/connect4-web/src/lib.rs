@@ -5,14 +5,13 @@ use connect4_lib::game::Game;
 use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
-mod canvas;
 mod components;
 mod coms;
 mod controller;
-
 use crate::components::webio::WebIOComponent;
+use components::{a_component, b_component, c_component};
 
-use components::signin::Signin;
+use components::{signin::Signin, navbar::Navbar, welcome::Welcome};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
@@ -67,13 +66,6 @@ fn seconds() -> f64 {
         / 1000.0
 }
 
-mod a_component;
-mod b_component;
-mod c_component;
-mod navbar;
-mod welcome;
-use navbar::Navbar;
-use welcome::Welcome;
 use yew::prelude::*;
 
 use yew_router::{prelude::*, Switch};
