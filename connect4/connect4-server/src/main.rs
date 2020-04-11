@@ -20,7 +20,7 @@ mod jwtHelper;
 mod player;
 
 /// /signin: takes username and password, returns JWT
-#[get("/signin/<u>/<p>", rank = 9)]
+#[get("/signin/<u>/<p>")]
 fn signin(u: String, p: String) -> Option<String> {
     println!("Signin called [{}, {}]", u, p);
     player::sign_in(u.as_str(), p.as_str())
@@ -84,7 +84,6 @@ fn rocket() -> rocket::Rocket {
             routes![signin, playmove, refresh, creategame, getgame],
         )
         .mount("/pkg", routes![files])
-        .mount("/", StaticFiles::from(path))
         .register(catchers![not_found])
 }
 
