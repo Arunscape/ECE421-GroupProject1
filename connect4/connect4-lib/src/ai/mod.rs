@@ -2,8 +2,6 @@ use super::game::{BoardState, ChipDescrip, Game};
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 
-mod bitboard;
-mod connect;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AIConfig {
@@ -29,7 +27,7 @@ pub const HARD_AI: AIConfig = AIConfig {
 pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (isize, ChipDescrip) {
     if ai_conf == HARD_AI {
         if crate::games::is_connect4(game) {
-            return connect::get_best_move(game);
+            // toto specific hard AI
         } else if crate::games::is_toto(game) {
             // toto specific hard AI
         }
