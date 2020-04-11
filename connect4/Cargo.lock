@@ -241,6 +241,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "connect4-coms"
+version = "0.1.0"
+dependencies = [
+ "connect4-lib",
+ "serde",
+]
+
+[[package]]
 name = "connect4-lib"
 version = "0.1.0"
 dependencies = [
@@ -254,6 +262,7 @@ name = "connect4-server"
 version = "0.1.0"
 dependencies = [
  "bson",
+ "connect4-coms",
  "connect4-lib",
  "jsonwebtoken",
  "mongodb",
@@ -261,12 +270,14 @@ dependencies = [
  "rocket",
  "rocket_contrib",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
 name = "connect4-web"
 version = "0.1.0"
 dependencies = [
+ "connect4-coms",
  "connect4-lib",
  "js-sys",
  "rand 0.7.3",

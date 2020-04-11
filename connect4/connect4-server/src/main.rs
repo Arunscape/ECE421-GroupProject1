@@ -13,6 +13,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
+use connect4_coms::types::Signin;
+
 mod dbhelper;
 mod gamehelper;
 mod jwtHelper;
@@ -22,13 +24,17 @@ mod player;
 #[get("/signin/<u>/<p>")]
 fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
-    match player::sign_in(u.as_str(), p.as_str()) {
-        Some(s) => {
-            let js = format!("{{ \"tok\": \"{}\", \"status\": \"success\" }}", s);
-            content::Json(js)
-        },
-        None => content::Json(String::from("{ \"tok\": \"\", \"status\": \"failed\" }")),
-    }
+    let data = match player::sign_in(u.as_str(), p.as_str()) {
+        Some(s) => Signin {
+                tok: s,
+                status: String::from("success")
+            },
+        None => Signin {
+                tok: String::from(""),
+                status: String::from("success")
+            }
+    };
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 /// /playmove: takes in description of move, gameid, and JWT, returns new gamestate

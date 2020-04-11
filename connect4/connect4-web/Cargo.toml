@@ -17,10 +17,11 @@ yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
 connect4-lib = { path="../connect4-lib" }
+connect4-coms = { path="../connect4-coms" }
 web_logger = "0.2.0"
 wee_alloc = "0.4.5"
 rand = { version = "0.7.0", features = ["wasm-bindgen"] }
-serde = "1.0.106"
+serde = "1.0"
 
 [dependencies.web-sys]
 web-sys = "*"
