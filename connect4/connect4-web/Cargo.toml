@@ -34,6 +34,11 @@ features = [
   'Performance',
   'console',
   'EventListener',
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
 ]
 version = "0.3.37"
 
