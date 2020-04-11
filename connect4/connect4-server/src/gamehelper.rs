@@ -68,6 +68,7 @@ pub fn insert_new_game(game: game::Game) -> String {
 
 pub fn update_game_with_play(
     roomcode: String,
+    username: &str,
     col: isize,
     color: game::ChipDescrip,
 ) -> Option<GameData> {
@@ -118,6 +119,6 @@ mod test {
     fn db_game_test() {
         let game: game::Game = games::connect4_3player();
         let roomcode = insert_new_game(game);
-        update_game_with_play(roomcode, 1, games::YELLOW_CHIP);
+        update_game_with_play(roomcode, "Alex", 1, games::YELLOW_CHIP);
     }
 }
