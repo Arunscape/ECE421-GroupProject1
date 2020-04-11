@@ -1,5 +1,6 @@
-use super::canvas::Canvas;
 use crate::log;
+use crate::canvas::Canvas;
+
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
 
@@ -144,4 +145,9 @@ pub fn update_falling_piece(
     } else {
         Some(falling)
     }
+}
+
+pub fn message(canvas: &Canvas, msg: String) {
+    canvas.context.set_font("100px Arial");
+    canvas.context.fill_text(&msg, 10.0, 150.0);
 }
