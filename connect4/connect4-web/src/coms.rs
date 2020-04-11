@@ -22,7 +22,6 @@ pub fn test_request() {
 pub fn getgame() {}
 
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
-
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     // TODO: convert from JsValue to actual value
     match js_json.map(|x| x.into_serde::<Signin>()) {
@@ -32,7 +31,7 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
             } else {
                 None
             }
-        },
+        }
         _ => None,
     }
 }

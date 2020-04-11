@@ -39,15 +39,15 @@ fn jwt_token_from_claims(my_claims: Claims) -> String {
     }
 }
 
-pub fn claims_from_jwt_token(token: String) -> Result<Claims, ()> {
+pub fn claims_from_jwt_token(token: String) -> Option<Claims> {
     let key = b"TODO:probablyshouldhidethis";
     let validation = Validation {
         //sub: Some("b@b.com".to_string()), // more validation here
         ..Validation::default()
     };
     match decode::<Claims>(&token, &DecodingKey::from_secret(key), &validation) {
-        Ok(c) => Ok(c.claims),
-        Err(_) => Err(()),
+        Ok(c) => Some(c.claims),
+        Err(_) => None,
     }
 }
 
@@ -70,35 +70,30 @@ mod test {
 
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
-        match claims_from_jwt_token(token) {
-            Ok(_) => assert!(true),
-            Err(_) => assert!(false),
-        }
+        let claims = claims_from_jwt_token(token).expect("still valid");
     }
 
     #[test]
     fn invalid_jwt_test() {
-        let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 2);
+        let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 1);
 
-        thread::sleep(time::Duration::from_millis(1 * 1000));
+        thread::sleep(time::Duration::from_millis(2 * 1000));
 
         match claims_from_jwt_token(token) {
-            Ok(_) => assert!(true),
-            Err(_) => assert!(false),
+            Some(_) => assert!(false),
+            None => assert!(true),
         }
     }
+
     #[test]
     fn jwt_payload_test() {
         let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 2);
 
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
-        match claims_from_jwt_token(token) {
-            Ok(claims) => match claims.data {
-                ClaimPayload::username(s) => assert!(s == "cats"),
-                _ => assert!(false),
-            },
-            Err(_) => assert!(false),
+        let claims = claims_from_jwt_token(token).expect("Still valid");
+        if let ClaimPayload::username(u) = claims.data {
+            assert!(u == "cats".to_string());
         }
     }
 }
