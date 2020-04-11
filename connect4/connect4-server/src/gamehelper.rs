@@ -38,7 +38,7 @@ fn gen_valid_roomcode() -> String {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct GameData {
+pub struct GameData {
     roomcode: String,
     board_state: game::BoardState,
     users: Vec<User>,
@@ -70,33 +70,30 @@ pub fn update_game_with_play(
     roomcode: String,
     col: isize,
     color: game::ChipDescrip,
-) -> game::BoardState {
-    // get the game from the DB
+) -> Option<GameData> {
+
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+    if let Some(mut game_data) = get_game_by_roomcode(roomcode.as_str()) {
 
-    let game_docs = query_collection_for_docs(
-        &db,
-        GAME_COLLECTION_NAME,
-        doc! {"roomcode": roomcode.to_owned()},
-    );
+        // make the play
+	    game_data.board_state = game_data.game.play(col, color);
 
-    // TODO: add error handling, next line could panic
-    // there should be 1 game docs...
+        // update the DB
+	    db.collection(GAME_COLLECTION_NAME).replace_one(
+	        doc! {"roomcode": roomcode.to_owned()},
+	        object_to_doc(&game_data).expect("should go todoc??"),
+	        None,
+	    );
 
-    let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
+        // return updated data
+        Some(game_data)
 
-    let new_state = game_data.game.play(col, color);
-
-    db.collection(GAME_COLLECTION_NAME).replace_one(
-        doc! {"roomcode": roomcode.to_owned()},
-        object_to_doc(&game_data).expect("should go todoc??"),
-        None,
-    );
-
-    new_state
+    } else {
+        None
+    }
 }
 
-pub fn get_game_by_roomcode(roomcode: String) -> Option<game::Game> {
+pub fn get_game_by_roomcode(roomcode: &str) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
     let game_docs = query_collection_for_docs(
@@ -112,7 +109,7 @@ pub fn get_game_by_roomcode(roomcode: String) -> Option<game::Game> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-    Some(game_data.game)
+    Some(game_data)
 }
 
 #[cfg(test)]
