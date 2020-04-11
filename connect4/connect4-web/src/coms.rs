@@ -20,7 +20,9 @@ pub fn test_request() {
 
 pub fn getgame() {}
 
-pub fn signin(usr: &str, passwd: &str) {}
+pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
+    None
+}
 
 pub fn playmove(chip: &Chip) {}
 
