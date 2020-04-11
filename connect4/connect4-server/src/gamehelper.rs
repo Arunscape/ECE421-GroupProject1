@@ -19,6 +19,7 @@ fn gen_roomcode() -> String {
 	.sample_iter(&Alphanumeric)
 	.take(ROOM_CODE_LEN)
 	.collect();
+    //rand_string.to_ascii_uppercase()
     rand_string
 }
 
