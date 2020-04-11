@@ -152,6 +152,7 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
 }
 
 // side effect: user is added to the game if they are not already
+// BUG: this does not write game_data back to database
 fn possibly_add_username_to_game(game_data: &mut GameData, username: &str) {
     match whats_my_player_number(game_data, username) {
         Some(num) => { /*nothing to do here*/ }
