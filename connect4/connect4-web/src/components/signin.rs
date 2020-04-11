@@ -71,10 +71,12 @@ impl Component for Signin {
                     let token: Option<String> = coms::signin(&username, &password).await;
 
                     match token {
-                        Some(s) => LocalStorage::set_token(&s),
+                        Some(s) => {
+                            LocalStorage::set_token(&s);
+                            window().location().set_href("/");
+                        }
                         None => {}
                     };
-                    window().location().set_href("/");
                 }
                 spawn_local(handleSignin(self.username.clone(), self.password.clone()));
             }
