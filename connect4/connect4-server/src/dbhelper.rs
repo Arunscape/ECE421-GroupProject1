@@ -7,6 +7,7 @@ pub static DATABASE_NAME: &str = "Connect4DB";
 pub static JWT_LIFETIME_SECONDS: u64 = 86400; // done day
 pub static DATABASE_LOCATION: &str = "mongodb://localhost:27017";
 pub static USER_COLLECTION_NAME: &str = "users";
+pub static GAME_COLLECTION_NAME: &str = "rooms";
 
 // error handling wrapper for db connect
 pub fn new_db(db_name: &str) -> Option<mongodb::Database> {
