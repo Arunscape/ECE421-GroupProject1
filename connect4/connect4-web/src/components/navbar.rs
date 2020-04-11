@@ -1,4 +1,4 @@
-use super::AppRoute;
+use super::super::AppRoute;
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 use yew_router::prelude::*;
 

@@ -1,4 +1,4 @@
-use super::super::coms;
+use crate::coms;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::JsFuture;

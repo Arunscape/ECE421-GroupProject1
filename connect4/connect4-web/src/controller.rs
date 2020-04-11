@@ -1,4 +1,4 @@
-use crate::canvas::Canvas;
+use crate::components::canvas::Canvas;
 use crate::log;
 
 use connect4_lib::game::Board;

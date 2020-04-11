@@ -1,4 +1,4 @@
-use crate::{c_component::CModel, ARoute, AppRoute};
+use crate::{components::c_component::CModel, ARoute, AppRoute};
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 use yew_router::{prelude::*, switch::AllowMissing};
 

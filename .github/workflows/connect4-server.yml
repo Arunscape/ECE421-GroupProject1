@@ -16,19 +16,19 @@ jobs:
         cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
     - name: Test
       run: cargo +nightly test --no-fail-fast --release --manifest-path=connect4/connect4-server/Cargo.toml
-  Lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Lint
-      run: |
-        cd connect4/connect4-server
-        rustup default nightly
-        rustup component add rustfmt
-        cargo +nightly fmt -- --check
-    - name: Clippy
-      run: |
-        cd connect4/connect4-server
-        rustup default nightly
-        rustup component add clippy
-        cargo +nightly clippy
+  # Lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #   - name: Lint
+  #     run: |
+  #       cd connect4/connect4-server
+  #       rustup default nightly
+  #       rustup component add rustfmt
+  #       cargo +nightly fmt -- --check
+  #   - name: Clippy
+  #     run: |
+  #       cd connect4/connect4-server
+  #       rustup default nightly
+  #       rustup component add clippy
+  #       cargo +nightly clippy
