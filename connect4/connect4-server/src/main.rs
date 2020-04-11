@@ -20,7 +20,7 @@ mod dbhelper;
 mod gamehelper;
 
 /// /signin: takes username and password, returns JWT
-#[get("/signin/<u>/<p>")]
+#[get("/signin/<u>/<p>", rank=9)]
 fn signin(u: String, p: String) -> Option<String> {
     player::sign_in(u.as_str(), p.as_str())
 }
@@ -59,7 +59,7 @@ fn not_found<'a>(req: &Request) -> Option<NamedFile> {
     NamedFile::open(path).ok()
 }
 
-#[get("/<file..>")]
+#[get("/<file..>", rank=11)]
 fn files(file: PathBuf) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
