@@ -17,21 +17,21 @@ jobs:
         wasm-pack build --target web
     - name: Test
       run: |
-      cd connect4/connect4-web
-      wasm-pack test --chrome --firefox
-  Lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Lint
-      run: |
         cd connect4/connect4-web
-        rustup default nightly
-        rustup component add rustfmt
-        cargo +nightly fmt -- --check
-    - name: Clippy
-      run: |
-        cd connect4/connect4-web
-        rustup default nightly
-        rustup component add clippy
-        cargo +nightly clippy
+        wasm-pack test --chrome --firefox
+  # Lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #   - name: Lint
+  #     run: |
+  #       cd connect4/connect4-web
+  #       rustup default nightly
+  #       rustup component add rustfmt
+  #       cargo +nightly fmt -- --check
+  #   - name: Clippy
+  #     run: |
+  #       cd connect4/connect4-web
+  #       rustup default nightly
+  #       rustup component add clippy
+  #       cargo +nightly clippy

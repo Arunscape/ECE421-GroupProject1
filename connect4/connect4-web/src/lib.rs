@@ -1,29 +1,31 @@
 #![recursion_limit = "1024"]
+#![feature(async_closure)]
+
 use connect4_lib::game::Game;
 use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
-mod canvas;
-mod controller;
 mod components;
-
+mod coms;
+mod controller;
 use crate::components::webio::WebIOComponent;
+use components::{a_component, b_component, c_component};
 
-use yew::prelude::*;
-use yew_router::prelude::*;
+use components::{signin::Signin, navbar::Navbar, welcome::Welcome};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
     log("Starting Yew");
+    coms::test_request();
     yew::initialize();
     web_logger::init();
     App::<Model>::new().mount_to_body();
 
     yew::run_loop();
-
 
     Ok(())
 }
@@ -60,16 +62,9 @@ fn seconds() -> f64 {
     window()
         .performance()
         .expect("performance should be available")
-        .now() / 1000.0
+        .now()
+        / 1000.0
 }
-
-mod a_component;
-mod b_component;
-mod c_component;
-mod navbar;
-mod welcome;
-use navbar::Navbar;
-use welcome::Welcome;
 
 use yew::prelude::*;
 
@@ -119,6 +114,7 @@ impl Component for Model {
                         render = Router::render(|switch: AppRoute| {
                             match switch {
                                 AppRoute::Root => html!{<Welcome/>},
+                                AppRoute::Signin => html!{<Signin/>},
                                 AppRoute::A(AllowMissing(route)) => html!{<AModel route = route />},
                                 AppRoute::B(route) => {
                                     let route: b_component::Props = route.into();
@@ -152,6 +148,8 @@ impl Component for Model {
 pub enum AppRoute {
     #[to = "/!"]
     Root,
+    #[to = "/signin!"]
+    Signin,
     #[to = "/a{*:inner}"]
     A(AllowMissing<ARoute>),
     #[to = "/b{*:inner}"]
