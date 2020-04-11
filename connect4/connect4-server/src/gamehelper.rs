@@ -68,13 +68,13 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
 }
 
 pub fn update_game_with_play(
-    roomcode: String,
+    roomcode: &str,
     username: &str,
     col: isize,
     color: game::ChipDescrip,
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
-    if let Some(mut game_data) = get_game_by_roomcode(username, roomcode.as_str()) {
+    if let Some(mut game_data) = get_game_by_roomcode(username, roomcode) {
         if !valid_play(&game_data, username, col, color) {
             return None;
         }
@@ -83,7 +83,7 @@ pub fn update_game_with_play(
 
         // update the DB
         db.collection(GAME_COLLECTION_NAME).replace_one(
-            doc! {"roomcode": roomcode.to_owned()},
+            doc! {"roomcode": roomcode.to_string()},
             object_to_doc(&game_data).expect("should go todoc??"),
             None,
         );
@@ -148,10 +148,49 @@ mod test {
     use super::*;
 
     #[test]
-    #[ignore]
-    fn db_game_test() {
+    //#[ignore]
+    fn db_insert_game_test() {
         let game: game::Game = games::connect4_3player();
         let roomcode = insert_new_game("Alex", game);
-        update_game_with_play(roomcode, "Alex", 1, games::YELLOW_CHIP);
+        update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
     }
+
+    #[test]
+    //#[ignore]
+    fn db_add_players_to_game_test() {
+        let user1 = "Alex";
+        let user2 = "Arun";
+        let game: game::Game = games::connect4_3player();
+        let roomcode = insert_new_game(user1, game);
+        update_game_with_play(&roomcode, user1, 1, games::YELLOW_CHIP);
+
+        // side effect: this adds user2 to the game
+        get_game_by_roomcode(user2, &roomcode);
+        let user2_sees = get_game_by_roomcode(user2, &roomcode).expect("GameData should exist");
+        let user1_sees = get_game_by_roomcode(user1, &roomcode).expect("GameData should exist");
+        assert!(user2_sees.users== user1_sees.users);
+
+    }
+
+    #[test]
+    fn player_number_test() {
+	    let game: game::Game = games::connect4_3player();
+	    let mut new_game = GameData {
+	        roomcode: gen_valid_roomcode().to_owned(),
+	        board_state: game::BoardState::Ongoing,
+	        users: vec![],
+	        game: game,
+	    };
+
+        assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
+        possibly_add_username_to_game(&mut new_game, "Alex");
+        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
+        possibly_add_username_to_game(&mut new_game, "Alex");
+        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
+        possibly_add_username_to_game(&mut new_game, "Arun");
+        assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
+
+    }
+
+
 }
