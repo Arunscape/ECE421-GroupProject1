@@ -58,7 +58,7 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
 }
 pub fn draw_board_mask_column(
     canvas: &Canvas,
-    height: isize,
+    height: usize,
     column_num: usize,
     color: &'static str,
 ) {
@@ -115,7 +115,7 @@ pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> 
 }
 
 pub fn highlight_column(canvas: &Canvas, col: isize) {
-    draw_board_mask_column(canvas, 6, col, COLOR_HIGHLIGHT);
+    draw_board_mask_column(canvas, 6, col as usize, COLOR_HIGHLIGHT);
 }
 
 pub fn animate_falling_piece(
