@@ -27,14 +27,6 @@ pub const HARD_AI: AIConfig = AIConfig {
 };
 
 pub fn get_best_move(game: &mut Game, ai_conf: AIConfig) -> (isize, ChipDescrip) {
-    if ai_conf == HARD_AI {
-        if crate::games::is_connect4(game) {
-            return connect::get_best_move(game);
-        } else if crate::games::is_toto(game) {
-            // toto specific hard AI
-        }
-    }
-
     let (_, mov, chip) = evaluate_board(game, ai_conf);
     (mov, chip)
 }

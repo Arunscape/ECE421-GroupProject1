@@ -34,11 +34,6 @@ extern "C" {
     fn log(a: &str);
 }
 
-#[macro_export]
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
-
 fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")
 }
