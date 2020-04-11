@@ -6,6 +6,7 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
+mod coms;
 mod components;
 mod controller;
 
@@ -20,6 +21,7 @@ use yew_router::prelude::*;
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
     log("Starting Yew");
+    coms::test_request();
     yew::initialize();
     web_logger::init();
     App::<Model>::new().mount_to_body();
