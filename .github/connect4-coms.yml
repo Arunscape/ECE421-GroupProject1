@@ -1,0 +1,34 @@
+name: Connect 4 Coms
+
+on:
+  push:
+    paths:
+      - "connect4/connect4-coms/**"
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build Coms
+        run: |
+          rustup default nightly
+          cargo +nightly build --verbose --release --manifest-path=connect4/connect4-coms/Cargo.toml
+      - name: Test
+        run: cargo +nightly test --no-fail-fast --release --manifest-path=connect4/connect4-coms/Cargo.toml
+  # Lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #   - name: Lint
+  #     run: |
+  #       cd connect4/connect4-coms
+  #       rustup default nightly
+  #       rustup component add rustfmt
+  #       cargo +nightly fmt -- --check
+  #   - name: Clippy
+  #     run: |
+  #       cd connect4/connect4-coms
+  #       rustup default nightly
+  #       rustup component add clippy
+  #       cargo +nightly clippy
