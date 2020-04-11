@@ -22,7 +22,7 @@ impl BitBoard {
             game.get_board().height as usize,
         );
         let mut bb = Self {
-            mask: mask,
+            mask,
             position: pos,
             turns: game.get_turn() as usize,
         };
@@ -57,10 +57,10 @@ impl BitBoard {
 
         for x in 0..WIDTH {
             let mcol = (self.mask >> ((WIDTH - x - 1) * mask_width)) & col_mask;
-            m |= mcol << x * mask_width;
+            m |= mcol << (x * mask_width);
 
             let pcol = (self.position >> ((WIDTH - x - 1) * mask_width)) & col_mask;
-            p |= pcol << x * mask_width;
+            p |= pcol << (x * mask_width);
         }
 
         self.mask = m;
@@ -98,7 +98,7 @@ impl BitBoard {
     pub fn get_valid_moves(&self) -> Vec<usize> {
         [3, 4, 2, 5, 1, 6, 0]
             .iter()
-            .map(|x| *x)
+            .copied()
             .filter(|&x| self.can_play(x))
             .collect()
     }
@@ -162,7 +162,7 @@ impl BitBoard {
     }
 
     fn column_mask(&self, col: usize) -> u64 {
-        ((1 << HEIGHT) - 1) << col * (HEIGHT + 1)
+        ((1 << HEIGHT) - 1) << (col * (HEIGHT + 1))
     }
 }
 

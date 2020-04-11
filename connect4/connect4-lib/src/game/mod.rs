@@ -216,7 +216,7 @@ impl Board {
     }
 }
 
-pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
+pub fn check_linear_pattern(pattern: &[ChipDescrip], game: &Game) -> bool {
     let lay = game.get_board_layout();
     let width = game.board.width;
     let height = game.board.height;
@@ -232,8 +232,8 @@ pub fn check_linear_pattern(pattern: &Vec<ChipDescrip>, game: &Game) -> bool {
         len: isize,
         width: isize,
         height: isize,
-        pattern: &Vec<ChipDescrip>,
-        lay: &Vec<Option<ChipDescrip>>,
+        pattern: &[ChipDescrip],
+        lay: &[Option<ChipDescrip>],
     ) -> bool {
         //let idx = |i| ((x + dx * i as isize) + (y + dy * i as isize) * (width as isize));
         let idx = |x, y| (x + y * width) as usize;

@@ -257,6 +257,7 @@ dependencies = [
  "connect4-lib",
  "jsonwebtoken",
  "mongodb",
+ "rand 0.7.3",
  "rocket",
  "rocket_contrib",
  "serde",

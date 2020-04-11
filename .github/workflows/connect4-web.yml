@@ -16,7 +16,9 @@ jobs:
         cargo +nightly install wasm-pack
         wasm-pack build --target web
     - name: Test
-      run: wasm-pack test --chrome --firefox
+      run: |
+      cd connect4/connect4-web
+      wasm-pack test --chrome --firefox
   Lint:
     runs-on: ubuntu-latest
     steps:
