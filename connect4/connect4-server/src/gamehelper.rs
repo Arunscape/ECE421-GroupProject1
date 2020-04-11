@@ -12,6 +12,27 @@ use connect4_lib::{
 
 static ROOM_CODE_LEN: usize = 3;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GameData {
+    roomcode: String,
+    board_state: game::BoardState,
+    users: Vec<String>,
+
+    #[serde(flatten)]
+    game: game::Game,
+}
+
+impl GameData {
+    fn new(game: game::Game, users: Vec<String>) -> Self {
+        GameData {
+            roomcode: gen_valid_roomcode().to_owned(),
+            board_state: game::BoardState::Ongoing,
+            users: users,
+            game: game,
+        }
+    }
+}
+
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
     let rand_string: String = thread_rng()
@@ -33,29 +54,14 @@ fn gen_valid_roomcode() -> String {
         ) {
             return roomcode;
         }
+        roomcode = gen_roomcode();
     }
-    return "".to_string();
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct GameData {
-    roomcode: String,
-    board_state: game::BoardState,
-    users: Vec<String>,
-
-    #[serde(flatten)]
-    game: game::Game,
 }
 
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
-    let mut new_game = GameData {
-        roomcode: gen_valid_roomcode().to_owned(),
-        board_state: game::BoardState::Ongoing, // is this default?
-        users: vec![game_maker.to_string()],    //TODO: add players...
-        game: game,
-    };
+    let mut new_game = GameData::new(game, vec![game_maker.to_string()]);
 
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
