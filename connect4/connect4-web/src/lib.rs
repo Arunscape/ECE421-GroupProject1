@@ -4,22 +4,66 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
+mod controller;
+mod components;
+
+use crate::components::webio::WebIOComponent;
+
+use yew::prelude::*;
+use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+
+
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
     yew::initialize();
     web_logger::init();
     App::<Model>::new().mount_to_body();
 
-    let game = games::connect4();
-    let c = canvas::Canvas::new("#canvas", 20, 20);
-
-    let mut game = games::connect4_ai();
     yew::run_loop();
-    // todo hook up to a button press or something
-    connect4_lib::play(&mut game, c);
 
     Ok(())
+}
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(a: &str);
+}
+
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+fn window() -> web_sys::Window {
+    web_sys::window().expect("no global `window` exists")
+}
+
+fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window()
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
+fn document() -> web_sys::Document {
+    window()
+        .document()
+        .expect("should have a document on window")
+}
+
+fn body() -> web_sys::HtmlElement {
+    document().body().expect("document should have a body")
+}
+
+fn seconds() -> f64 {
+    window()
+        .performance()
+        .expect("performance should be available")
+        .now() / 1000.0
 }
 
 mod a_component;
