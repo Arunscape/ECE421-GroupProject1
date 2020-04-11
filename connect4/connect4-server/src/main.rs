@@ -55,9 +55,9 @@ fn creategame() -> content::Json<&'static str> {
     content::Json("{ \"type\": \"playmove\" }")
 }
 
-/// /getgame: takes in gameid, JWT, and returns gamestate
-#[get("/getgame")]
-fn getgame() -> content::Json<&'static str> {
+/// /getgame: takes in gameid, JWT, and returns GameData
+#[get("/getgame/<id>")]
+fn getgame(id: String) -> content::Json<&'static str> {
     content::Json("{ \"type\": \"getgame\" }")
 }
 
