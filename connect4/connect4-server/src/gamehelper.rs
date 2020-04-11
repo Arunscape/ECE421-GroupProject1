@@ -12,71 +12,87 @@ use connect4_lib::{
 
 static ROOM_CODE_LEN: usize = 3;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct GameData {
-    roomcode: String,
-    board_state: game::BoardState,
-    users: Vec<String>,
+use connect4_coms::types::GameData;
+//#[derive(Debug, Serialize, Deserialize)]
+//pub struct GameData {
+//    roomcode: String,
+//    board_state: game::BoardState,
+//    users: Vec<String>,
+//
+//    #[serde(flatten)]
+//    game: game::Game,
+//}
+//
 
-    #[serde(flatten)]
-    game: game::Game,
-}
+// START OF SADNESS
 
-impl GameData {
-    fn new(game: game::Game, users: Vec<String>) -> Self {
-        GameData {
-            roomcode: gen_valid_roomcode().to_owned(),
-            board_state: game::BoardState::Ongoing,
-            users: users,
-            game: game,
-        }
-    }
-    fn valid_play(&self, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-        if let Some(player_num) = self.whats_my_player_number(username) {
-            let valid_turn_num = (self.game.get_turn() as usize % self.game.get_player_count())
-                as isize
-                == player_num;
-            let valid_chip = self
-                .game
-                .current_player()
-                .chip_options
-                .iter()
-                .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-            let valid_col = !self.game.invalid_column(col);
 
-            valid_turn_num && valid_chip && valid_col
-        } else {
-            // panic!("player isnt in DB for some reason?")
-            false
-        }
-    }
-    // side effect: user is added to the game if they are not already
-    fn write_username(&mut self, username: &str) -> bool {
-        match self.whats_my_player_number(username) {
-            Some(num) => false,
-            None => {
-                self.users.push(username.to_string());
-                true
-            },
-        }
-    }
-
-    fn whats_my_player_number(&self, username: &str) -> Option<isize> {
-        let res: Vec<usize> = self
-            .users
+fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
+    if let Some(player_num) = whats_my_player_number(game_data, username) {
+        let valid_turn_num = (game_data.game.get_turn() as usize % game_data.game.get_player_count())
+            as isize
+            == player_num;
+        let valid_chip = game_data
+            .game
+            .current_player()
+            .chip_options
             .iter()
-            .enumerate()
-            .filter(|(i, item)| item.as_str() == username)
-            .map(|(i, item)| i)
-            .collect();
+            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+        let valid_col = !game_data.game.invalid_column(col);
 
-        if res.len() == 0 {
-            None
-        } else {
-            Some(res[0] as isize)
-        }
+        valid_turn_num && valid_chip && valid_col
+    } else {
+        // panic!("player isnt in DB for some reason?")
+        false
     }
 }
+// side effect: user is added to the game if they are not already
+fn write_username(game_data: &mut GameData, username: &str) -> bool {
+    match whats_my_player_number(game_data, username) {
+        Some(num) => false,
+        None => {
+            game_data.users.push(username.to_string());
+            true
+        },
+    }
+}
+
+
+fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
+    let res: Vec<usize> = game_data
+        .users
+        .iter()
+        .enumerate()
+        .filter(|(i, item)| item.as_str() == username)
+        .map(|(i, item)| i)
+        .collect();
+
+    if res.len() == 0 {
+        None
+    } else {
+        Some(res[0] as isize)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+// END OF SADNESSS
+
+
+
+
+
+
+
+
+
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
@@ -106,7 +122,12 @@ fn gen_valid_roomcode() -> String {
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
-    let mut new_game = GameData::new(game, vec![game_maker.to_string()]);
+    let mut new_game = GameData {
+            roomcode: gen_valid_roomcode().to_owned(),
+            board_state: game::BoardState::Ongoing,
+            users: vec![game_maker.to_string()],
+            game: game,
+        };
 
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
@@ -126,7 +147,7 @@ pub fn update_game_with_play(
 ) -> Option<GameData> {
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
     if let Some(mut game_data) = get_game_data(username, roomcode) {
-        if !game_data.valid_play(username, col, color) {
+        if !valid_play(&game_data, username, col, color) {
             return None;
         }
         // make the play
@@ -163,7 +184,7 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
     // possibly write the new username to the DB
-    if game_data.write_username(username) {
+    if write_username(&mut game_data, username) {
         // update the DB
         db.collection(GAME_COLLECTION_NAME).replace_one(
             doc! {"roomcode": roomcode.to_string()},
@@ -213,12 +234,12 @@ mod test {
             game: game,
         };
 
-        assert_eq!(None, new_game.whats_my_player_number("Alex"));
-        new_game.write_username("Alex");
-        assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
-        new_game.write_username("Alex");
-        assert_eq!(Some(0), new_game.whats_my_player_number("Alex"));
-        new_game.write_username("Arun");
-        assert_eq!(Some(1), new_game.whats_my_player_number("Arun"));
+        assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
+        assert!(write_username(&mut new_game, "Alex"));
+        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
+        assert!(!write_username(&mut new_game, "Alex"));
+        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
+        assert!(write_username(&mut new_game, "Arun"));
+        assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
     }
 }
