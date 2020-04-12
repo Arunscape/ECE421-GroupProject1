@@ -35,6 +35,7 @@ impl Component for ConnectRouter {
                     match switch {
                         AppRoute::Root => homescreen(),
                         AppRoute::Signin => html!{<Signin/>},
+                        AppRoute::NewGame => create_game(),
                         AppRoute::Game => html!{<WebIOComponent/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
                         AppRoute::Scores => html!{"Todo, put scores page here"},
@@ -51,12 +52,24 @@ impl Component for ConnectRouter {
     }
 }
 
+fn create_game() -> VNode {
+      html!{
+          <Menu topbar="Create Game" show_sound=false show_settings=false show_stats=false>
+            <div class="flex flex-col">
+              <MenuButton text="Connect4" dest="/game/offline"/>
+              <MenuButton text="Toot and Otto" dest="#"/>
+              <MenuButton text="Custom Game" dest="#"/>
+            </div>
+          </Menu>
+      }
+}
+
 fn homescreen() -> VNode {
    if let Some(s) = LocalStorage::get_username() {
       html!{
           <Menu topbar=format!("Hello, {}", s) show_sound=false show_settings=false show_stats=true>
             <div class="flex flex-col">
-              <MenuButton text="Create Game" dest="/game/offline"/>
+              <MenuButton text="Create Game" dest="/newgame"/>
               <MenuButton text="Current Games" dest="#"/>
               <MenuButton text="Past Games" dest="#"/>
             </div>
@@ -67,7 +80,7 @@ fn homescreen() -> VNode {
           <Menu topbar="" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Sign In" dest="/signin"/>
-              <MenuButton text="Play Offline" dest="/game/offline"/>
+              <MenuButton text="Play Offline" dest="/newgame"/>
             </div>
           </Menu>
       }
@@ -86,6 +99,8 @@ pub enum AppRoute {
     ScoreBoard,
     #[to = "/game"]
     Game,
+    #[to = "/newgame"]
+    NewGame,
     #[to = "/Scores!"]
     Scores,
 }
