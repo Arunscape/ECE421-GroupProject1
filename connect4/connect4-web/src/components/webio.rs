@@ -57,6 +57,7 @@ impl WebIO {
         };
         s.game_state = match s.game.current_player().player_type {
             PlayerType::Local => GameState::GetMove,
+            PlayerType::Remote => GameState::GetMove,
             PlayerType::AI(ai_conf) => GameState::WaitingForLocal,
         };
         s
@@ -92,6 +93,7 @@ impl WebIO {
                     PlayerType::AI(ai) => {
                         connect4_lib::ai::get_best_move(&mut self.game.clone(), ai)
                     }
+                    PlayerType::Remote => todo!(),
                 };
                 self.play_move(loc, ty);
             }
@@ -228,6 +230,7 @@ impl WebIO {
         self.game_state = match res {
             BoardState::Ongoing => match self.game.current_player().player_type {
                 PlayerType::Local => GameState::PlayingMove(Box::from(GameState::GetMove)),
+                PlayerType::Remote => todo!(),
                 PlayerType::AI(_) => GameState::PlayingMove(Box::from(GameState::WaitingForLocal)),
             },
             BoardState::Invalid => self.game_state.clone(),
