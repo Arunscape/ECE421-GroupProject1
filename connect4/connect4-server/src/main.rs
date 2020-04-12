@@ -23,6 +23,7 @@ mod player;
 
 use jwtHelper::{claims_from_jwt_token, gen_jwt_token};
 use connect4_coms::types::{Claims, ClaimPayload, PlayMove};
+use connect4_lib::game::Game;
 use connect4_lib::games::connect4_3player; // TODO: remove
 use connect4_lib::game::ChipDescrip; //TODO: remove
 
@@ -136,16 +137,13 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[put("/creategame")]
-fn creategame(wrapper: JwtPayloadWrapper) -> content::Json<String> {
-
-    //TODO: get game from request body
-    let placeholder_game = connect4_3player();
+#[put("/creategame", data = "<new_game>")]
+fn creategame(wrapper: JwtPayloadWrapper, new_game: Json<connect4_lib::game::Game>) -> content::Json<String> {
 
     let mut data = match wrapper.get_username() {
         Some(u) => GameDataResponse {
             status: String::from("success"),
-            game_data: gamehelper::insert_new_game(u, placeholder_game),
+            game_data: gamehelper::insert_new_game(u, new_game.into_inner()),
         },
         None => GameDataResponse {
 	        status: String::from("No Username in JWT"),
