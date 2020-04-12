@@ -11,10 +11,12 @@
  - Only do work when necessary (not continuously rendering)
  - Make it easy to use with asycn functions (pass through callbacks or have an async handler or...)
  - Separate the game component and the game object.
-    - game object (deals with the canvas directly)
-    - component we throw into yew (wraps around game object)
+    - _game object_ (deals with the canvas directly)
+    - _game component_ we throw into yew (wraps around game object)
         - creates the canvas 
-    - screen which contains game component
+        - by default take 100% available space
+        - basically is just the canvas
+    - _game screen_ which contains game component
 
 
 ## User stories
