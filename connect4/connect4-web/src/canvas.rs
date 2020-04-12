@@ -11,16 +11,14 @@ use std::rc::Rc;
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
     pub context: web_sys::CanvasRenderingContext2d,
-    width: u32,
-    height: u32,
     press_count: Rc<Cell<isize>>,
     mouse_loc: Rc<Cell<(i32, i32)>>,
 }
 
 impl Canvas {
-    pub fn new(attr_id: &str, width: u32, height: u32) -> Canvas {
+    pub fn new(canvas_id: &'static str) -> Canvas {
         let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id("canvas").unwrap();
+        let canvas = document.get_element_by_id(canvas_id).unwrap();
 
         // setup HTML canvas and context
         let canvas: web_sys::HtmlCanvasElement = canvas
@@ -68,8 +66,6 @@ impl Canvas {
         let mut my_can = Canvas {
             canvas,
             context,
-            width,
-            height,
             press_count: presser,
             mouse_loc: loc,
         };

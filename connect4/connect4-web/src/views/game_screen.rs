@@ -9,12 +9,6 @@ pub struct GameScreen {
     link: ComponentLink<Self>,
 }
 
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub active: bool,
-    pub canvas: Canvas,
-    pub game: Game,
-}
 
 pub enum Msg {
     GoBack,
@@ -31,11 +25,11 @@ impl GameScreen {
 
     fn view() -> VNode {
         
-        let game_id = query("game").expect("game id not present in query string");
-        let game_object = GameObject::new(self.props.canvas, self.props.game);
-        let active = self.props.active;
+        let game_type = query("game").expect("game type not present in query string");
+        let other_player = query("player").expect("player not present in query string")
+        let active = true;
         html! {
-            <GameComponent/>
+            <GameComponent gameid other_player active/>
         }
     }
 }

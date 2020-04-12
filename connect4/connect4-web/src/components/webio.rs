@@ -49,7 +49,7 @@ impl WebIO {
     fn new(game: Game) -> Self {
         let mut s = Self {
             game,
-            canvas: Canvas::new("#canvas", 200, 200),
+            canvas: Canvas::new("#canvas"),
             game_state: GameState::GetMove,
             running: true,
             over_column: None,

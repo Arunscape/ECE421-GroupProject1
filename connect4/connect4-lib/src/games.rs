@@ -3,6 +3,11 @@ use crate::game::{check_linear_pattern, Board, Checker, ChipDescrip, Game, Playe
 use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
 use std::rc::Rc;
 
+pub enum GameType {
+    Connect4,
+    Toto,
+}
+
 pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
     let check = move |game: &Game| -> bool { check_linear_pattern(&[chip; 4], game) };
     Rc::from(check)
@@ -128,16 +133,20 @@ pub fn connect4_ai_p2() -> Game {
 }
 
 pub fn connect4() -> Game {
+    connect4_custom(PlayerType::Local, PlayerType::Local)
+}
+
+pub fn connect4_custom(player1_type: PlayerType, player2_type: PlayerType) -> Game {
     let board = Board::new(7, 6);
 
     let players = vec![
         Player {
-            player_type: PlayerType::Local,
+            player_type: player1_type,
             chip_options: vec![RED_CHIP],
             win_conditions: vec![four_in_a_row(RED_CHIP)],
         },
         Player {
-            player_type: PlayerType::Local,
+            player_type: player2_type,
             chip_options: vec![YELLOW_CHIP],
             win_conditions: vec![four_in_a_row(YELLOW_CHIP)],
         },
@@ -166,16 +175,20 @@ pub fn toto_ai() -> Game {
 }
 
 pub fn toto() -> Game {
+    toto_custom(PlayerType::Local, PlayerType::Local)
+}
+
+pub fn toto_custom(player1_type: PlayerType, player2_type: PlayerType) -> Game {
     let board = Board::new(6, 4);
 
     let players = vec![
         Player {
-            player_type: PlayerType::Local,
+            player_type: player1_type,
             chip_options: vec![T_CHIP, O_CHIP],
             win_conditions: vec![wrap_4_check(T_CHIP, O_CHIP)],
         },
         Player {
-            player_type: PlayerType::Local,
+            player_type: player2_type,
             chip_options: vec![T_CHIP, O_CHIP],
             win_conditions: vec![wrap_4_check(O_CHIP, T_CHIP)],
         },
@@ -206,6 +219,13 @@ pub fn connect4_3player() -> Game {
     ];
 
     Game::new(board, players)
+}
+
+pub fn build_game(game_type: GameType, player1_type: PlayerType, player2_type: PlayerType) -> Game {
+    match game_type {
+        GameType::Connect4 => connect4_custom(player1_type, player2_type),
+        GameType::Toto => toto_custom(player1_type, player2_type),
+    }
 }
 
 #[cfg(test)]
