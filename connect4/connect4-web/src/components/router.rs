@@ -66,12 +66,13 @@ fn create_game() -> VNode {
 }
 
 fn player_config() -> VNode {
+    let preset = query("preset").unwrap_or(String::from("connect4"));
       html!{
           <Menu title="Setup Players" topbar="" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
-              <MenuButton text="Single player" dest="/game/offline"/>
-              <MenuButton text="Local Multiplayer" dest="/game/offline"/>
-              <MenuButton text="Online Multiplayer" dest="/game/offline"/>
+              <MenuButton text="Single player" dest=format!("/game/offline?mode={}&player=ai", preset)/>
+              <MenuButton text="Local Multiplayer" dest=format!("/game/offline?mode={}&player=local", preset)/>
+              <MenuButton text="Online Multiplayer" dest=format!("/game/offline?mode={}&player=remote", preset)/>
             </div>
           </Menu>
       }
@@ -118,4 +119,17 @@ pub enum AppRoute {
     PlayerConfig,
     #[to = "/Scores!"]
     Scores,
+}
+
+fn query(key: &str) -> Option<String> {
+    let url = window().location().href().unwrap();
+    url
+        .split('?')
+        .skip(1)
+        .next()
+        .map(|x| x.split('&'))
+        .map(|items| items.filter(|x| x.split('=').next() == Some(key)))
+        .and_then(|mut x| x.next())
+        .and_then(|x| x.split('=').skip(1).next())
+        .map(|x| String::from(x))
 }
