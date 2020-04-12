@@ -119,6 +119,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
     Some(new_game)
 }
 
+// TODO: refactor to take in a Comms PlayMove object
 pub fn update_game_with_play(
     roomcode: &str,
     username: &str,
