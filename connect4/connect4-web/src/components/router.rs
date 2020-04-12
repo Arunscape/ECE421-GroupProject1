@@ -37,6 +37,7 @@ impl Component for ConnectRouter {
                         AppRoute::Signin => html!{<Signin/>},
                         AppRoute::NewGame => create_game(),
                         AppRoute::PlayerConfig => player_config(),
+                        AppRoute::AIConfig => ai_config(),
                         AppRoute::Game => html!{<WebIOComponent/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
                         AppRoute::Scores => html!{"Todo, put scores page here"},
@@ -57,22 +58,38 @@ fn create_game() -> VNode {
       html!{
           <Menu title="New Game" topbar="" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
-              <MenuButton text="Connect4" dest="/setupgame?preset=connect4"/>
-              <MenuButton text="Toot and Otto" dest="/setupgame?preset=toto"/>
-              <MenuButton text="Custom Game" dest="/setupgame?preset=custom"/>
+              <MenuButton text="Connect4" dest="/setupgame?game=connect4"/>
+              <MenuButton text="Toot and Otto" dest="/setupgame?game=toto"/>
+              <MenuButton text="Custom Game" dest="/setupgame?game=custom"/>
             </div>
           </Menu>
       }
 }
 
 fn player_config() -> VNode {
-    let preset = query("preset").unwrap_or(String::from("connect4"));
+    let preset = query("game").unwrap_or(String::from("connect4"));
       html!{
           <Menu title="Setup Players" topbar="" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
-              <MenuButton text="Single player" dest=format!("/game/offline?mode={}&player=ai", preset)/>
-              <MenuButton text="Local Multiplayer" dest=format!("/game/offline?mode={}&player=local", preset)/>
-              <MenuButton text="Online Multiplayer" dest=format!("/game/offline?mode={}&player=remote", preset)/>
+              <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
+              <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player=local", preset)/>
+              <MenuButton text="Online Multiplayer" dest=format!("/game/offline?game={}&player=remote", preset)/>
+            </div>
+          </Menu>
+      }
+}
+
+fn ai_config() -> VNode {
+    let preset = query("game").unwrap_or(String::from("connect4"));
+      html!{
+          <Menu title="Setup AI" topbar="" show_sound=false show_settings=false show_stats=false>
+            <div class="flex flex-col">
+              <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player=ai_easy", preset)/>
+              <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player=ai_mid", preset)/>
+              <MenuButton text="Player 1 Hard" dest=format!("/game/offline?game={}&player=ai_hard", preset)/>
+              <MenuButton text="Player 2 Easy" dest=format!("/game/offline?game={}&player=ai_easy2", preset)/>
+              <MenuButton text="Player 2 Medium" dest=format!("/game/offline?game={}&player=ai_mid2", preset)/>
+              <MenuButton text="Player 2 Hard" dest=format!("/game/offline?game={}&player=ai_hard2", preset)/>
             </div>
           </Menu>
       }
@@ -117,6 +134,8 @@ pub enum AppRoute {
     NewGame,
     #[to = "/setupgame"]
     PlayerConfig,
+    #[to = "/setupai"]
+    AIConfig,
     #[to = "/Scores!"]
     Scores,
 }
