@@ -1,6 +1,6 @@
-use yew::prelude::*;
-use yew::{virtual_dom::VNode};
 use web_sys::MouseEvent;
+use yew::prelude::*;
+use yew::virtual_dom::VNode;
 
 use crate::components::Menu;
 
@@ -18,9 +18,7 @@ impl Component for SettingsPage {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        SettingsPage {
-            link
-        }
+        SettingsPage { link }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -29,7 +27,7 @@ impl Component for SettingsPage {
     }
 
     fn view(&self) -> VNode {
-        html!{
+        html! {
           <Menu topbar="" title="Settings" show_settings=false show_stats=false>
             { toggle_setting("Colorblind Mode", false, self.link.callback(|_| Msg::ToggleColorBlind)) }
           </Menu>
@@ -37,7 +35,11 @@ impl Component for SettingsPage {
     }
 }
 
-fn toggle_setting(name: &str, is_on: bool, on_toggle: yew::callback::Callback<MouseEvent>) -> VNode {
+fn toggle_setting(
+    name: &str,
+    is_on: bool,
+    on_toggle: yew::callback::Callback<MouseEvent>,
+) -> VNode {
     html! {
         <button onclick=on_toggle> { name } </button>
     }
