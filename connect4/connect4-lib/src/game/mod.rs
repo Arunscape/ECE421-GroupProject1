@@ -11,6 +11,7 @@ pub type Checker = Rc<dyn Fn(&Game) -> bool>;
 pub enum PlayerType {
     Local,
     AI(AIConfig),
+    Remote,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -70,7 +71,7 @@ impl Game {
         self.turn += 1;
     }
 
-    pub fn invalid_column(&self, col:isize) -> bool {
+    pub fn invalid_column(&self, col: isize) -> bool {
         let y = self.board.get_col_height(col);
         y + 1 > self.board.height || col > self.board.width
     }

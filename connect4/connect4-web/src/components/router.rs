@@ -1,11 +1,12 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
-use yew_router::{prelude::*, Switch};
 use yew_router::switch::{AllowMissing, Permissive};
+use yew_router::{prelude::*, Switch};
 
-use crate::window;
+use crate::components::{Menu, MenuButton, Signin, WebIOComponent};
 use crate::storage::LocalStorage;
-use crate::components::{WebIOComponent, Signin, Menu, MenuButton};
+use crate::views::SettingsPage;
+use crate::{constants, window};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -33,6 +34,7 @@ impl Component for ConnectRouter {
             <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
+                        AppRoute::Settings => html!{<SettingsPage/>},
                         AppRoute::Root => homescreen(),
                         AppRoute::Signin => html!{<Signin/>},
                         AppRoute::NewGame => create_game(),
@@ -55,68 +57,68 @@ impl Component for ConnectRouter {
 }
 
 fn create_game() -> VNode {
-      html!{
-          <Menu title="New Game" topbar="" show_sound=false show_settings=false show_stats=false>
-            <div class="flex flex-col">
-              <MenuButton text="Connect4" dest="/setupgame?game=connect4"/>
-              <MenuButton text="Toot and Otto" dest="/setupgame?game=toto"/>
-              <MenuButton text="Custom Game" dest="/setupgame?game=custom"/>
-            </div>
-          </Menu>
-      }
+    html! {
+        <Menu title="New Game" topbar="" show_settings=false show_stats=false>
+          <div class="flex flex-col">
+            <MenuButton text="Connect4" dest=format!("/setupgame?game={}", constants::game::CONNECT4)/>
+            <MenuButton text="Toot and Otto" dest=format!("/setupgame?game={}", constants::game::TOTO)/>
+            <MenuButton text="Custom Game" dest=format!("/setupgame?game={}", constants::game::CUSTOM)/>
+          </div>
+        </Menu>
+    }
 }
 
 fn player_config() -> VNode {
     let preset = query("game").unwrap_or(String::from("connect4"));
-      html!{
-          <Menu title="Setup Players" topbar="" show_sound=false show_settings=false show_stats=false>
-            <div class="flex flex-col">
-              <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
-              <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player=local", preset)/>
-              <MenuButton text="Online Multiplayer" dest=format!("/game/offline?game={}&player=remote", preset)/>
-            </div>
-          </Menu>
-      }
+    html! {
+        <Menu title="Setup Players" topbar=""  show_settings=false show_stats=false>
+          <div class="flex flex-col">
+            <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
+            <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::LOCAL)/>
+            <MenuButton text="Online Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::REMOTE)/>
+          </div>
+        </Menu>
+    }
 }
 
 fn ai_config() -> VNode {
     // TODO: do a nicer selection then just 6 buttons
     // like a radio for dificulty, and a radio for p1/p2
     let preset = query("game").unwrap_or(String::from("connect4"));
-      html!{
-          <Menu title="Setup AI" topbar="" show_sound=false show_settings=false show_stats=false>
-            <div class="flex flex-col">
-              <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player=ai_easy", preset)/>
-              <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player=ai_mid", preset)/>
-              <MenuButton text="Player 1 Hard" dest=format!("/game/offline?game={}&player=ai_hard", preset)/>
-              <MenuButton text="Player 2 Easy" dest=format!("/game/offline?game={}&player=ai_easy2", preset)/>
-              <MenuButton text="Player 2 Medium" dest=format!("/game/offline?game={}&player=ai_mid2", preset)/>
-              <MenuButton text="Player 2 Hard" dest=format!("/game/offline?game={}&player=ai_hard2", preset)/>
-            </div>
-          </Menu>
-      }
+    html! {
+        <Menu title="Setup AI" topbar=""  show_settings=false show_stats=false>
+          <div class="flex flex-col">
+            <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY)/>
+            <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID)/>
+            <MenuButton text="Player 1 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD)/>
+            <MenuButton text="Player 2 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY2)/>
+            <MenuButton text="Player 2 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID2)/>
+            <MenuButton text="Player 2 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD2)/>
+          </div>
+        </Menu>
+    }
 }
 
 fn homescreen() -> VNode {
-   if let Some(s) = LocalStorage::get_username() {
-      html!{
-          <Menu topbar=format!("Hello, {}", s) title="Connecty" show_sound=false show_settings=false show_stats=true>
-            <div class="flex flex-col">
-              <MenuButton text="Create Game" dest="/newgame"/>
-              <MenuButton text="Current Games" dest="#"/>
-              <MenuButton text="Past Games" dest="#"/>
-            </div>
-          </Menu>
-      }
+    if let Some(s) = LocalStorage::get_username() {
+        html! {
+            <Menu topbar=format!("Hello, {}", s) title="Connecty"  show_settings=false show_stats=true>
+              <div class="flex flex-col">
+                <MenuButton text="Create Game" dest="/newgame"/>
+                <MenuButton text="Current Games" dest="#"/>
+                <MenuButton text="Past Games" dest="#"/>
+              </div>
+            </Menu>
+        }
     } else {
-      html!{
-          <Menu topbar="" title="Connecty" show_sound=false show_settings=false show_stats=false>
-            <div class="flex flex-col">
-              <MenuButton text="Sign In" dest="/signin"/>
-              <MenuButton text="Play Offline" dest="/newgame"/>
-            </div>
-          </Menu>
-      }
+        html! {
+            <Menu topbar="" title="Connecty"  show_settings=false show_stats=false>
+              <div class="flex flex-col">
+                <MenuButton text="Sign In" dest="/signin"/>
+                <MenuButton text="Play Offline" dest="/newgame"/>
+              </div>
+            </Menu>
+        }
     }
 }
 
@@ -140,12 +142,13 @@ pub enum AppRoute {
     AIConfig,
     #[to = "/Scores!"]
     Scores,
+    #[to = "/settings!"]
+    Settings,
 }
 
 fn query(key: &str) -> Option<String> {
     let url = window().location().href().unwrap();
-    url
-        .split('?')
+    url.split('?')
         .skip(1)
         .next()
         .map(|x| x.split('&'))

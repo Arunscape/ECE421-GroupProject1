@@ -8,8 +8,10 @@ use connect4_lib::io::{GameIO, TermIO};
 mod canvas;
 mod components;
 mod coms;
+mod constants;
 mod controller;
 mod storage;
+mod views;
 
 use crate::components::router::ConnectRouter;
 
@@ -65,4 +67,3 @@ fn seconds() -> f64 {
         .now()
         / 1000.0
 }
-
