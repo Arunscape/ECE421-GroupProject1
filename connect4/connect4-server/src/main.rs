@@ -70,7 +70,6 @@ impl JwtPayloadWrapper {
     }
 }
 
-/// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
 fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
@@ -87,13 +86,11 @@ fn signin(u: String, p: String) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /playmove: takes in description of move, gameid, and JWT, returns new gamestate
 #[put("/playmove")]
 fn playmove() -> content::Json<&'static str> {
     content::Json("{ \"type\": \"playmove\" }")
 }
 
-/// /refresh: takes in JWT returns new JWT
 #[post("/refresh")]
 fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 
@@ -114,7 +111,6 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /creategame: takes in description of game, and JWT, returns gameid
 #[put("/creategame")]
 fn creategame(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 
@@ -140,7 +136,6 @@ fn creategame(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /getgame: takes in gameid, JWT, and returns GameData
 #[get("/getgame/<id>")]
 fn getgame(id: String, wrapper: JwtPayloadWrapper) -> content::Json<String> {
 
