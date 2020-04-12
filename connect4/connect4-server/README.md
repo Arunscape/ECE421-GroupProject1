@@ -31,7 +31,7 @@ http://blog.gamesolver.org/solving-connect-four/01-introduction/
 ### /api/playmove
 - takes in:
 -     jwt token from authentication header
--     comms PlayMove object
+-     comms PlayMove object from the request body
 -         has the room id in it
 -         has the column in it
 -         has the lib chip description in it
