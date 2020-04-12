@@ -18,6 +18,7 @@ use std::path::PathBuf;
 mod dbhelper;
 mod gamehelper;
 mod jwthelper;
+mod statshelper;
 mod player;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
