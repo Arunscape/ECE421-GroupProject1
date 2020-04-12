@@ -27,7 +27,7 @@ pub async fn getgame(id: &str) -> Option<GameData> {
     match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
-                Some(v.game_data)
+                v.game_data
             } else {
                 None
             }
