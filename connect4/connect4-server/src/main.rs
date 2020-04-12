@@ -21,8 +21,9 @@ mod jwtHelper;
 mod player;
 
 use jwtHelper::{claims_from_jwt_token, gen_jwt_token};
-use connect4_coms::types::{Claims, ClaimPayload};
+use connect4_coms::types::{Claims, ClaimPayload, PlayMove};
 use connect4_lib::games::connect4_3player; // TODO: remove
+use connect4_lib::game::ChipDescrip; //TODO: remove
 
 use rocket::request::{self, FromRequest};
 use rocket::Outcome;
@@ -87,8 +88,41 @@ fn signin(u: String, p: String) -> content::Json<String> {
 }
 
 #[put("/playmove")]
-fn playmove() -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"playmove\" }")
+fn playmove(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+
+    let placeholder_move = PlayMove {
+        status: "".to_string(),
+        game_id: "PLACEHOLDER".to_string(),
+        column: 1,
+        chip_descrip: ChipDescrip {
+            graphic: '4',
+            bg_color: 2,
+            fg_color: 0,
+        }
+    };
+    // get data according to jwt username extraction success
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data: gamehelper::update_game_with_play(
+                &placeholder_move.game_id,
+                u,
+                placeholder_move.column,
+                placeholder_move.chip_descrip,
+                )
+        },
+        None => GameDataResponse {
+	        status: String::from("failed"),
+	        game_data: None,
+        },
+    };
+
+    // if play update failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("Invalid move?");
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 #[post("/refresh")]
