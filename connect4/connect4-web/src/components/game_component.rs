@@ -12,6 +12,11 @@ impl GameComponent {
     // I OWN THE GAME OBJECT AND DECIDE WHAT TO DO WITH THE PROPS I RECEIVE
     fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
         Self { props }
+
+      let rand_string: String = "canvas" + thread_rng()
+          .sample_iter(&Alphanumeric)
+          .take(10)
+          .collect::<String>().to_ascii_lowercase()
     }
     fn update(&mut _self, _msg: Self::Message) -> ShouldRender {
         false
