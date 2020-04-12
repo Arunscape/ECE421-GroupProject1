@@ -38,14 +38,7 @@ impl Component for ConnectRouter {
             <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
-                        AppRoute::Root => html!{
-                            <Menu topbar="Hello" show_sound=false show_settings=false show_stats=false>
-                              <div class="flex flex-col">
-                                <MenuButton text="Sign In" dest="/signin"/>
-                                <MenuButton text="Play Offline" dest="/game/offline"/>
-                              </div>
-                            </Menu>
-                        },
+                        AppRoute::Root => homescreen(),
                         AppRoute::Signin => html!{<Signin/>},
                         AppRoute::Game => html!{<WebIOComponent/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
@@ -60,6 +53,29 @@ impl Component for ConnectRouter {
                 })
             />
         }
+    }
+}
+
+fn homescreen() -> VNode {
+   if let Some(s) = LocalStorage::get_token() {
+      html!{
+          <Menu topbar="Hello, {username}" show_sound=false show_settings=false show_stats=true>
+            <div class="flex flex-col">
+              <MenuButton text="Create Game" dest="/game/offline"/>
+              <MenuButton text="Current Games" dest="#"/>
+              <MenuButton text="Past Games" dest="#"/>
+            </div>
+          </Menu>
+      }
+    } else {
+      html!{
+          <Menu topbar="" show_sound=false show_settings=false show_stats=false>
+            <div class="flex flex-col">
+              <MenuButton text="Sign In" dest="/signin"/>
+              <MenuButton text="Play Offline" dest="/game/offline"/>
+            </div>
+          </Menu>
+      }
     }
 }
 
