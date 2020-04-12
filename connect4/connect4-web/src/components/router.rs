@@ -36,6 +36,7 @@ impl Component for ConnectRouter {
                         AppRoute::Root => homescreen(),
                         AppRoute::Signin => html!{<Signin/>},
                         AppRoute::NewGame => create_game(),
+                        AppRoute::PlayerConfig => player_config(),
                         AppRoute::Game => html!{<WebIOComponent/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
                         AppRoute::Scores => html!{"Todo, put scores page here"},
@@ -54,11 +55,23 @@ impl Component for ConnectRouter {
 
 fn create_game() -> VNode {
       html!{
-          <Menu topbar="Create Game" show_sound=false show_settings=false show_stats=false>
+          <Menu title="New Game" topbar="" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
-              <MenuButton text="Connect4" dest="/game/offline"/>
-              <MenuButton text="Toot and Otto" dest="#"/>
-              <MenuButton text="Custom Game" dest="#"/>
+              <MenuButton text="Connect4" dest="/setupgame?preset=connect4"/>
+              <MenuButton text="Toot and Otto" dest="/setupgame?preset=toto"/>
+              <MenuButton text="Custom Game" dest="/setupgame?preset=custom"/>
+            </div>
+          </Menu>
+      }
+}
+
+fn player_config() -> VNode {
+      html!{
+          <Menu title="Setup Players" topbar="" show_sound=false show_settings=false show_stats=false>
+            <div class="flex flex-col">
+              <MenuButton text="Single player" dest="/game/offline"/>
+              <MenuButton text="Local Multiplayer" dest="/game/offline"/>
+              <MenuButton text="Online Multiplayer" dest="/game/offline"/>
             </div>
           </Menu>
       }
@@ -67,7 +80,7 @@ fn create_game() -> VNode {
 fn homescreen() -> VNode {
    if let Some(s) = LocalStorage::get_username() {
       html!{
-          <Menu topbar=format!("Hello, {}", s) show_sound=false show_settings=false show_stats=true>
+          <Menu topbar=format!("Hello, {}", s) title="Connecty" show_sound=false show_settings=false show_stats=true>
             <div class="flex flex-col">
               <MenuButton text="Create Game" dest="/newgame"/>
               <MenuButton text="Current Games" dest="#"/>
@@ -77,7 +90,7 @@ fn homescreen() -> VNode {
       }
     } else {
       html!{
-          <Menu topbar="" show_sound=false show_settings=false show_stats=false>
+          <Menu topbar="" title="Connecty" show_sound=false show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Sign In" dest="/signin"/>
               <MenuButton text="Play Offline" dest="/newgame"/>
@@ -101,6 +114,8 @@ pub enum AppRoute {
     Game,
     #[to = "/newgame"]
     NewGame,
+    #[to = "/setupgame"]
+    PlayerConfig,
     #[to = "/Scores!"]
     Scores,
 }
