@@ -36,7 +36,7 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
 // side effect: user is added to the game if they are not already
 fn write_username(game_data: &mut GameData, username: &str) -> bool {
     match whats_my_player_number(game_data, username) {
-        Some(num) => false,
+        Some(_num) => false,
         None => {
             game_data.users.push(username.to_string());
             true
@@ -49,8 +49,8 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
         .users
         .iter()
         .enumerate()
-        .filter(|(i, item)| item.as_str() == username)
-        .map(|(i, item)| i)
+        .filter(|(_i, item)| item.as_str() == username)
+        .map(|(i, _item)| i)
         .collect();
 
     if res.len() == 0 {
@@ -88,7 +88,7 @@ fn gen_valid_roomcode() -> String {
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
-    let mut new_game = GameData {
+    let new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
         users: vec![game_maker.to_string()],
