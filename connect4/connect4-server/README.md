@@ -45,3 +45,16 @@ http://blog.gamesolver.org/solving-connect-four/01-introduction/
 -     game id from the api path
 - returns:
 -     comms GameDataResponse
+
+### /api/joingame/id
+- takes in:
+-     jwt token from authenticaion header
+-     username from the jwt token
+-     game id from the api path
+-     player type from ????? (probably the body)
+-         player type is a lib enum (local, ai, remote)
+-     the player number?
+- returns:
+-     just a success or failure? not sure
+
+the purpose of this endpoint is to register players in the username vector within a GameData object. TODO: support this in backend
