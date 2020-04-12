@@ -6,6 +6,7 @@ use yew_router::switch::{AllowMissing, Permissive};
 use crate::window;
 use crate::storage::LocalStorage;
 use crate::components::{WebIOComponent, Signin, Menu, MenuButton};
+use crate::views::{SettingsPage};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -38,6 +39,7 @@ impl Component for ConnectRouter {
                         AppRoute::NewGame => create_game(),
                         AppRoute::PlayerConfig => player_config(),
                         AppRoute::AIConfig => ai_config(),
+                        AppRoute::Settings => html!{<SettingsPage/>},
                         AppRoute::Game => html!{<WebIOComponent/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
                         AppRoute::Scores => html!{"Todo, put scores page here"},
@@ -140,6 +142,8 @@ pub enum AppRoute {
     AIConfig,
     #[to = "/Scores!"]
     Scores,
+    #[to = "/settings!"]
+    Settings,
 }
 
 fn query(key: &str) -> Option<String> {
