@@ -9,6 +9,7 @@ use rocket::Request;
 use rocket::Response;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
+use rocket_contrib::json::Json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
@@ -87,28 +88,18 @@ fn signin(u: String, p: String) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[put("/playmove")]
-fn playmove(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+#[put("/playmove", data = "<move_data>")]
+fn playmove(wrapper: JwtPayloadWrapper, move_data: Json<PlayMove>) -> content::Json<String> {
 
-    let placeholder_move = PlayMove {
-        status: "".to_string(),
-        game_id: "PLACEHOLDER".to_string(),
-        column: 1,
-        chip_descrip: ChipDescrip {
-            graphic: '4',
-            bg_color: 2,
-            fg_color: 0,
-        }
-    };
     // get data according to jwt username extraction success
     let mut data = match wrapper.get_username() {
         Some(u) => GameDataResponse {
             status: String::from("success"),
             game_data: gamehelper::update_game_with_play(
-                &placeholder_move.game_id,
+                &move_data.game_id,
                 u,
-                placeholder_move.column,
-                placeholder_move.chip_descrip,
+                move_data.column,
+                move_data.chip_descrip,
                 )
         },
         None => GameDataResponse {
