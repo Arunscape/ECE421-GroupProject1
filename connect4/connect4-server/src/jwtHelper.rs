@@ -15,7 +15,7 @@ pub enum ClaimPayload {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    data: ClaimPayload, // extra data fields
+    pub data: ClaimPayload, // extra data fields
     exp: usize,
 }
 
