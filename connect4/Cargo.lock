@@ -280,6 +280,7 @@ dependencies = [
  "connect4-coms",
  "connect4-lib",
  "js-sys",
+ "jsonwebtoken",
  "rand 0.7.3",
  "rayon",
  "serde",

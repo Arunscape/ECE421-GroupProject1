@@ -25,11 +25,6 @@ impl Component for ConnectRouter {
     }
 
     fn mounted(&mut self) -> ShouldRender {
-        // if let None = LocalStorage::get_token() {
-        //     if window().location().pathname().unwrap() != "/signin" {
-        //         window().location().set_href("/signin");
-        //     }
-        // }
         true
     }
 
@@ -57,9 +52,9 @@ impl Component for ConnectRouter {
 }
 
 fn homescreen() -> VNode {
-   if let Some(s) = LocalStorage::get_token() {
+   if let Some(s) = LocalStorage::get_username() {
       html!{
-          <Menu topbar="Hello, {username}" show_sound=false show_settings=false show_stats=true>
+          <Menu topbar=format!("Hello, {}", s) show_sound=false show_settings=false show_stats=true>
             <div class="flex flex-col">
               <MenuButton text="Create Game" dest="/game/offline"/>
               <MenuButton text="Current Games" dest="#"/>

@@ -18,35 +18,12 @@ pub struct Signin {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {}
 
+#[derive(Debug)]
 pub enum Msg {
     ButtonClick,
     UpdateUserName(String),
     UpdatePassword(String),
-}
-
-// todo delete me
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Branch {
-    pub name: String,
-    pub commit: Commit,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Commit {
-    pub sha: String,
-    pub commit: CommitDetails,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CommitDetails {
-    pub author: Signature,
-    pub committer: Signature,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Signature {
-    pub name: String,
-    pub email: String,
+    UpdateMessage(String),
 }
 
 impl Component for Signin {
@@ -63,25 +40,38 @@ impl Component for Signin {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        crate::log(&format!("Recived Message: {:?}", msg));
         match msg {
             Msg::ButtonClick => {
-                self.hm = String::from("Signing in...");
+                self.link.send_message(Msg::UpdateMessage(String::from("Signing in...")));
 
-                async fn handleSignin(username: String, password: String) {
+                async fn handleSignin(username: String, password: String, msg: ComponentLink<Signin>) {
                     let token: Option<String> = coms::signin(&username, &password).await;
 
+                    crate::log(&format!("Recived Token: {:?}", token));
                     match token {
                         Some(s) => {
-                            LocalStorage::set_token(&s);
-                            window().location().set_href("/");
-                        }
-                        None => {}
+                            if s == "" {
+                                crate::log(&format!("Sending Callback 1"));
+                                msg.send_message(Msg::UpdateMessage(String::from("Incorrect Password")));
+                            } else {
+                                LocalStorage::set_token(&s);
+                                window().location().set_href("/");
+                            }
+                        },
+                        None => {
+                            msg.send_message(Msg::UpdateMessage(String::from("Error")));
+                        },
                     };
                 }
-                spawn_local(handleSignin(self.username.clone(), self.password.clone()));
+                spawn_local(handleSignin(self.username.clone(), self.password.clone(), self.link.clone()));
             }
             Msg::UpdateUserName(s) => self.username = s,
             Msg::UpdatePassword(s) => self.password = s,
+            Msg::UpdateMessage(s) => {
+                crate::log(&format!("Recived msg: {}", s));
+                self.hm = s
+            },
         };
         true
     }

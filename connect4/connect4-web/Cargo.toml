@@ -16,6 +16,7 @@ rayon = "1.3.0"
 yew-router = { version = "0.11.0", features = ["web_sys"] }
 wasm-bindgen-futures = "0.4.10"
 js-sys = "0.3.37"
+jsonwebtoken = "7.1.0"
 connect4-lib = { path="../connect4-lib" }
 connect4-coms = { path="../connect4-coms" }
 web_logger = "0.2.0"

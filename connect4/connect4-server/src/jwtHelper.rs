@@ -2,22 +2,9 @@
 
 //use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{thread, time};
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum ClaimPayload {
-    // dummy example payloads
-    username(String),
-    number(i32),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    data: ClaimPayload, // extra data fields
-    exp: usize,
-}
+use connect4_coms::types::{Claims, ClaimPayload};
 
 fn since_epoch_seconds() -> u64 {
     match SystemTime::now().duration_since(UNIX_EPOCH) {

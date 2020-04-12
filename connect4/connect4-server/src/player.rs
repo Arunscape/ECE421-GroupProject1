@@ -2,6 +2,7 @@ use crate::dbhelper::*;
 use crate::jwtHelper::*;
 use bson::doc;
 use serde::{Deserialize, Serialize};
+use connect4_coms::types::{Claims, ClaimPayload};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
