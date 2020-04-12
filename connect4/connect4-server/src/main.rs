@@ -2,33 +2,27 @@
 
 #[macro_use]
 extern crate rocket;
-use rocket::http::{ContentType, Status};
-use rocket::response::status::NotFound;
-use rocket::response::{content, NamedFile, Redirect};
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+use rocket::response::{content, NamedFile};
+use rocket::Outcome;
 use rocket::Request;
-use rocket::Response;
 use rocket_contrib::json::Json;
-use rocket_contrib::serve::StaticFiles;
-use rocket_contrib::templates::Template;
-use std::collections::HashMap;
-use std::fs::File;
-use std::{io, path::PathBuf};
-
-use connect4_coms::types::{GameDataResponse, Refresh, Signin};
+use std::path::PathBuf;
+//use rocket::response::status::NotFound;
+//use rocket::Response;
+//use rocket_contrib::serve::StaticFiles;
+//use rocket_contrib::templates::Template;
+//use std::fs::File;
 
 mod dbhelper;
 mod gamehelper;
 mod jwthelper;
 mod player;
 
-use connect4_coms::types::{ClaimPayload, Claims, PlayMove};
-use connect4_lib::game::ChipDescrip;
-use connect4_lib::game::Game;
-use connect4_lib::games::connect4_3player; // TODO: remove
-use jwthelper::{claims_from_jwt_token, gen_jwt_token}; //TODO: remove
-
-use rocket::request::{self, FromRequest};
-use rocket::Outcome;
+use connect4_coms::types::{ClaimPayload, PlayMove};
+use connect4_coms::types::{GameDataResponse, Refresh, Signin};
+use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
 // then the handler will have a valid claim payload
@@ -65,10 +59,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
 
 impl JwtPayloadWrapper {
     fn get_username(&self) -> Option<&str> {
-        if let ClaimPayload::username(u) = &self.claim_payload {
-            Some(u)
-        } else {
-            None
+        match &self.claim_payload {
+            ClaimPayload::username(u) => Some(u),
+            _ => None,
         }
     }
 }
@@ -182,7 +175,7 @@ fn getgame(id: String, wrapper: JwtPayloadWrapper) -> content::Json<String> {
 }
 
 #[catch(404)]
-fn not_found<'a>(req: &Request) -> Option<NamedFile> {
+fn not_found<'a>(_req: &Request) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
         .parent()
@@ -204,7 +197,7 @@ fn files(file: PathBuf) -> Option<NamedFile> {
 }
 
 fn rocket() -> rocket::Rocket {
-    let path = std::env::current_dir()
+    let _path = std::env::current_dir()
         .unwrap()
         .parent()
         .unwrap()

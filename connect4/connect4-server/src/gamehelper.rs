@@ -1,14 +1,9 @@
 use crate::dbhelper::*;
-use crate::jwthelper::*;
-use crate::player::*;
 use bson::doc;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
 
-use connect4_lib::{
-    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io::GameIO,
-};
+use connect4_lib::game;
 
 static ROOM_CODE_LEN: usize = 3;
 
@@ -166,6 +161,7 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use connect4_lib::games;
 
     #[test]
     #[ignore]

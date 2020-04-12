@@ -1,7 +1,7 @@
 use crate::dbhelper::*;
 use crate::jwthelper::*;
 use bson::doc;
-use connect4_coms::types::{ClaimPayload, Claims};
+use connect4_coms::types::ClaimPayload;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -56,7 +56,6 @@ mod test {
     fn db_sign_in_test() {
         let token = sign_in("Alex", "Yeet").expect("Alex shouldn't be in the DB yet");
 
-        // TODO: verify that Alex
         let token = sign_in("Alex", "Yeet").expect("Alex must sign in again");
 
         // this isnt Alex's password!!
