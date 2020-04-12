@@ -1,8 +1,9 @@
-pub mod a_component;
-pub mod b_component;
-pub mod c_component;
-pub mod canvas;
-pub mod navbar;
 pub mod signin;
 pub mod webio;
-pub mod welcome;
+pub mod menu;
+pub mod router;
+
+pub use menu::Menu;
+pub use signin::Signin;
+pub use webio::WebIOComponent;
+pub use router::ConnectRouter;

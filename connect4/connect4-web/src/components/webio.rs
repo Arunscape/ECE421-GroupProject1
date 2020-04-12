@@ -1,4 +1,4 @@
-use crate::components::canvas::Canvas;
+use crate::canvas::Canvas;
 use crate::controller;
 use crate::log;
 use crate::window;
