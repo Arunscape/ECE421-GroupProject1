@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
-use connect4_coms::types::{Refresh, Signin};
+use connect4_coms::types::{Refresh, Signin, GameDataResponse};
 
 mod dbhelper;
 mod gamehelper;
@@ -59,6 +59,16 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     }
 }
 
+impl JwtPayloadWrapper {
+    fn get_username(&self) -> Option<&str> {
+	    if let ClaimPayload::username(u) = &self.claim_payload {
+            Some(u)
+	    } else {
+            None
+        }
+    }
+}
+
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
 fn signin(u: String, p: String) -> content::Json<String> {
@@ -85,19 +95,20 @@ fn playmove() -> content::Json<&'static str> {
 /// /refresh: takes in JWT returns new JWT
 #[post("/refresh")]
 fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
-    // assume its going to fail
-    let mut data = Refresh {
-        status: String::from("failed"),
-        new_tok: String::from(""),
-    };
 
-    // payload was an username, return success Refresh json
-    if let ClaimPayload::username(u) = wrapper.claim_payload {
-        data = Refresh {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => Refresh {
             status: String::from("success"),
-            new_tok: gen_jwt_token(ClaimPayload::username(u), dbhelper::JWT_LIFETIME_SECONDS),
-        };
-    }
+            new_tok: gen_jwt_token(
+                ClaimPayload::username(u.to_string()),
+                dbhelper::JWT_LIFETIME_SECONDS)
+        },
+        None => Refresh  {
+	        status: String::from("failed"),
+	        new_tok: String::from(""),
+        },
+    };
 
     content::Json(serde_json::to_string(&data).unwrap())
 }
@@ -110,8 +121,26 @@ fn creategame() -> content::Json<&'static str> {
 
 /// /getgame: takes in gameid, JWT, and returns GameData
 #[get("/getgame/<id>")]
-fn getgame(id: String) -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"getgame\" }")
+fn getgame(id: String, wrapper: JwtPayloadWrapper) -> content::Json<String> {
+
+
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data:  gamehelper::get_game_data(u, id.as_str()),
+        },
+        None => GameDataResponse {
+	        status: String::from("No Username in JWT"),
+            game_data: None,
+        },
+    };
+
+    // if get_game_data failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("could not find game");
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 #[catch(404)]
