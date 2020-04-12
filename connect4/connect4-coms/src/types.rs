@@ -46,3 +46,15 @@ pub struct Claims {
     pub data: ClaimPayload, // extra data fields
     pub exp: usize,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GameStats {
+    pub game_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GameStatsResponse {
+    pub status: String,
+    pub game_stats: Option<GameStats>,
+}
+
