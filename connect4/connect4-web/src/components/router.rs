@@ -56,7 +56,7 @@ impl Component for ConnectRouter {
 
 fn create_game() -> VNode {
       html!{
-          <Menu title="New Game" topbar="" show_sound=false show_settings=false show_stats=false>
+          <Menu title="New Game" topbar="" show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Connect4" dest="/setupgame?game=connect4"/>
               <MenuButton text="Toot and Otto" dest="/setupgame?game=toto"/>
@@ -69,7 +69,7 @@ fn create_game() -> VNode {
 fn player_config() -> VNode {
     let preset = query("game").unwrap_or(String::from("connect4"));
       html!{
-          <Menu title="Setup Players" topbar="" show_sound=false show_settings=false show_stats=false>
+          <Menu title="Setup Players" topbar="" show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
               <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player=local", preset)/>
@@ -84,7 +84,7 @@ fn ai_config() -> VNode {
     // like a radio for dificulty, and a radio for p1/p2
     let preset = query("game").unwrap_or(String::from("connect4"));
       html!{
-          <Menu title="Setup AI" topbar="" show_sound=false show_settings=false show_stats=false>
+          <Menu title="Setup AI" topbar="" show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player=ai_easy", preset)/>
               <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player=ai_mid", preset)/>
@@ -100,7 +100,7 @@ fn ai_config() -> VNode {
 fn homescreen() -> VNode {
    if let Some(s) = LocalStorage::get_username() {
       html!{
-          <Menu topbar=format!("Hello, {}", s) title="Connecty" show_sound=false show_settings=false show_stats=true>
+          <Menu topbar=format!("Hello, {}", s) title="Connecty" show_settings=true show_stats=true>
             <div class="flex flex-col">
               <MenuButton text="Create Game" dest="/newgame"/>
               <MenuButton text="Current Games" dest="#"/>
@@ -110,7 +110,7 @@ fn homescreen() -> VNode {
       }
     } else {
       html!{
-          <Menu topbar="" title="Connecty" show_sound=false show_settings=false show_stats=false>
+          <Menu topbar="" title="Connecty" show_settings=false show_stats=false>
             <div class="flex flex-col">
               <MenuButton text="Sign In" dest="/signin"/>
               <MenuButton text="Play Offline" dest="/newgame"/>

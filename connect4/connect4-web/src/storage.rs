@@ -31,6 +31,23 @@ impl LocalStorage {
               _ => None,
             })
     }
+
+    pub fn set_colorblind_setting(val: bool) {
+        window()
+            .unwrap()
+            .local_storage()
+            .unwrap()
+            .unwrap()
+            .set_item(&"colorblind", &format!("{}", val));
+    }
+    pub fn get_colorblind_setting() -> bool {
+        window()
+            .unwrap()
+            .local_storage()
+            .unwrap()
+            .unwrap()
+            .get_item(&"colorblind").unwrap().unwrap_or(String::new()) == "true"
+    }
 }
 
 

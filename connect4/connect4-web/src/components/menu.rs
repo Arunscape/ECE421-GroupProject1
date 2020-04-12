@@ -8,7 +8,6 @@ pub struct Menu {
 pub struct Props {
     pub topbar: String,
     pub title: String,
-    pub show_sound: bool,
     pub show_stats: bool,
     pub show_settings: bool,
     pub children: Children,
@@ -43,7 +42,8 @@ impl Component for Menu {
                     { self.props.children.render() }
                 </div>
                 <div>
-                  { render_if(html!{icon()}, self.props.show_sound) }
+                  { render_if(html!{icon()}, self.props.show_stats) }
+                  { render_if(html!{icon()}, self.props.show_settings) }
                 </div>
             </div>
         }
