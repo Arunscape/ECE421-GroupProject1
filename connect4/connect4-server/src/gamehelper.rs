@@ -13,18 +13,6 @@ use connect4_lib::{
 static ROOM_CODE_LEN: usize = 3;
 
 use connect4_coms::types::GameData;
-//#[derive(Debug, Serialize, Deserialize)]
-//pub struct GameData {
-//    roomcode: String,
-//    board_state: game::BoardState,
-//    users: Vec<String>,
-//
-//    #[serde(flatten)]
-//    game: game::Game,
-//}
-//
-
-// START OF SADNESS
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
     if let Some(player_num) = whats_my_player_number(game_data, username) {
@@ -71,8 +59,6 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
         Some(res[0] as isize)
     }
 }
-
-// END OF SADNESSS
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
