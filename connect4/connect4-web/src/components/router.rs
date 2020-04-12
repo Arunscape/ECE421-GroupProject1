@@ -80,6 +80,8 @@ fn player_config() -> VNode {
 }
 
 fn ai_config() -> VNode {
+    // TODO: do a nicer selection then just 6 buttons
+    // like a radio for dificulty, and a radio for p1/p2
     let preset = query("game").unwrap_or(String::from("connect4"));
       html!{
           <Menu title="Setup AI" topbar="" show_sound=false show_settings=false show_stats=false>
