@@ -1,5 +1,5 @@
 use crate::dbhelper::*;
-use crate::jwtHelper::*;
+use crate::jwthelper::*;
 use crate::player::*;
 use bson::doc;
 use rand::distributions::Alphanumeric;

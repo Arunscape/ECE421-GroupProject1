@@ -1,5 +1,5 @@
 use crate::dbhelper::*;
-use crate::jwtHelper::*;
+use crate::jwthelper::*;
 use bson::doc;
 use connect4_coms::types::{ClaimPayload, Claims};
 use serde::{Deserialize, Serialize};

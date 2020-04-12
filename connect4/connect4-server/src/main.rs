@@ -18,14 +18,14 @@ use connect4_coms::types::{GameDataResponse, Refresh, Signin};
 
 mod dbhelper;
 mod gamehelper;
-mod jwtHelper;
+mod jwthelper;
 mod player;
 
 use connect4_coms::types::{ClaimPayload, Claims, PlayMove};
 use connect4_lib::game::ChipDescrip;
 use connect4_lib::game::Game;
 use connect4_lib::games::connect4_3player; // TODO: remove
-use jwtHelper::{claims_from_jwt_token, gen_jwt_token}; //TODO: remove
+use jwthelper::{claims_from_jwt_token, gen_jwt_token}; //TODO: remove
 
 use rocket::request::{self, FromRequest};
 use rocket::Outcome;
