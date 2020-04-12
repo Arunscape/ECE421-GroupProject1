@@ -20,9 +20,7 @@ impl Component for Menu {
     type Properties = Props;
 
     fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Self {
-            props,
-        }
+        Self { props }
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
@@ -48,11 +46,9 @@ impl Component for Menu {
             </div>
         }
     }
-
-
 }
 fn icon() -> VNode {
-    html!{
+    html! {
         <p> { "#" } </p>
     }
 }
