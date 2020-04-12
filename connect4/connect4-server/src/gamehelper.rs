@@ -26,11 +26,10 @@ use connect4_coms::types::GameData;
 
 // START OF SADNESS
 
-
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
     if let Some(player_num) = whats_my_player_number(game_data, username) {
-        let valid_turn_num = (game_data.game.get_turn() as usize % game_data.game.get_player_count())
-            as isize
+        let valid_turn_num = (game_data.game.get_turn() as usize
+            % game_data.game.get_player_count()) as isize
             == player_num;
         let valid_chip = game_data
             .game
@@ -53,10 +52,9 @@ fn write_username(game_data: &mut GameData, username: &str) -> bool {
         None => {
             game_data.users.push(username.to_string());
             true
-        },
+        }
     }
 }
-
 
 fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
     let res: Vec<usize> = game_data
@@ -74,25 +72,7 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
     }
 }
 
-
-
-
-
-
-
-
-
-
 // END OF SADNESSS
-
-
-
-
-
-
-
-
-
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
@@ -123,11 +103,11 @@ fn gen_valid_roomcode() -> String {
 // TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
     let mut new_game = GameData {
-            roomcode: gen_valid_roomcode().to_owned(),
-            board_state: game::BoardState::Ongoing,
-            users: vec![game_maker.to_string()],
-            game: game,
-        };
+        roomcode: gen_valid_roomcode().to_owned(),
+        board_state: game::BoardState::Ongoing,
+        users: vec![game_maker.to_string()],
+        game: game,
+    };
 
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
