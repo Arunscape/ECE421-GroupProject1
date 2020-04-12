@@ -33,14 +33,12 @@ pub struct GameData {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GameDataResponse {
     pub status: String,
-    pub game_data: GameData,
+    pub game_data: Option<GameData>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ClaimPayload {
-    // dummy example payloads
     username(String),
-    number(i32),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

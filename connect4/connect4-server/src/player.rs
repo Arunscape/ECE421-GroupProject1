@@ -1,8 +1,8 @@
 use crate::dbhelper::*;
-use crate::jwtHelper::*;
+use crate::jwthelper::*;
 use bson::doc;
+use connect4_coms::types::ClaimPayload;
 use serde::{Deserialize, Serialize};
-use connect4_coms::types::{Claims, ClaimPayload};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -56,7 +56,6 @@ mod test {
     fn db_sign_in_test() {
         let token = sign_in("Alex", "Yeet").expect("Alex shouldn't be in the DB yet");
 
-        // TODO: verify that Alex
         let token = sign_in("Alex", "Yeet").expect("Alex must sign in again");
 
         // this isnt Alex's password!!

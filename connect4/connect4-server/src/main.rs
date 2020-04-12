@@ -2,29 +2,27 @@
 
 #[macro_use]
 extern crate rocket;
-use rocket::http::{ContentType, Status};
-use rocket::response::status::NotFound;
-use rocket::response::{content, NamedFile, Redirect};
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+use rocket::response::{content, NamedFile};
+use rocket::Outcome;
 use rocket::Request;
-use rocket::Response;
-use rocket_contrib::serve::StaticFiles;
-use rocket_contrib::templates::Template;
-use std::collections::HashMap;
-use std::fs::File;
-use std::{io, path::PathBuf};
-
-use connect4_coms::types::{Refresh, Signin};
+use rocket_contrib::json::Json;
+use std::path::PathBuf;
+//use rocket::response::status::NotFound;
+//use rocket::Response;
+//use rocket_contrib::serve::StaticFiles;
+//use rocket_contrib::templates::Template;
+//use std::fs::File;
 
 mod dbhelper;
 mod gamehelper;
-mod jwtHelper;
+mod jwthelper;
 mod player;
 
-use jwtHelper::{claims_from_jwt_token, gen_jwt_token};
-use connect4_coms::types::{Claims, ClaimPayload};
-
-use rocket::request::{self, FromRequest};
-use rocket::Outcome;
+use connect4_coms::types::{ClaimPayload, PlayMove};
+use connect4_coms::types::{GameDataResponse, Refresh, Signin};
+use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
 // then the handler will have a valid claim payload
@@ -59,7 +57,15 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     }
 }
 
-/// /signin: takes username and password, returns JWT
+impl JwtPayloadWrapper {
+    fn get_username(&self) -> Option<&str> {
+        match &self.claim_payload {
+            ClaimPayload::username(u) => Some(u),
+            _ => None,
+        }
+    }
+}
+
 #[get("/signin/<u>/<p>")]
 fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
@@ -76,46 +82,100 @@ fn signin(u: String, p: String) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /playmove: takes in description of move, gameid, and JWT, returns new gamestate
-#[put("/playmove")]
-fn playmove() -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"playmove\" }")
-}
-
-/// /refresh: takes in JWT returns new JWT
-#[post("/refresh")]
-fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
-    // assume its going to fail
-    let mut data = Refresh {
-        status: String::from("failed"),
-        new_tok: String::from(""),
+#[put("/playmove", data = "<move_data>")]
+fn playmove(wrapper: JwtPayloadWrapper, move_data: Json<PlayMove>) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data: gamehelper::update_game_with_play(
+                &move_data.game_id,
+                u,
+                move_data.column,
+                move_data.chip_descrip,
+            ),
+        },
+        None => GameDataResponse {
+            status: String::from("failed"),
+            game_data: None,
+        },
     };
 
-    // payload was an username, return success Refresh json
-    if let ClaimPayload::username(u) = wrapper.claim_payload {
-        data = Refresh {
-            status: String::from("success"),
-            new_tok: gen_jwt_token(ClaimPayload::username(u), dbhelper::JWT_LIFETIME_SECONDS),
-        };
+    // if play update failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("Invalid move?");
     }
 
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /creategame: takes in description of game, and JWT, returns gameid
-#[put("/creategame")]
-fn creategame() -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"playmove\" }")
+#[post("/refresh")]
+fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => Refresh {
+            status: String::from("success"),
+            new_tok: gen_jwt_token(
+                ClaimPayload::username(u.to_string()),
+                dbhelper::JWT_LIFETIME_SECONDS,
+            ),
+        },
+        None => Refresh {
+            status: String::from("failed"),
+            new_tok: String::from(""),
+        },
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
-/// /getgame: takes in gameid, JWT, and returns GameData
+#[put("/creategame", data = "<new_game>")]
+fn creategame(
+    wrapper: JwtPayloadWrapper,
+    new_game: Json<connect4_lib::game::Game>,
+) -> content::Json<String> {
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data: gamehelper::insert_new_game(u, new_game.into_inner()),
+        },
+        None => GameDataResponse {
+            status: String::from("No Username in JWT"),
+            game_data: None,
+        },
+    };
+
+    // if get_game_data failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("could not find game");
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
 #[get("/getgame/<id>")]
-fn getgame(id: String) -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"getgame\" }")
+fn getgame(id: String, wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data: gamehelper::get_game_data(u, id.as_str()),
+        },
+        None => GameDataResponse {
+            status: String::from("No Username in JWT"),
+            game_data: None,
+        },
+    };
+
+    // if get_game_data failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("could not find game");
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 #[catch(404)]
-fn not_found<'a>(req: &Request) -> Option<NamedFile> {
+fn not_found<'a>(_req: &Request) -> Option<NamedFile> {
     let path = std::env::current_dir()
         .unwrap()
         .parent()
@@ -137,7 +197,7 @@ fn files(file: PathBuf) -> Option<NamedFile> {
 }
 
 fn rocket() -> rocket::Rocket {
-    let path = std::env::current_dir()
+    let _path = std::env::current_dir()
         .unwrap()
         .parent()
         .unwrap()

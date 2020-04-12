@@ -1,4 +1,3 @@
-use bson::ordered::OrderedDocument;
 use bson::*;
 use mongodb::{options::ClientOptions, Client};
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ pub static GAME_COLLECTION_NAME: &str = "rooms";
 
 // error handling wrapper for db connect
 pub fn new_db(db_name: &str) -> Option<mongodb::Database> {
-    match connect_to_db(DATABASE_NAME) {
+    match connect_to_db(db_name) {
         Ok(db) => Some(db),
         Err(_) => None, // TODO: error handle
     }

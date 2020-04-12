@@ -1,30 +1,13 @@
 use crate::dbhelper::*;
-use crate::jwtHelper::*;
-use crate::player::*;
 use bson::doc;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
 
-use connect4_lib::{
-    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io::GameIO,
-};
+use connect4_lib::game;
 
 static ROOM_CODE_LEN: usize = 3;
 
 use connect4_coms::types::GameData;
-//#[derive(Debug, Serialize, Deserialize)]
-//pub struct GameData {
-//    roomcode: String,
-//    board_state: game::BoardState,
-//    users: Vec<String>,
-//
-//    #[serde(flatten)]
-//    game: game::Game,
-//}
-//
-
-// START OF SADNESS
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
     if let Some(player_num) = whats_my_player_number(game_data, username) {
@@ -48,7 +31,7 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
 // side effect: user is added to the game if they are not already
 fn write_username(game_data: &mut GameData, username: &str) -> bool {
     match whats_my_player_number(game_data, username) {
-        Some(num) => false,
+        Some(_num) => false,
         None => {
             game_data.users.push(username.to_string());
             true
@@ -61,8 +44,8 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
         .users
         .iter()
         .enumerate()
-        .filter(|(i, item)| item.as_str() == username)
-        .map(|(i, item)| i)
+        .filter(|(_i, item)| item.as_str() == username)
+        .map(|(i, _item)| i)
         .collect();
 
     if res.len() == 0 {
@@ -71,8 +54,6 @@ fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize>
         Some(res[0] as isize)
     }
 }
-
-// END OF SADNESSS
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
@@ -101,8 +82,8 @@ fn gen_valid_roomcode() -> String {
 
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
-pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
-    let mut new_game = GameData {
+pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
+    let new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
         users: vec![game_maker.to_string()],
@@ -116,9 +97,10 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
     db.collection(GAME_COLLECTION_NAME)
         .insert_one(game_doc, None); // TODO: error handle
 
-    new_game.roomcode.to_owned()
+    Some(new_game)
 }
 
+// TODO: refactor to take in a Comms PlayMove object
 pub fn update_game_with_play(
     roomcode: &str,
     username: &str,
@@ -179,12 +161,14 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use connect4_lib::games;
 
     #[test]
     #[ignore]
     fn db_insert_game_test() {
         let game: game::Game = games::connect4_3player();
-        let roomcode = insert_new_game("Alex", game);
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
     }
 
@@ -194,7 +178,8 @@ mod test {
         let user1 = "Alex";
         let user2 = "Arun";
         let game: game::Game = games::connect4_3player();
-        let roomcode = insert_new_game(user1, game);
+        let game_data = insert_new_game(user1, game).expect("GameData");
+        let roomcode = game_data.roomcode;
         update_game_with_play(&roomcode, user1, 1, games::YELLOW_CHIP);
 
         // side effect: this adds user2 to the game
