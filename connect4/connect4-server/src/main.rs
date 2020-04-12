@@ -22,6 +22,7 @@ mod player;
 
 use jwtHelper::{claims_from_jwt_token, gen_jwt_token};
 use connect4_coms::types::{Claims, ClaimPayload};
+use connect4_lib::games::connect4_3player; // TODO: remove
 
 use rocket::request::{self, FromRequest};
 use rocket::Outcome;
@@ -115,8 +116,28 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 
 /// /creategame: takes in description of game, and JWT, returns gameid
 #[put("/creategame")]
-fn creategame() -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"playmove\" }")
+fn creategame(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+
+    //TODO: get game from request body
+    let placeholder_game = connect4_3player();
+
+    let mut data = match wrapper.get_username() {
+        Some(u) => GameDataResponse {
+            status: String::from("success"),
+            game_data: gamehelper::insert_new_game(u, placeholder_game),
+        },
+        None => GameDataResponse {
+	        status: String::from("No Username in JWT"),
+            game_data: None,
+        },
+    };
+
+    // if get_game_data failed change error message
+    if !data.game_data.is_some() {
+        data.status = String::from("could not find game");
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 /// /getgame: takes in gameid, JWT, and returns GameData
