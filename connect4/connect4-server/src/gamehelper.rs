@@ -185,7 +185,8 @@ mod test {
     #[ignore]
     fn db_insert_game_test() {
         let game: game::Game = games::connect4_3player();
-        let roomcode = insert_new_game("Alex", game);
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
     }
 
@@ -195,7 +196,8 @@ mod test {
         let user1 = "Alex";
         let user2 = "Arun";
         let game: game::Game = games::connect4_3player();
-        let roomcode = insert_new_game(user1, game);
+        let game_data = insert_new_game(user1, game).expect("GameData");
+        let roomcode = game_data.roomcode;
         update_game_with_play(&roomcode, user1, 1, games::YELLOW_CHIP);
 
         // side effect: this adds user2 to the game
