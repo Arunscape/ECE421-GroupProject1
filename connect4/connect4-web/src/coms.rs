@@ -6,7 +6,7 @@ use web_sys::{Request, RequestInit, RequestMode, Response};
 
 use connect4_coms::{
     status,
-    types::{GameData, PlayMove, Signin},
+    types::{GameData, GameDataResponse, PlayMove, Signin},
 };
 use connect4_lib::game::Chip;
 
@@ -24,10 +24,10 @@ pub fn test_request() {
 
 pub async fn getgame(id: &str) -> Option<GameData> {
     let js_json = request("GET", &format!("getgame/{}", id), None, None).await;
-    match js_json.map(|x| x.into_serde::<GameData>()) {
+    match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
-                Some(v)
+                Some(v.game_data)
             } else {
                 None
             }

@@ -25,6 +25,7 @@ pub struct GameData {
     pub game: Game,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GameDataResponse {
     pub status: String,
     pub game_data: GameData,

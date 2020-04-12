@@ -17,6 +17,9 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use crate::coms::{getgame, playmove};
+use connect4_coms::types::{GameDataResponse, PlayMove, Signin};
+
 #[derive(Clone, Debug)]
 enum GameState {
     GetMove,
@@ -179,9 +182,17 @@ impl WebIO {
         }
     }
 
-    fn sync_board(&mut self) {}
+    fn sync_board(&mut self) {
+        //calls getgame
+        let pathname = window().location().pathname().unwrap();
+        let game_id = pathname.split("/").skip(2).next().unwrap();
+        console_log!("game id is: {}", game_id);
+        // coms::getgame(id: &str)
+    }
 
-    fn send_move(&mut self) {}
+    fn send_move(&mut self) {
+        //calls playmove
+    }
 
     fn play_local_move(&mut self) {
         let col = self
