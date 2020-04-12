@@ -41,14 +41,17 @@ impl GameComponent {
             constants::player::REMOTE => games::build_game(game_type, game::PlayerType::Local, game::PlayerType::Remote),
         };
 
-        let canvas_id = "todocreaterandomcanvasid"; // TODO
+        let canvas_id: String = "canvas" + thread_rng()
+          .sample_iter(&Alphanumeric)
+          .take(10)
+          .collect::<String>().to_ascii_lowercase();
+
         let canvas = Canvas::new(canvas_id);
         
         let game_object = GameObject {
             game,
             canvas,
-
-        }
+        };
         Self { props, link, game_object }
     }
     fn update(&mut _self, _msg: Self::Message) -> ShouldRender {
