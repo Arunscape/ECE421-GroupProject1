@@ -24,9 +24,14 @@ impl GameObject {
     //    let Chip 
     }
 
+    pub fn handle_keyboard_event(&mut self, key: char){
+        
+    }
+
     
 
     // get user input from canvas
     // call functions in controller
     // replaces webio
+    //another thing the game object needs to do is get the desired move from the player in games like toot and Otto. Right now, I hard coded in, get the first move from the move list
 }

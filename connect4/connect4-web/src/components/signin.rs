@@ -43,9 +43,14 @@ impl Component for Signin {
         crate::log(&format!("Recived Message: {:?}", msg));
         match msg {
             Msg::ButtonClick => {
-                self.link.send_message(Msg::UpdateMessage(String::from("Signing in...")));
+                self.link
+                    .send_message(Msg::UpdateMessage(String::from("Signing in...")));
 
-                async fn handleSignin(username: String, password: String, msg: ComponentLink<Signin>) {
+                async fn handleSignin(
+                    username: String,
+                    password: String,
+                    msg: ComponentLink<Signin>,
+                ) {
                     let token: Option<String> = coms::signin(&username, &password).await;
 
                     crate::log(&format!("Recived Token: {:?}", token));
@@ -53,25 +58,31 @@ impl Component for Signin {
                         Some(s) => {
                             if s == "" {
                                 crate::log(&format!("Sending Callback 1"));
-                                msg.send_message(Msg::UpdateMessage(String::from("Incorrect Password")));
+                                msg.send_message(Msg::UpdateMessage(String::from(
+                                    "Incorrect Password",
+                                )));
                             } else {
                                 LocalStorage::set_token(&s);
                                 window().location().set_href("/");
                             }
-                        },
+                        }
                         None => {
                             msg.send_message(Msg::UpdateMessage(String::from("Error")));
-                        },
+                        }
                     };
                 }
-                spawn_local(handleSignin(self.username.clone(), self.password.clone(), self.link.clone()));
+                spawn_local(handleSignin(
+                    self.username.clone(),
+                    self.password.clone(),
+                    self.link.clone(),
+                ));
             }
             Msg::UpdateUserName(s) => self.username = s,
             Msg::UpdatePassword(s) => self.password = s,
             Msg::UpdateMessage(s) => {
                 crate::log(&format!("Recived msg: {}", s));
                 self.hm = s
-            },
+            }
         };
         true
     }

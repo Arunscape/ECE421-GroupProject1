@@ -10,6 +10,7 @@ mod components;
 mod coms;
 mod controller;
 mod storage;
+mod views;
 
 use crate::components::router::ConnectRouter;
 
@@ -65,4 +66,3 @@ fn seconds() -> f64 {
         .now()
         / 1000.0
 }
-
