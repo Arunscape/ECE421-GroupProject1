@@ -4,8 +4,11 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
+use connect4_coms::{
+    status,
+    types::{GameData, GameDataResponse, PlayMove, Signin},
+};
 use connect4_lib::game::Chip;
-use connect4_coms::types::Signin;
 
 use crate::log;
 
@@ -19,13 +22,25 @@ pub fn test_request() {
     spawn_local(test());
 }
 
-pub fn getgame() {}
+pub async fn getgame(id: &str) -> Option<GameData> {
+    let js_json = request("GET", &format!("getgame/{}", id), None, None).await;
+    match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
+        Ok(Ok(v)) => {
+            if v.status == status::SUCCESS {
+                Some(v.game_data)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
 
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
     let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     match js_json.map(|x| x.into_serde::<Signin>()) {
         Ok(Ok(v)) => {
-            if v.status == "success" {
+            if v.status == status::SUCCESS {
                 Some(v.tok)
             } else {
                 None
@@ -35,7 +50,19 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
     }
 }
 
-pub fn playmove(chip: &Chip) {}
+pub async fn playmove(chip: &Chip) -> Option<isize> {
+    let js_json = request("PUT", "playmove", None, None).await;
+    match js_json.map(|x| x.into_serde::<PlayMove>()) {
+        Ok(Ok(v)) => {
+            if v.status == status::SUCCESS {
+                Some(v.column)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
 
 fn build_url(postfix: &str) -> String {
     format!("http://{}/api/{}", SERVER_LOC, postfix)

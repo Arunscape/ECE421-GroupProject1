@@ -13,12 +13,51 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::{io, path::PathBuf};
 
-use connect4_coms::types::Signin;
+use connect4_coms::types::{Refresh, Signin};
 
 mod dbhelper;
 mod gamehelper;
 mod jwtHelper;
 mod player;
+
+use jwtHelper::{claims_from_jwt_token, gen_jwt_token};
+use connect4_coms::types::{Claims, ClaimPayload};
+
+use rocket::request::{self, FromRequest};
+use rocket::Outcome;
+
+// if a handler has this type in its params,
+// then the handler will have a valid claim payload
+// OR the request will fail
+struct JwtPayloadWrapper {
+    claim_payload: ClaimPayload,
+}
+
+// extract jwt from header, then extract claim data
+// fail with ()???
+impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
+    type Error = ();
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, ()> {
+        println!("{:?}", request.headers());
+        let token: String = request
+            .headers()
+            .get("authorization")
+            .next()
+            .expect("no authorization in header")
+            .split(" ")
+            .skip(1) // skip the word bearer
+            .next()
+            .expect("no jwt token in header")
+            .to_string();
+        println!("Parsed JWT token: {:?}", token);
+        match claims_from_jwt_token(token) {
+            Some(claim) => Outcome::Success(JwtPayloadWrapper {
+                claim_payload: claim.data,
+            }),
+            None => Outcome::Failure((Status::Unauthorized, ())),
+        }
+    }
+}
 
 /// /signin: takes username and password, returns JWT
 #[get("/signin/<u>/<p>")]
@@ -26,13 +65,13 @@ fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
     let data = match player::sign_in(u.as_str(), p.as_str()) {
         Some(s) => Signin {
-                tok: s,
-                status: String::from("success")
-            },
+            tok: s,
+            status: String::from("success"),
+        },
         None => Signin {
-                tok: String::from(""),
-                status: String::from("success")
-            }
+            tok: String::from(""),
+            status: String::from("success"),
+        },
     };
     content::Json(serde_json::to_string(&data).unwrap())
 }
@@ -45,8 +84,22 @@ fn playmove() -> content::Json<&'static str> {
 
 /// /refresh: takes in JWT returns new JWT
 #[post("/refresh")]
-fn refresh() -> content::Json<&'static str> {
-    content::Json("{ \"type\": \"refresh\" }")
+fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // assume its going to fail
+    let mut data = Refresh {
+        status: String::from("failed"),
+        new_tok: String::from(""),
+    };
+
+    // payload was an username, return success Refresh json
+    if let ClaimPayload::username(u) = wrapper.claim_payload {
+        data = Refresh {
+            status: String::from("success"),
+            new_tok: gen_jwt_token(ClaimPayload::username(u), dbhelper::JWT_LIFETIME_SECONDS),
+        };
+    }
+
+    content::Json(serde_json::to_string(&data).unwrap())
 }
 
 /// /creategame: takes in description of game, and JWT, returns gameid
@@ -55,9 +108,9 @@ fn creategame() -> content::Json<&'static str> {
     content::Json("{ \"type\": \"playmove\" }")
 }
 
-/// /getgame: takes in gameid, JWT, and returns gamestate
-#[get("/getgame")]
-fn getgame() -> content::Json<&'static str> {
+/// /getgame: takes in gameid, JWT, and returns GameData
+#[get("/getgame/<id>")]
+fn getgame(id: String) -> content::Json<&'static str> {
     content::Json("{ \"type\": \"getgame\" }")
 }
 

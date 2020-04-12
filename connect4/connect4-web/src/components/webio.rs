@@ -4,8 +4,10 @@ use crate::log;
 use crate::window;
 use crate::{request_animation_frame, seconds};
 use connect4_lib::{
-    game::Board, game::BoardState, game::ChipDescrip, game::Game, game::PlayerType, GameIO,
+    game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType},
+    io::GameIO,
 };
+use wasm_bindgen_futures::spawn_local;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -16,6 +18,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
+
+use crate::coms;
+use connect4_coms::types::{GameDataResponse, PlayMove, Signin};
 
 #[derive(Clone, Debug)]
 enum GameState {
@@ -179,9 +184,28 @@ impl WebIO {
         }
     }
 
-    fn sync_board(&mut self) {}
+    fn sync_board(&mut self) {
+        //calls getgame
+        let getgame = async || {
+            let pathname = window().location().pathname().unwrap();
+            let game_id = pathname.split("/").skip(2).next().unwrap();
+            console_log!("game id is: {}", game_id);
+            //self.game = coms::getgame(game_id).await.unwrap().game;
+            todo!("figure out how to update self in an async manner");
+            // maybe this will help? https://www.reddit.com/r/rust/comments/csz49l/async_fn_painful_self_lifetime_imposition/
+        };
+        spawn_local(getgame());
+    }
 
-    fn send_move(&mut self) {}
+    fn send_move(&mut self, chip: Chip) {
+        //calls playmove
+
+        async fn playmove(chip: Chip) {
+            coms::playmove(&chip);
+        }
+
+        spawn_local(playmove(chip));
+    }
 
     fn play_local_move(&mut self) {
         let col = self
@@ -194,7 +218,8 @@ impl WebIO {
     fn play_move(&mut self, loc: isize, ty: ChipDescrip) {
         let res = self.game.play(loc, ty);
         self.determine_state_after_move(res);
-        self.send_move();
+        let chip = Chip::new(loc, ty);
+        self.send_move(chip);
         self.falling_loc = Some((loc, controller::get_chip_fall(self.game.get_board()), 0.0));
         // TODO: no magic numbers
     }
