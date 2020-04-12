@@ -5,7 +5,7 @@ use yew_router::switch::{AllowMissing, Permissive};
 
 use crate::window;
 use crate::storage::LocalStorage;
-use crate::components::{WebIOComponent, Signin, Menu};
+use crate::components::{WebIOComponent, Signin, Menu, MenuButton};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -25,11 +25,11 @@ impl Component for ConnectRouter {
     }
 
     fn mounted(&mut self) -> ShouldRender {
-        if let None = LocalStorage::get_token() {
-            if window().location().pathname().unwrap() != "/signin" {
-                window().location().set_href("/signin");
-            }
-        }
+        // if let None = LocalStorage::get_token() {
+        //     if window().location().pathname().unwrap() != "/signin" {
+        //         window().location().set_href("/signin");
+        //     }
+        // }
         true
     }
 
@@ -41,8 +41,8 @@ impl Component for ConnectRouter {
                         AppRoute::Root => html!{
                             <Menu topbar="Hello" show_sound=false show_settings=false show_stats=false>
                               <div class="flex flex-col">
-                                <div class=""> { "Sign In" } </div>
-                                <div class=""> { "Play Offline" } </div>
+                                <MenuButton text="Sign In" dest="/signin"/>
+                                <MenuButton text="Play Offline" dest="/game/offline"/>
                               </div>
                             </Menu>
                         },
