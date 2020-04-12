@@ -101,7 +101,7 @@ fn gen_valid_roomcode() -> String {
 
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
-pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
+pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
     let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
@@ -116,7 +116,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> String {
     db.collection(GAME_COLLECTION_NAME)
         .insert_one(game_doc, None); // TODO: error handle
 
-    new_game.roomcode.to_owned()
+    Some(new_game)
 }
 
 pub fn update_game_with_play(
