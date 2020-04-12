@@ -1,10 +1,10 @@
 // from https://github.com/Keats/jsonwebtoken/blob/master/examples/validation.rs
 
 //use jsonwebtoken::errors::ErrorKind;
+use connect4_coms::types::{ClaimPayload, Claims};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{thread, time};
-use connect4_coms::types::{Claims, ClaimPayload};
 
 fn since_epoch_seconds() -> u64 {
     match SystemTime::now().duration_since(UNIX_EPOCH) {
