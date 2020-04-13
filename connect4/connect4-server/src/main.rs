@@ -22,7 +22,7 @@ mod statshelper;
 mod player;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
-use connect4_coms::types::{GameDataResponse, Refresh, Signin};
+use connect4_coms::types::{GameDataResponse, Refresh, Signin, JoinPlayers, JoinPlayersResponse};
 use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
@@ -130,6 +130,28 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
+#[post("/allgames/ongoing")]
+fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => gamehelper::all_player_games(u, "Ongoing"),
+        None => vec![],
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
+#[post("/allgames/past")]
+fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => gamehelper::all_player_games(u, "Ongoing"),
+        None => vec![],
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
 #[put("/creategame", data = "<new_game>")]
 fn creategame(
     wrapper: JwtPayloadWrapper,
@@ -150,6 +172,27 @@ fn creategame(
     if !data.game_data.is_some() {
         data.status = String::from("could not find game");
     }
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
+#[put("/joingame/<id>", data = "<new_players>")]
+fn joingame(
+    wrapper: JwtPayloadWrapper,
+    id: String,
+    new_players: Json<JoinPlayers>,
+) -> content::Json<String> {
+
+    let mut data = match wrapper.get_username() {
+        Some(u) => JoinPlayersResponse {
+            status: String::from("success"),
+            player_numbers: gamehelper::join_players(&id, u, new_players.into_inner()),
+        },
+        None => JoinPlayersResponse {
+            status: String::from("failed to add any players"),
+            player_numbers: vec![None; new_players.players.len()],
+        },
+    };
 
     content::Json(serde_json::to_string(&data).unwrap())
 }
@@ -206,7 +249,7 @@ fn rocket() -> rocket::Rocket {
     rocket::ignite()
         .mount(
             "/api",
-            routes![signin, playmove, refresh, creategame, getgame],
+            routes![allpast, allongoing, joingame, signin, playmove, refresh, creategame, getgame],
         )
         .mount("/pkg", routes![files])
         .register(catchers![not_found])

@@ -12,7 +12,7 @@ use connect4_lib::game::Chip;
 
 use crate::log;
 
-const SERVER_LOC: &'static str = "localhost:8000";
+const SERVER_LOC: &'static str = "127.0.0.1:8000";
 pub fn test_request() {
     async fn test() {
         request("GET", "getgame", None, None).await;
