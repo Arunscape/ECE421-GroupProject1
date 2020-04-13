@@ -205,12 +205,23 @@ pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec
     return res;
 }
 
-pub fn all_player_games(username: &str, board_state: &str) -> Vec<GameData> {
-    let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+pub fn all_ongoing_games(username: &str) -> Vec<GameData> {
+    let db = new_db(DATABASE_NAME).expect("no mongo, is it running?");
     docs_to_objects(query_collection_for_docs(
         &db, GAME_COLLECTION_NAME,
-        doc!{"users":{ "$elemMatch": {"$eq": username}}, "board_state": board_state}
+        doc!{"users":{ "$elemmatch": {"$eq": username}}, "board_state": "Ongoing"}
     ))
+}
+pub fn all_not_ongoing_games(username: &str) -> Vec<GameData> {
+    let db = new_db(DATABASE_NAME).expect("no mongo, is it running?");
+    docs_to_objects(query_collection_for_docs(
+        &db, GAME_COLLECTION_NAME,
+        doc!{
+            "users":{ "$elemmatch": {"$eq": username}},
+            "board_state":{"$ne": "Ongoing"}
+            }
+    ))
+
 }
 
 #[cfg(test)]
@@ -317,6 +328,7 @@ mod test {
 	        3,
 	        players[0].clone().chip_options[0]
 	    );
+
 
     }
 
