@@ -18,11 +18,11 @@ use std::path::PathBuf;
 mod dbhelper;
 mod gamehelper;
 mod jwthelper;
-mod statshelper;
 mod player;
+mod statshelper;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
-use connect4_coms::types::{GameDataResponse, Refresh, Signin, JoinPlayers, JoinPlayersResponse};
+use connect4_coms::types::{GameDataResponse, JoinPlayers, JoinPlayersResponse, Refresh, Signin};
 use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
@@ -40,7 +40,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
         println!("{:?}", request.headers());
         let token: String = request
             .headers()
-            .get("authorization")
+            .get("Authorization")
             .next()
             .expect("no authorization in header")
             .split(" ")
@@ -160,7 +160,6 @@ fn joingame(
     id: String,
     new_players: Json<JoinPlayers>,
 ) -> content::Json<String> {
-
     let mut data = match wrapper.get_username() {
         Some(u) => JoinPlayersResponse {
             status: String::from("success"),

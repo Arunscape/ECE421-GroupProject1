@@ -1,3 +1,5 @@
+use crate::storage::LocalStorage;
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -8,14 +10,14 @@ use connect4_coms::{
     status,
     types::{GameData, GameDataResponse, PlayMove, Signin},
 };
-use connect4_lib::game::Chip;
+use connect4_lib::game::{Chip, Game};
 
 use crate::log;
 
 const SERVER_LOC: &'static str = "127.0.0.1:8000";
 pub fn test_request() {
     async fn test() {
-        request("GET", "getgame", None, None).await;
+        request::<i32>("GET", "getgame", None, None).await;
     }
 
     log(&format!("Spawning local for request"));
@@ -23,7 +25,23 @@ pub fn test_request() {
 }
 
 pub async fn getgame(id: &str) -> Option<GameData> {
-    let js_json = request("GET", &format!("getgame/{}", id), None, None).await;
+    let token = LocalStorage::get_token();
+    let js_json = request::<i32>("GET", &format!("getgame/{}", id), None, token).await;
+    match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
+        Ok(Ok(v)) => {
+            if v.status == status::SUCCESS {
+                v.game_data
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+pub async fn create_game(game: Game) -> Option<GameData> {
+    let token = LocalStorage::get_token();
+    let js_json = request("PUT", &"creategame", Some(game), token).await;
     match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
@@ -37,7 +55,7 @@ pub async fn getgame(id: &str) -> Option<GameData> {
 }
 
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
-    let js_json = request("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
+    let js_json = request::<i32>("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     match js_json.map(|x| x.into_serde::<Signin>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
@@ -51,7 +69,7 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
 }
 
 pub async fn playmove(chip: &Chip) -> Option<isize> {
-    let js_json = request("PUT", "playmove", None, None).await;
+    let js_json = request::<i32>("PUT", "playmove", None, None).await;
     match js_json.map(|x| x.into_serde::<PlayMove>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
@@ -68,11 +86,11 @@ fn build_url(postfix: &str) -> String {
     format!("http://{}/api/{}", SERVER_LOC, postfix)
 }
 
-async fn request(
+async fn request<T: Serialize>(
     verb: &str,
     path: &str,
-    body: Option<&str>,
-    tok: Option<&str>,
+    body: Option<T>,
+    tok: Option<String>,
 ) -> Result<JsValue, JsValue> {
     let mut opts = RequestInit::new();
     opts.method(verb);
@@ -87,9 +105,10 @@ async fn request(
             .headers()
             .set("Authorization", &format!("Bearer {}", m_tok))?;
     }
-    opts.body(body.map(|x| JsValue::from_str(x)).as_ref());
-    if body.is_some() {
+    if let Some(b) = body {
         request.headers().set("Content-Type", "application/json")?;
+        let js_val = JsValue::from_serde(&b).expect("could not serialize body given");
+        opts.body(Some(&js_val));
     }
 
     let window = web_sys::window().unwrap();
