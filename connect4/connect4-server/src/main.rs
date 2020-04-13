@@ -130,6 +130,28 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
+#[post("/allgames/ongoing")]
+fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => gamehelper::all_ongoing_games(u),
+        None => vec![],
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
+#[post("/allgames/past")]
+fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    // get data according to jwt username extraction success
+    let data = match wrapper.get_username() {
+        Some(u) => gamehelper::all_not_ongoing_games(u),
+        None => vec![],
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
 #[put("/creategame", data = "<new_game>")]
 fn creategame(
     wrapper: JwtPayloadWrapper,
@@ -226,7 +248,7 @@ fn rocket() -> rocket::Rocket {
     rocket::ignite()
         .mount(
             "/api",
-            routes![joingame, signin, playmove, refresh, creategame, getgame],
+            routes![allpast, allongoing, joingame, signin, playmove, refresh, creategame, getgame],
         )
         .mount("/pkg", routes![files])
         .register(catchers![not_found])

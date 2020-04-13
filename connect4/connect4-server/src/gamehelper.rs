@@ -205,14 +205,25 @@ pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec
     return res;
 }
 
-pub fn all_player_games(username: &str) -> Vec<GameData> {
-    let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+pub fn all_ongoing_games(username: &str) -> Vec<GameData> {
+    let db = new_db(DATABASE_NAME).expect("no mongo, is it running?");
     docs_to_objects(query_collection_for_docs(
-        &db,
-        GAME_COLLECTION_NAME,
-        doc!{"users":{ "$elemMatch": {"$eq": username}}}
+        &db, GAME_COLLECTION_NAME,
+        doc!{"users":{ "$elemmatch": {"$eq": username}}, "board_state": "Ongoing"}
     ))
 }
+pub fn all_not_ongoing_games(username: &str) -> Vec<GameData> {
+    let db = new_db(DATABASE_NAME).expect("no mongo, is it running?");
+    docs_to_objects(query_collection_for_docs(
+        &db, GAME_COLLECTION_NAME,
+        doc!{
+            "users":{ "$elemmatch": {"$eq": username}},
+            "board_state":{"$ne": "Ongoing"}
+            }
+    ))
+
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -276,4 +287,49 @@ mod test {
     #[test]
     fn player_number_test() {
     }
+
+    #[test]
+    #[ignore]
+    fn db_crush_arun_test(){
+        let game: game::Game = games::connect4();
+        let players = game.players.clone();
+
+        // /api/newgame
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
+
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Alex", JoinPlayers {
+            players: vec![players[0].clone()]
+        });
+        let result = join_players(&roomcode, "Arun", JoinPlayers {
+            players: vec![players[1].clone()]
+        });
+
+        // /api/playmove/<roomcode>
+        for i in 0..3 {
+	        update_game_with_play(
+	            &roomcode,
+	            "Alex",
+	            i,
+	            players[0].clone().chip_options[0]
+	        );
+	        update_game_with_play(
+	            &roomcode,
+	            "Arun",
+	            i,
+	            players[1].clone().chip_options[0]
+	        );
+        }
+        //play winning move
+	    update_game_with_play(
+	        &roomcode,
+	        "Alex",
+	        3,
+	        players[0].clone().chip_options[0]
+	    );
+
+
+    }
+
 }

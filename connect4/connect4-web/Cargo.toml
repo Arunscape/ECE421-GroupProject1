@@ -35,6 +35,7 @@ features = [
   'Window',
   'DomRect',
   'MouseEvent',
+  'KeyEvent',
   'Performance',
   'console',
   'EventListener',
