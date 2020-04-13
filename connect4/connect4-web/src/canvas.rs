@@ -51,12 +51,6 @@ impl Canvas {
             loc2.set((e.client_x() - left, e.client_y() - top));
         }) as Box<dyn FnMut(web_sys::MouseEvent)>);
 
-        canvas.set_onmousedown(Some(down.as_ref().unchecked_ref()));
-        canvas.set_onmousemove(Some(mov.as_ref().unchecked_ref()));
-
-        down.forget();
-        mov.forget();
-
         // create actual Canvas object
         let mut my_can = Canvas {
             canvas,
@@ -95,5 +89,12 @@ impl Canvas {
         );
     }
 
-    pub fn register_listener(f: fn()) {}
+    pub fn register_onclick_listener(&self, f: js_sys::Function) {
+        self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
+        f.forget();
+    }
+    pub fn register_keypress_listener(&self, f: js_sys::Function) {
+        self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
+        f.forget();
+    }
 }
