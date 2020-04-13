@@ -46,7 +46,7 @@ pub enum BoardState {
 pub struct Game {
     turn: isize,
     board: Board,
-    players: Vec<Player>,
+    pub players: Vec<Player>,
 }
 
 impl Game {
