@@ -5,7 +5,7 @@ use yew_router::{prelude::*, Switch};
 
 use crate::components::{Menu, MenuButton, Signin, WebIOComponent};
 use crate::storage::LocalStorage;
-use crate::views::SettingsPage;
+use crate::views::{OnlineConfigPage, SettingsPage};
 use crate::{constants, window};
 
 #[global_allocator]
@@ -45,6 +45,7 @@ impl Component for ConnectRouter {
                     AppRoute::Scores => html!{"Todo, put scores page here"},
                     AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
                     AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)},
+                    AppRoute::OnlineConfig => html!{<OnlineConfigPage/>},
                 }
             })
 
@@ -75,7 +76,7 @@ fn player_config() -> VNode {
         <div class="flex flex-col">
           <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
           <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::LOCAL)/>
-          <MenuButton text="Online Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::REMOTE)/>
+          <MenuButton text="Online Multiplayer" dest=format!("/setuponline?game={}&player={}", preset, constants::player::REMOTE)/>
         </div>
       </Menu>
   }
@@ -140,6 +141,8 @@ pub enum AppRoute {
   PlayerConfig,
   #[to = "/setupai"]
   AIConfig,
+  #[to = "/setuponline"]
+  OnlineConfig,
   #[to = "/Scores!"]
   Scores,
   #[to = "/settings!"]

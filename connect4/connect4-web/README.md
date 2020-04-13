@@ -34,3 +34,9 @@
             - whether or not it is an active game, or an image of a game. (so a user can preview an in-progress game, and game history)
     - loading spinner when waiting for user input
 
+# Todo (arun)
+    - create games and join games menu
+    when we click remote
+    menu: join/create
+    join: txtfield: game id
+    create: send create request to server
