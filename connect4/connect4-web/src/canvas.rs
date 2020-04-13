@@ -14,9 +14,9 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn new(canvas_id: &'static str) -> Canvas {
+    pub fn new(canvas_id: String) -> Canvas {
         let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id(canvas_id).unwrap();
+        let canvas = document.get_element_by_id(&canvas_id).unwrap();
 
         // setup HTML canvas and context
         let canvas: web_sys::HtmlCanvasElement = canvas

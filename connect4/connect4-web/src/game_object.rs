@@ -1,5 +1,6 @@
 use crate::canvas::Canvas;
 use crate::controller;
+#[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{BoardState, Chip, ChipDescrip, Game, PlayerType};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};

@@ -3,9 +3,9 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::{AllowMissing, Permissive};
 use yew_router::{prelude::*, Switch};
 
-use crate::components::{Menu, MenuButton, Signin, WebIOComponent};
+use crate::components::{Menu, MenuButton, Signin};
 use crate::storage::LocalStorage;
-use crate::views::SettingsPage;
+use crate::views::{GameScreen, SettingsPage};
 use crate::{constants, window};
 
 #[global_allocator]
@@ -40,7 +40,7 @@ impl Component for ConnectRouter {
                         AppRoute::NewGame => create_game(),
                         AppRoute::PlayerConfig => player_config(),
                         AppRoute::AIConfig => ai_config(),
-                        AppRoute::Game => html!{<WebIOComponent/>},
+                        AppRoute::Game => html!{<GameScreen/>},
                         AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
                         AppRoute::Scores => html!{"Todo, put scores page here"},
                         AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
