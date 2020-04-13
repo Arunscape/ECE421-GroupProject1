@@ -54,3 +54,17 @@ http://blog.gamesolver.org/solving-connect-four/01-introduction/
 - returns:
 -     a vector of possible player numbers, if the server failed to register a player it will have None as the player number in the repsonse
 
+
+### /api/allgames/past
+- takes in:
+-     jwt token from authenticaion header with username in it
+- returns:
+-     a possibly empty vector of comms GameData that all have username in the users list and a game state not Ongoing
+
+(note that this endpoint doesnt work yet because the backend prevents you from ever winning a game)
+
+### /api/allgames/ongoing
+- takes in:
+-     jwt token from authenticaion header with username in it
+- returns:
+-     a possibly empty vector of comms GameData that all have username in the users list and a game state Ongoing
