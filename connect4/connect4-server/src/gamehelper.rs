@@ -277,4 +277,47 @@ mod test {
     fn player_number_test() {
     }
 
+    #[test]
+    #[ignore]
+    fn db_crush_arun_test(){
+        let game: game::Game = games::connect4();
+        let players = game.players.clone();
+
+        // /api/newgame
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
+
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Alex", JoinPlayers {
+            players: vec![players[0].clone()]
+        });
+        let result = join_players(&roomcode, "Arun", JoinPlayers {
+            players: vec![players[1].clone()]
+        });
+
+        // /api/playmove/<roomcode>
+        for i in 0..3 {
+	        update_game_with_play(
+	            &roomcode,
+	            "Alex",
+	            i,
+	            players[0].clone().chip_options[0]
+	        );
+	        update_game_with_play(
+	            &roomcode,
+	            "Arun",
+	            i,
+	            players[1].clone().chip_options[0]
+	        );
+        }
+        //play winning move
+	    update_game_with_play(
+	        &roomcode,
+	        "Alex",
+	        3,
+	        players[0].clone().chip_options[0]
+	    );
+
+    }
+
 }
