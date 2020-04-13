@@ -205,6 +205,14 @@ pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec
     return res;
 }
 
+pub fn all_player_games(username: &str) -> Vec<GameData> {
+    let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+    docs_to_objects(query_collection_for_docs(
+        &db,
+        GAME_COLLECTION_NAME,
+        doc!{"users":{ "$elemMatch": {"$eq": username}}}
+    ))
+}
 #[cfg(test)]
 mod test {
     use super::*;
