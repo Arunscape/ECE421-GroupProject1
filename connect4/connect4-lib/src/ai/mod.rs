@@ -125,10 +125,10 @@ fn minmax_search(game: &mut Game, depth: isize) -> isize {
     }
 
     let is_max = game.get_turn() % 2 == 0;
-    if game.get_player(1).win_conditions.iter().any(|x| x(game)) {
+    if game.get_player(1).just_won(&game) {
         return -(depth as isize);
     }
-    if game.get_player(0).win_conditions.iter().any(|x| x(game)) {
+    if game.get_player(0).just_won(&game) {
         return depth as isize;
     }
 

@@ -19,7 +19,14 @@ pub struct Player {
     pub player_type: PlayerType,
     pub chip_options: Vec<ChipDescrip>,
     #[serde(skip_serializing, skip_deserializing)]
+    //pub win_conditions: Vec<Vec<chip::ChipDescrip>>,
     pub win_conditions: Vec<Checker>,
+}
+
+impl Player {
+    pub fn just_won(&self, game: &Game) -> bool {
+        self.win_conditions.iter().any(|x| x(game))
+    }
 }
 
 impl std::fmt::Debug for Player {
@@ -125,7 +132,7 @@ impl Game {
         let mut wins = 0;
         let mut draws = false;
         for (player_num, player) in self.players.iter().enumerate() {
-            if player.win_conditions.iter().any(|x| x(game)) {
+            if player.just_won(&game) {
                 if wins == 0 {
                     wins = player_num as isize + 1;
                 } else {
