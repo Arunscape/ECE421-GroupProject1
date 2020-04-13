@@ -8,6 +8,7 @@ use connect4_lib::io::{GameIO, TermIO};
 mod canvas;
 mod components;
 mod coms;
+mod game_object;
 mod constants;
 mod controller;
 mod storage;
@@ -38,6 +39,10 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = console)]
     fn log(a: &str);
+}
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
 fn window() -> web_sys::Window {

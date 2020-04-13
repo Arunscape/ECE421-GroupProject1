@@ -1,39 +1,34 @@
 use yew::prelude::*;
+use crate::constants;
+
 use crate::{
-    components::GameComponent, 
+    components::GameComponent,
     game_object::GameObject
 };
-use crate::router::query;
+
+use crate::components::router::query;
 
 pub struct GameScreen {
     link: ComponentLink<Self>,
 }
 
-
-pub enum Msg {
-    GoBack,
-}
-
-impl GameScreen {
+impl Component for GameScreen {
+    type Message = ();
+    type Properties = ();
     // I OWN THE GAME COMPONENT
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Self {  props }
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        Self {  link }
     }
-    fn update(&mut _self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
         false
     }
 
-    fn view() -> VNode {
-        
-        let game_type = query("game").expect("game type not present in query string");
-        let other_player = query("player").expect("player not present in query string")
-        let active = true;
+    fn view(&self) -> Html {
+        let gt: String = query("game").unwrap_or(String::from("connect4"));
+        let op: String = query("player").unwrap_or(String::from("local"));
+        //    active=true
         html! {
-            <GameComponent gameid other_player active/>
+            <GameComponent game_type=gt other_player=op gameid=String::from("offline") active=true/>
         }
     }
 }
-
-
-
-

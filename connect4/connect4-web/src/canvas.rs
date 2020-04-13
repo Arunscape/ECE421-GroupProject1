@@ -11,14 +11,12 @@ use std::rc::Rc;
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
     pub context: web_sys::CanvasRenderingContext2d,
-    press_count: Rc<Cell<isize>>,
-    mouse_loc: Rc<Cell<(i32, i32)>>,
 }
 
 impl Canvas {
-    pub fn new(canvas_id: &'static str) -> Canvas {
+    pub fn new(canvas_id: String) -> Canvas {
         let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id(canvas_id).unwrap();
+        let canvas = document.get_element_by_id(&canvas_id).unwrap();
 
         // setup HTML canvas and context
         let canvas: web_sys::HtmlCanvasElement = canvas
@@ -33,41 +31,21 @@ impl Canvas {
             .dyn_into::<web_sys::CanvasRenderingContext2d>()
             .unwrap();
 
-        // Setup canvas mouse stuff
-        let presser = Rc::new(Cell::new(0));
-        let presser1 = presser.clone();
-        let presser2 = presser.clone();
-        let loc = Rc::new(Cell::new((0, 0)));
-        let loc2 = loc.clone();
-
-        let bounds = canvas.get_bounding_client_rect();
-        let left = bounds.x() as i32;
-        let top = bounds.y() as i32;
-
-        let down = Closure::wrap(Box::new(move || {
-            presser1.set(presser1.get() + 1);
-        }) as Box<dyn FnMut()>);
-        let mov = Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
-            loc2.set((e.client_x() - left, e.client_y() - top));
-        }) as Box<dyn FnMut(web_sys::MouseEvent)>);
-
         // create actual Canvas object
         let mut my_can = Canvas {
             canvas,
             context,
-            press_count: presser,
-            mouse_loc: loc,
         };
 
         my_can
     }
 
     pub fn is_mouse_pressed(&self) -> bool {
-        self.press_count.get() > 0
+        false
     }
 
     pub fn get_mouse_loc(&self) -> (i32, i32) {
-        self.mouse_loc.get()
+        (0, 0)
     }
 
     pub fn draw_circle(&self, x: f64, y: f64, r: f64, fill: String, stroke: String) {
@@ -89,14 +67,14 @@ impl Canvas {
         );
     }
 
-    pub fn register_onclick_listener(&self, f: js_sys::Function) {
-        //self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
-        //f.forget();
-        todo!()
+    pub fn register_onclick_listener(&self, onclick: Box<FnMut(web_sys::MouseEvent)>) {
+        let f = Closure::wrap(onclick);
+        self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
+        f.forget();
     }
-    pub fn register_keypress_listener(&self, f: js_sys::Function) {
-        //self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
-        //f.forget();
-        todo!()
+    pub fn register_keypress_listener(&self, onkey: Box<dyn FnMut(web_sys::KeyboardEvent)>) {
+        let f = Closure::wrap(onkey);
+        self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
+        f.forget();
     }
 }
