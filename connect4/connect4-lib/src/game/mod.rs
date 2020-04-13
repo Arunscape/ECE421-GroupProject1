@@ -81,29 +81,7 @@ impl Game {
             BoardState::Invalid
         } else {
             self.play_no_check(col, color);
-            let game = &self;
-            let mut wins = 0;
-            let mut draws = false;
-            for (player_num, player) in self.players.iter().enumerate() {
-                if player.win_conditions.iter().any(|x| x(game)) {
-                    if wins == 0 {
-                        wins = player_num as isize + 1;
-                    } else {
-                        draws = true;
-                    }
-                }
-            }
-            if wins == 0 || draws {
-                if draws {
-                    BoardState::Draw
-                } else if self.turn == self.board.width * self.board.height {
-                    BoardState::Draw
-                } else {
-                    BoardState::Ongoing
-                }
-            } else {
-                BoardState::Win(wins)
-            }
+            self.compute_board_state()
         }
     }
 
@@ -140,6 +118,32 @@ impl Game {
 
     pub fn next_player(&self) -> &Player {
         &self.players[(self.turn as usize + 1) % self.players.len()]
+    }
+
+    pub fn compute_board_state(&self) -> BoardState {
+        let game = &self;
+        let mut wins = 0;
+        let mut draws = false;
+        for (player_num, player) in self.players.iter().enumerate() {
+            if player.win_conditions.iter().any(|x| x(game)) {
+                if wins == 0 {
+                    wins = player_num as isize + 1;
+                } else {
+                    draws = true;
+                }
+            }
+        }
+        if wins == 0 || draws {
+            if draws {
+                BoardState::Draw
+            } else if self.turn == self.board.width * self.board.height {
+                BoardState::Draw
+            } else {
+                BoardState::Ongoing
+            }
+        } else {
+            BoardState::Win(wins)
+        }
     }
 }
 
