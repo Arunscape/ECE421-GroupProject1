@@ -53,12 +53,18 @@ impl GameObject {
         let state = self.derive_state_from_board();
 
         match state {
-            GameState::WaitingForMove(player_type) => controller::message(self.canvas, "Wait for your opponent to make a move!"),
             GameState::GameOver(board_state) => self.end_game(board_state),
-            GameState::PlayingMove(boxed_game_state) => {
-                let chip_descrip = self.game.current_player().chip_options[0];
-                let chip = Chip::new(column_number, chip_descrip);
-                self.play_move(chip);
+            GameState::PlayingMove(boxed_game_state) => {/* Ignore clicks while animating */},
+            GameState::WaitingForMove(player_type) => {
+                match player_type {
+                    PlayerType::Local => {
+                   let chip_descrip = self.game.current_player().chip_options[0];
+                   let chip = Chip::new(column_number, chip_descrip);
+                   self.play_move(chip);
+                    },
+                    _ => controller::message(self.canvas, "Wait for your opponent to make a move!"),
+                }
+                }
             },
         }
 
