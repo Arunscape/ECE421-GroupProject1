@@ -28,16 +28,6 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
         false
     }
 }
-// side effect: user is added to the game if they are not already
-fn write_username(game_data: &mut GameData, username: &str) -> bool {
-    match whats_my_player_number(game_data, username) {
-        Some(_num) => false,
-        None => {
-            game_data.users.push(username.to_string());
-            true
-        }
-    }
-}
 
 fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
     let res: Vec<usize> = game_data
@@ -147,15 +137,11 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-    // possibly write the new username to the DB
-    if write_username(&mut game_data, username) {
-        // update the DB
-        db.collection(GAME_COLLECTION_NAME).replace_one(
-            doc! {"roomcode": roomcode.to_string()},
-            object_to_doc(&game_data).expect("should go todoc??"),
-            None,
-        );
-    }
+//        db.collection(GAME_COLLECTION_NAME).replace_one(
+//            doc! {"roomcode": roomcode.to_string()},
+//            object_to_doc(&game_data).expect("should go todoc??"),
+//            None,
+//        );
 
     adjust_local_perspective(&mut game_data, username);
     Some(game_data)
@@ -214,20 +200,5 @@ mod test {
 
     #[test]
     fn player_number_test() {
-        let game: game::Game = games::connect4_3player();
-        let mut new_game = GameData {
-            roomcode: gen_valid_roomcode().to_owned(),
-            board_state: game::BoardState::Ongoing,
-            users: vec![],
-            game: game,
-        };
-
-        assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
-        assert!(write_username(&mut new_game, "Alex"));
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        assert!(!write_username(&mut new_game, "Alex"));
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        assert!(write_username(&mut new_game, "Arun"));
-        assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
     }
 }
