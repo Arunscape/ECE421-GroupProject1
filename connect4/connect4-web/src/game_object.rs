@@ -59,6 +59,8 @@ impl GameObject {
         slf.canvas.register_onclick_listener(onclick);
         slf.canvas.register_keypress_listener(onkeypress);
 
+        slf.repaint();
+
         slf
     }
 
@@ -124,6 +126,10 @@ impl GameObject {
         todo!();
     }
 
+    fn handle_server_event(&self) {
+        todo!();
+    }
+
     fn derive_state_from_board(&self) -> GameState {
         match self.game.compute_board_state() {
             BoardState::Draw => GameState::GameOver(BoardState::Draw),
@@ -137,14 +143,8 @@ impl GameObject {
         }
     }
 
-    fn wait_for_move(&self) {
-        // poll the server?
-        //self.game = coms::getgame(game_id).await.unwrap().game;
-        todo!();
+    fn repaint(&self) {
+        controller::draw_gameboard(&self.canvas, &self.game.get_board());
     }
 
-    // get user input from canvas
-    // call functions in controller
-    // replaces webio
-    //another thing the game object needs to do is get the desired move from the player in games like toot and Otto. Right now, I hard coded in, get the first move from the move list
 }

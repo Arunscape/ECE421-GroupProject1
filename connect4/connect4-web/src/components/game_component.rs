@@ -33,8 +33,8 @@ impl Component for GameComponent {
 
         Self { props, link, canvas_id, game_object: None }
     }
-    fn mounted(&mut self) -> ShouldRender {
 
+    fn mounted(&mut self) -> ShouldRender {
         let canvas = Canvas::new(self.canvas_id.clone());
 
         let game_type = match self.props.game_type.as_str() {
@@ -66,7 +66,7 @@ impl Component for GameComponent {
 
     fn view(&self) -> Html {
         html! {
-            <canvas id={&self.canvas_id} classes="h-full w-full" height="1080" width="1960" style="outline: black 3px solid;"/>
+            <canvas id={&self.canvas_id} class="h-full w-full" height="1080" width="1960" style="outline: black 3px solid;"/>
         }
     }
 }
