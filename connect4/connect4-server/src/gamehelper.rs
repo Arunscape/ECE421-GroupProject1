@@ -83,7 +83,7 @@ fn gen_valid_roomcode() -> String {
 // given a connect4-lib style game, insert it into the DB
 // TODO: adding placeholder AI's in the users
 pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
-    let new_game = GameData {
+    let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
         users: vec![game_maker.to_string()],
@@ -97,6 +97,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
     db.collection(GAME_COLLECTION_NAME)
         .insert_one(game_doc, None); // TODO: error handle
 
+    adjust_local_perspective(&mut new_game, game_maker);
     Some(new_game)
 }
 
@@ -123,6 +124,7 @@ pub fn update_game_with_play(
         );
 
         // return updated data
+        adjust_local_perspective(&mut game_data, username);
         Some(game_data)
     } else {
         None
@@ -155,8 +157,29 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
         );
     }
 
+    adjust_local_perspective(&mut game_data, username);
     Some(game_data)
 }
+
+
+// with respoect to the username, adjust game_data's player types
+// to local and remote accordingly, skip the AI's
+fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
+
+    for i in 0..game_data.game.get_player_count() {
+        game_data.game.players[i].player_type = {
+            if let  game::PlayerType::AI(asdf) = game_data.game.players[i].player_type {
+                game::PlayerType::AI(asdf)
+            } else if game_data.users[i] == username {
+                game::PlayerType::Local
+            } else {
+                game::PlayerType::Remote
+            }
+        };
+    }
+
+}
+
 
 #[cfg(test)]
 mod test {
