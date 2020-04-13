@@ -1,5 +1,5 @@
 use connect4_lib::game::ChipDescrip;
-use connect4_lib::game::{BoardState, Game};
+use connect4_lib::game::{BoardState, Game, Player};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -58,3 +58,13 @@ pub struct GameStatsResponse {
     pub game_stats: Option<GameStats>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JoinPlayers {
+    pub players: Vec<Player>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JoinPlayersResponse {
+    pub status: String,
+    pub player_numbers: Vec<Option<isize>>,
+}
