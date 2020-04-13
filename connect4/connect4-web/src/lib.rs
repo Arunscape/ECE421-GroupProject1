@@ -8,6 +8,7 @@ use connect4_lib::io::{GameIO, TermIO};
 mod canvas;
 mod components;
 mod coms;
+mod game_object;
 mod constants;
 mod controller;
 mod storage;
