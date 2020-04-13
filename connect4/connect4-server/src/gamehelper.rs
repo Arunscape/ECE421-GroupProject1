@@ -76,7 +76,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
     let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
-        users: vec![game_maker.to_string()],
+        users: vec![],
         game: game,
     };
 
