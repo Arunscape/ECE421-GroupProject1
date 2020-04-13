@@ -232,6 +232,9 @@ pub fn check_linear_pattern(pattern: &[ChipDescrip], game: &Game) -> bool {
     let len = pattern.len() as isize;
     assert!(len <= width);
     assert!(len <= height);
+    if game.turn == 0 {
+        return false
+    }
 
     fn check_dir(
         x: isize,
