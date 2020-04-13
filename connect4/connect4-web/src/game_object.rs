@@ -20,13 +20,13 @@ impl GameObject {
     pub fn new(canvas: Canvas, game: Game) -> Self {
         let game_state = self.derive_state_from_board();
 
-        let onclick = Closure::wrap(Box::new(|| {
+        let onclick = Closure::wrap(Box::new(|e: web_sys::TouchEvent| {
             todo!();
-        }) as Box<dyn FnMut()>) ;
+        }) as Box<dyn FnMut(web_sys::TouchEvent)>) ;
 
-        let onkeypress = Closure::wrap(Box::new(|| {
+        let onkeypress = Closure::wrap(Box::new(|e: web_sys::KeyEvent| {
             todo!();
-        }) as Box<dyn FnMut()>) ;
+        }) as Box<dyn FnMut(web_sys::KeyEvent)>) ;
 
         canvas.register_onclick_listener(onclick);
         canvas.register_keypress_listener(onkeypress);
