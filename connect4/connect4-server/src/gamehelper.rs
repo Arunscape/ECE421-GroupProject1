@@ -147,7 +147,12 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 // to local and remote accordingly, skip the AI's
 fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 
-    for i in 0..game_data.game.get_player_count() {
+    if game_data.users.len() == 0 {
+        // nothing to do
+        return;
+    }
+
+    for i in 0..game_data.users.len() {
         game_data.game.players[i].player_type = {
             if let  game::PlayerType::AI(asdf) = game_data.game.players[i].player_type {
                 game::PlayerType::AI(asdf)
@@ -185,7 +190,7 @@ fn insert_players(game_data: &mut GameData, username: &str, players: Vec<game::P
 }
 
 pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec<Option<isize>> {
-    let mut game_data = get_game_data(roomcode, username).expect("GameData, is mogno running?");
+    let mut game_data = get_game_data(username, roomcode).expect("GameData, is mogno running?");
     let res = insert_players(&mut game_data, username, joining.players);
 
     // write new users to the database
@@ -207,11 +212,40 @@ mod test {
 
     #[test]
     #[ignore]
-    fn db_insert_game_test() {
+    #[should_panic]
+    fn db_invalid_play_test() {
         let game: game::Game = games::connect4_3player();
         let game_data = insert_new_game("Alex", game).expect("GameData");
         let roomcode = game_data.roomcode;
+        // should panic, Alex hasnt joined game yet
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
+    }
+
+    #[test]
+    #[ignore]
+    fn db_multi_client_join_play_test() {
+        let game: game::Game = games::connect4_3player();
+        let players = game.players.clone();
+
+        // /api/newgame
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
+
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Alex", JoinPlayers {
+            players: vec![players[0].clone(), players[1].clone()]
+        });
+        assert!(result == vec![Some(0 as isize), Some(1 as isize)]);
+
+        // /api/playmove/<roomcode>
+        update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
+        // arun joins from a second client
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Arun", JoinPlayers {
+            players: vec![players[2].clone()]
+        });
+        assert!(result == vec![Some(2 as isize)]);
+
     }
 
     #[test]
