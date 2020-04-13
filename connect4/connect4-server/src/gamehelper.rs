@@ -7,7 +7,7 @@ use connect4_lib::game;
 
 static ROOM_CODE_LEN: usize = 3;
 
-use connect4_coms::types::GameData;
+use connect4_coms::types::{GameData, JoinPlayers};
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
     if let Some(player_num) = whats_my_player_number(game_data, username) {
@@ -26,16 +26,6 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
     } else {
         // panic!("player isnt in DB for some reason?")
         false
-    }
-}
-// side effect: user is added to the game if they are not already
-fn write_username(game_data: &mut GameData, username: &str) -> bool {
-    match whats_my_player_number(game_data, username) {
-        Some(_num) => false,
-        None => {
-            game_data.users.push(username.to_string());
-            true
-        }
     }
 }
 
@@ -86,7 +76,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
     let mut new_game = GameData {
         roomcode: gen_valid_roomcode().to_owned(),
         board_state: game::BoardState::Ongoing,
-        users: vec![game_maker.to_string()],
+        users: vec![],
         game: game,
     };
 
@@ -147,15 +137,6 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-    // possibly write the new username to the DB
-    if write_username(&mut game_data, username) {
-        // update the DB
-        db.collection(GAME_COLLECTION_NAME).replace_one(
-            doc! {"roomcode": roomcode.to_string()},
-            object_to_doc(&game_data).expect("should go todoc??"),
-            None,
-        );
-    }
 
     adjust_local_perspective(&mut game_data, username);
     Some(game_data)
@@ -166,7 +147,12 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 // to local and remote accordingly, skip the AI's
 fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 
-    for i in 0..game_data.game.get_player_count() {
+    if game_data.users.len() == 0 {
+        // nothing to do
+        return;
+    }
+
+    for i in 0..game_data.users.len() {
         game_data.game.players[i].player_type = {
             if let  game::PlayerType::AI(asdf) = game_data.game.players[i].player_type {
                 game::PlayerType::AI(asdf)
@@ -181,6 +167,44 @@ fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 }
 
 
+// add the player to game_data's users as username
+// TODO: verify player type (AI or not)
+// return the player number in the array 0-indexed
+fn insert_player(game_data: &mut GameData, username: &str, _player: game::Player) -> Option<isize> {
+    let players_in_game = game_data.users.len();
+    if players_in_game == game_data.game.get_player_count() {
+        // Game is full
+        None
+    } else {
+        // add username
+        game_data.users.push(username.to_string());
+        Some(players_in_game as isize)
+    }
+
+}
+
+fn insert_players(game_data: &mut GameData, username: &str, players: Vec<game::Player>) -> Vec<Option<isize>> {
+    players.iter()
+    .map(|p| insert_player(game_data, username, p.clone()))
+    .collect()
+}
+
+pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec<Option<isize>> {
+    let mut game_data = get_game_data(username, roomcode).expect("GameData, is mogno running?");
+    let res = insert_players(&mut game_data, username, joining.players);
+
+    // write new users to the database
+    // todo: return vec of none's if the write fails
+    let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+    db.collection(GAME_COLLECTION_NAME).replace_one(
+        doc! {"roomcode": roomcode.to_string()},
+        object_to_doc(&game_data).expect("should go todoc??"),
+        None,
+    );
+
+    return res;
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -188,11 +212,40 @@ mod test {
 
     #[test]
     #[ignore]
-    fn db_insert_game_test() {
+    #[should_panic]
+    fn db_invalid_play_test() {
         let game: game::Game = games::connect4_3player();
         let game_data = insert_new_game("Alex", game).expect("GameData");
         let roomcode = game_data.roomcode;
+        // should panic, Alex hasnt joined game yet
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
+    }
+
+    #[test]
+    #[ignore]
+    fn db_multi_client_join_play_test() {
+        let game: game::Game = games::connect4_3player();
+        let players = game.players.clone();
+
+        // /api/newgame
+        let game_data = insert_new_game("Alex", game).expect("GameData");
+        let roomcode = game_data.roomcode;
+
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Alex", JoinPlayers {
+            players: vec![players[0].clone(), players[1].clone()]
+        });
+        assert!(result == vec![Some(0 as isize), Some(1 as isize)]);
+
+        // /api/playmove/<roomcode>
+        update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
+        // arun joins from a second client
+        // /api/joinplayers/<roomcode>
+        let result = join_players(&roomcode, "Arun", JoinPlayers {
+            players: vec![players[2].clone()]
+        });
+        assert!(result == vec![Some(2 as isize)]);
+
     }
 
     #[test]
@@ -214,20 +267,5 @@ mod test {
 
     #[test]
     fn player_number_test() {
-        let game: game::Game = games::connect4_3player();
-        let mut new_game = GameData {
-            roomcode: gen_valid_roomcode().to_owned(),
-            board_state: game::BoardState::Ongoing,
-            users: vec![],
-            game: game,
-        };
-
-        assert_eq!(None, whats_my_player_number(&new_game, "Alex"));
-        assert!(write_username(&mut new_game, "Alex"));
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        assert!(!write_username(&mut new_game, "Alex"));
-        assert_eq!(Some(0), whats_my_player_number(&new_game, "Alex"));
-        assert!(write_username(&mut new_game, "Arun"));
-        assert_eq!(Some(1), whats_my_player_number(&new_game, "Arun"));
     }
 }
