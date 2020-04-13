@@ -20,13 +20,18 @@ impl GameObject {
     pub fn new(canvas: Canvas, game: Game) -> Self {
         let game_state = self.derive_state_from_board();
 
-        let onclick = Closure::wrap(Box::new(|e: web_sys::TouchEvent| {
-            todo!();
-        }) as Box<dyn FnMut(web_sys::TouchEvent)>) ;
+        let bounds = canvas.canvas.get_bounding_client_rect();
+        let left = bounds.x() as i32;
+        let top = bounds.y() as i32;
+        let onclick = Box::new(|e: web_sys::MouseEvent| {
+            let loc = ((e.client_x() - left, e.client_y() - top));
+            let col = controller::canvas_loc_to_column(&self.canvas, loc.0, loc.1, self.game.get_board());
+            self.handle_click(col);
+        });
 
-        let onkeypress = Closure::wrap(Box::new(|e: web_sys::KeyEvent| {
+        let onkeypress = Box::new(|e: web_sys::KeyEvent| {
             todo!();
-        }) as Box<dyn FnMut(web_sys::KeyEvent)>) ;
+        });
 
         canvas.register_onclick_listener(onclick);
         canvas.register_keypress_listener(onkeypress);
@@ -39,12 +44,12 @@ impl GameObject {
         let board = self.game.get_board();
         let loc = chip.get_x();
 
-       // controller::animate_falling_piece(self.canvas, chip: connect4_lib::game::ChipDescrip, board: &Board, loc: (isize, f64, f64))   
+       // controller::animate_falling_piece(self.canvas, chip: connect4_lib::game::ChipDescrip, board: &Board, loc: (isize, f64, f64))
        self.game_state = WaitingForMove(board.current_player);
     }
 
     pub fn handle_click(&mut self, column_number: isize)  {
-        
+
         let state = self.derive_state_from_board();
 
         match state {
@@ -93,7 +98,7 @@ impl GameObject {
         todo!();
     }
 
-    
+
 
     // get user input from canvas
     // call functions in controller
