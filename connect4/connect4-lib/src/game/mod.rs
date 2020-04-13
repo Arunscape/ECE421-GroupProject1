@@ -19,8 +19,7 @@ pub struct Player {
     pub player_type: PlayerType,
     pub chip_options: Vec<ChipDescrip>,
     #[serde(skip_serializing, skip_deserializing)]
-    //pub win_conditions: Vec<Vec<chip::ChipDescrip>>,
-    pub win_conditions: Vec<Checker>,
+    pub win_conditions: Vec<Vec<chip::ChipDescrip>>,
 }
 
 impl Player {
