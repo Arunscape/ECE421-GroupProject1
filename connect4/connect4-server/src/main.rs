@@ -134,7 +134,7 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
-        Some(u) => gamehelper::all_player_games(u, "Ongoing"),
+        Some(u) => gamehelper::all_ongoing_games(u),
         None => vec![],
     };
 
@@ -145,7 +145,7 @@ fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
-        Some(u) => gamehelper::all_player_games(u, "Ongoing"),
+        Some(u) => gamehelper::all_not_ongoing_games(u),
         None => vec![],
     };
 
