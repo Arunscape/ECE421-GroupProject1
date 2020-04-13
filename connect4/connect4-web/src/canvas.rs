@@ -89,12 +89,12 @@ impl Canvas {
         );
     }
 
-    pub fn register_onclick_listener(&self, f: js_sys::Function) {
+    pub fn register_onclick_listener(&self, f: Box<dyn FnMut(web_sys::TouchEvent)>) {
         self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
-        f.forget();
+        //        f.forget();
     }
-    pub fn register_keypress_listener(&self, f: js_sys::Function) {
+    pub fn register_keypress_listener(&self, f: Box<dyn FnMut(web_sys::KeyEvent)>) {
         self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
-        f.forget();
+        //       f.forget();
     }
 }
