@@ -47,20 +47,15 @@ impl Canvas {
         let down = Closure::wrap(Box::new(move || {
             presser1.set(presser1.get() + 1);
         }) as Box<dyn FnMut()>);
-        let up = Closure::wrap(Box::new(move || {
-            presser2.set(presser2.get() - 1);
-        }) as Box<dyn FnMut()>);
         let mov = Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
             loc2.set((e.client_x() - left, e.client_y() - top));
         }) as Box<dyn FnMut(web_sys::MouseEvent)>);
 
         canvas.set_onmousedown(Some(down.as_ref().unchecked_ref()));
-        canvas.set_onmouseup(Some(up.as_ref().unchecked_ref()));
         canvas.set_onmousemove(Some(mov.as_ref().unchecked_ref()));
 
         down.forget();
         mov.forget();
-        up.forget();
 
         // create actual Canvas object
         let mut my_can = Canvas {
@@ -99,4 +94,6 @@ impl Canvas {
             self.canvas.height().into(),
         );
     }
+
+    pub fn register_listener(f: fn()) {}
 }
