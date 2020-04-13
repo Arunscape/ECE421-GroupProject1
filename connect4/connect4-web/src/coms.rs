@@ -95,6 +95,11 @@ async fn request<T: Serialize>(
     let mut opts = RequestInit::new();
     opts.method(verb);
     opts.mode(RequestMode::Cors);
+    let has_body = body.is_some();
+    if let Some(b) = body {
+        let js_val = JsValue::from_serde(&b).expect("could not serialize body given");
+        opts.body(Some(&js_val));
+    }
 
     log(&format!("Making request to: {}", build_url(path)));
     let request: Result<Request, JsValue> = Request::new_with_str_and_init(&build_url(path), &opts);
@@ -105,10 +110,8 @@ async fn request<T: Serialize>(
             .headers()
             .set("Authorization", &format!("Bearer {}", m_tok))?;
     }
-    if let Some(b) = body {
+    if has_body {
         request.headers().set("Content-Type", "application/json")?;
-        let js_val = JsValue::from_serde(&b).expect("could not serialize body given");
-        opts.body(Some(&js_val));
     }
 
     let window = web_sys::window().unwrap();
