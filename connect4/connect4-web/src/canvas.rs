@@ -90,11 +90,13 @@ impl Canvas {
     }
 
     pub fn register_onclick_listener(&self, f: js_sys::Function) {
-        self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
-        f.forget();
+        //self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
+        //f.forget();
+        todo!()
     }
     pub fn register_keypress_listener(&self, f: js_sys::Function) {
-        self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
-        f.forget();
+        //self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
+        //f.forget();
+        todo!()
     }
 }
