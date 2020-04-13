@@ -7,7 +7,7 @@ use connect4_lib::game;
 
 static ROOM_CODE_LEN: usize = 3;
 
-use connect4_coms::types::GameData;
+use connect4_coms::types::{GameData, JoinPlayers};
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
     if let Some(player_num) = whats_my_player_number(game_data, username) {
@@ -137,11 +137,6 @@ pub fn get_game_data(username: &str, roomcode: &str) -> Option<GameData> {
 
     let mut game_data: GameData = docs_to_objects::<GameData>(game_docs).remove(0);
 
-//        db.collection(GAME_COLLECTION_NAME).replace_one(
-//            doc! {"roomcode": roomcode.to_string()},
-//            object_to_doc(&game_data).expect("should go todoc??"),
-//            None,
-//        );
 
     adjust_local_perspective(&mut game_data, username);
     Some(game_data)
@@ -166,6 +161,44 @@ fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 
 }
 
+
+// add the player to game_data's users as username
+// TODO: verify player type (AI or not)
+// return the player number in the array 0-indexed
+fn insert_player(game_data: &mut GameData, username: &str, _player: game::Player) -> Option<isize> {
+    let players_in_game = game_data.users.len();
+    if players_in_game == game_data.game.get_player_count() {
+        // Game is full
+        None
+    } else {
+        // add username
+        game_data.users.push(username.to_string());
+        Some(players_in_game as isize)
+    }
+
+}
+
+fn insert_players(game_data: &mut GameData, username: &str, players: Vec<game::Player>) -> Vec<Option<isize>> {
+    players.iter()
+    .map(|p| insert_player(game_data, username, p.clone()))
+    .collect()
+}
+
+pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec<Option<isize>> {
+    let mut game_data = get_game_data(roomcode, username).expect("GameData, is mogno running?");
+    let res = insert_players(&mut game_data, username, joining.players);
+
+    // write new users to the database
+    // todo: return vec of none's if the write fails
+    let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
+    db.collection(GAME_COLLECTION_NAME).replace_one(
+        doc! {"roomcode": roomcode.to_string()},
+        object_to_doc(&game_data).expect("should go todoc??"),
+        None,
+    );
+
+    return res;
+}
 
 #[cfg(test)]
 mod test {
