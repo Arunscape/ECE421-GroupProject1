@@ -23,7 +23,8 @@ pub struct Player {
 
 impl Player {
     pub fn just_won(&self, game: &Game) -> bool {
-        self.win_conditions.iter().any(|x| x(game))
+        self.win_conditions.iter()
+        .any(|chip_pattern| check_linear_pattern(&chip_pattern, game))
     }
 }
 
