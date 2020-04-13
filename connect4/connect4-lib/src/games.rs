@@ -8,16 +8,12 @@ pub enum GameType {
     Toto,
 }
 
-pub fn four_in_a_row(chip: ChipDescrip) -> Checker {
-    let check = move |game: &Game| -> bool { check_linear_pattern(&[chip; 4], game) };
-    Rc::from(check)
+pub fn four_in_a_row(chip: ChipDescrip) -> Vec<ChipDescrip> {
+    vec![chip; 4]
 }
 
-pub fn wrap_4_check(chip: ChipDescrip, chip_inner: ChipDescrip) -> Checker {
-    let check = move |game: &Game| -> bool {
-        check_linear_pattern(&[chip, chip_inner, chip_inner, chip], game)
-    };
-    Rc::from(check)
+pub fn wrap_4_check(chip: ChipDescrip, chip_inner: ChipDescrip) -> Vec<ChipDescrip> {
+    vec![chip, chip_inner, chip_inner, chip]
 }
 
 pub fn is_connect4(game: &Game) -> bool {
