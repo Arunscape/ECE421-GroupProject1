@@ -49,12 +49,8 @@ http://blog.gamesolver.org/solving-connect-four/01-introduction/
 ### /api/joingame/id
 - takes in:
 -     jwt token from authenticaion header
--     username from the jwt token
 -     game id from the api path
--     player type from ????? (probably the body)
--         player type is a lib enum (local, ai, remote)
--     the player number?
+-     a vector of players to register from the body
 - returns:
--     just a success or failure? not sure
+-     a vector of possible player numbers, if the server failed to register a player it will have None as the player number in the repsonse
 
-the purpose of this endpoint is to register players in the username vector within a GameData object. TODO: support this in backend
