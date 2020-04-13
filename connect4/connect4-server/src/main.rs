@@ -22,7 +22,7 @@ mod statshelper;
 mod player;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
-use connect4_coms::types::{GameDataResponse, Refresh, Signin};
+use connect4_coms::types::{GameDataResponse, Refresh, Signin, JoinPlayers, JoinPlayersResponse};
 use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
@@ -154,6 +154,27 @@ fn creategame(
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
+#[put("/joingame/<id>", data = "<new_players>")]
+fn joingame(
+    wrapper: JwtPayloadWrapper,
+    id: String,
+    new_players: Json<JoinPlayers>,
+) -> content::Json<String> {
+
+    let mut data = match wrapper.get_username() {
+        Some(u) => JoinPlayersResponse {
+            status: String::from("success"),
+            player_numbers: gamehelper::join_players(&id, u, new_players.into_inner()),
+        },
+        None => JoinPlayersResponse {
+            status: String::from("failed to add any players"),
+            player_numbers: vec![None; new_players.players.len()],
+        },
+    };
+
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
 #[get("/getgame/<id>")]
 fn getgame(id: String, wrapper: JwtPayloadWrapper) -> content::Json<String> {
     let mut data = match wrapper.get_username() {
@@ -206,7 +227,7 @@ fn rocket() -> rocket::Rocket {
     rocket::ignite()
         .mount(
             "/api",
-            routes![signin, playmove, refresh, creategame, getgame],
+            routes![joingame, signin, playmove, refresh, creategame, getgame],
         )
         .mount("/pkg", routes![files])
         .register(catchers![not_found])
