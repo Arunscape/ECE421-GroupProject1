@@ -47,11 +47,21 @@ impl Component for OnlineConfigPage {
             let game = coms::getgame(&room_code).await;
             match game {
                 Some(game_data) => {
-                    window().location().set_href(&format!(
-                        "game/{}?{}",
-                        game_data.roomcode.to_string(),
-                        querystring.to_string()
-                    ));
+                    let spots = coms::join_game(&game_data.roomcode).await;
+                    if let Some(s) = spots {
+                        if !s.iter().any(|x| x.is_none()) {
+                            window().location().set_href(&format!(
+                                "game/{}?{}",
+                                game_data.roomcode.to_string(),
+                                querystring.to_string()
+                            ));
+                        } else {
+                            crate::alert("Room is full!");
+                        }
+                    } else {
+                        crate::log("something went horribly wrong");
+                        //todo better code style
+                    }
                 }
                 None => crate::log("Invalid room code entered"),
             };
@@ -66,15 +76,26 @@ impl Component for OnlineConfigPage {
             let game =
                 games::build_game(game_type, game::PlayerType::Local, game::PlayerType::Remote);
             let game = coms::create_game(game).await;
+
             match game {
                 Some(game_data) => {
-                    window().location().set_href(&format!(
-                        "game/{}?{}",
-                        game_data.roomcode.to_string(),
-                        querystring.to_string()
-                    ));
+                    let spots = coms::join_game(&game_data.roomcode).await;
+                    if let Some(s) = spots {
+                        if !s.iter().any(|x| x.is_none()) {
+                            window().location().set_href(&format!(
+                                "game/{}?{}",
+                                game_data.roomcode.to_string(),
+                                querystring.to_string()
+                            ));
+                        } else {
+                            crate::alert("Room is full!");
+                        }
+                    } else {
+                        crate::log("something went horribly wrong");
+                        //todo better code style
+                    }
                 }
-                None => crate::log("Invalid room code entered"),
+                None => crate::alert("Invalid room code entered"),
             };
         }
 

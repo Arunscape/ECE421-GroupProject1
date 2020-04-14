@@ -1,11 +1,13 @@
 use crate::canvas::Canvas;
 use crate::controller;
 use crate::{request_animation_frame, set_timeout};
+use crate::{coms};
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::jq::{mpsc, JReceiver, JSender};
@@ -23,6 +25,7 @@ struct GameOnThread {
     game_state: GameState,
     message_receiver: JReceiver<Msg>,
     sender: JSender<Msg>,
+    gameid: String,
 }
 
 #[derive(Debug)]
@@ -47,16 +50,18 @@ enum Msg {
     Clicked((i32, i32)),
     KeyPressed(u32),
     FinishedAnimation,
+    ServerReceived,
 }
 
 impl GameObject {
-    pub fn new(canvas: Canvas, game: Game) -> Self {
+    pub fn new(canvas: Canvas, game: Game, gameid: String) -> Self {
         let (sender, message_receiver) = mpsc();
         let mut slf = GameOnThread {
             canvas,
             game,
             game_state: GameState::WaitingForMove(PlayerType::Local),
             message_receiver,
+            gameid,
             sender: sender.clone(),
         };
         let game_state = slf.derive_state_from_board();
@@ -119,6 +124,7 @@ impl GameOnThread {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
                     self.game_state = *next;
                     self.repaint();
+                    self.request_game_from_server();
                 }
             }
             Some(Msg::KeyPressed(key_code)) => {}
@@ -132,6 +138,9 @@ impl GameOnThread {
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
+            },
+            Some(Msg::ServerReceived) => {
+                console_log!("Got Game Data");
             }
             None => {}
         }
@@ -178,6 +187,22 @@ impl GameOnThread {
 
     fn handle_server_event(&self) {
         todo!();
+    }
+
+    fn request_game_from_server(&self) {
+
+        async fn getgamer(
+            sender: JSender<Msg>,
+            gameid: String,
+        ) {
+            let data = coms::getgame(&gameid).await;
+            if let Some(gamedata) = data {
+                console_log!("Server Data: {:?}", gamedata);
+                sender.send(Msg::ServerReceived);
+            }
+        }
+        spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
+
     }
 
     fn derive_state_from_board(&self) -> GameState {
