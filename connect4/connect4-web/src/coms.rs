@@ -93,6 +93,28 @@ pub async fn playmove(chip: Chip, game_id: String) -> Option<GameData> {
     }
 }
 
+pub async fn getgamespast() -> Vec<GameData> {
+    getgames(true).await
+}
+
+pub async fn getgamespresent() -> Vec<GameData> {
+    getgames(false).await
+}
+
+async fn getgames(past: bool) -> Vec<GameData> {
+    let token = LocalStorage::get_token();
+    let url = if past {
+        "allgames/past"
+    } else {
+        "allgames/ongoing"
+    };
+    let js_json = request::<i32>("GET", url, None, token).await;
+    match js_json.map(|x| x.into_serde::<Vec<GameData>>()) {
+        Ok(Ok(v)) => v,
+        _ => Vec::new(),
+    }
+}
+
 pub async fn get_player_stats() -> Option<GameStats> {
     let token = LocalStorage::get_token();
     let js_json = request::<i32>("GET", "playerstats", None, token).await;

@@ -35,9 +35,11 @@ impl Component for SettingsPage {
     fn view(&self) -> VNode {
         let is_colorblind = LocalStorage::get_colorblind_setting();
         html! {
-          <Menu topbar="" title="Settings" show_settings=false show_stats=false>
+        <>
+          //<Menu topbar="" title="Settings" show_settings=false show_stats=false>
             { toggle_setting("Colorblind Mode", is_colorblind, self.link.callback(|_| Msg::ToggleColorBlind)) }
-          </Menu>
+          //</Menu>
+        </>
         }
     }
 }
