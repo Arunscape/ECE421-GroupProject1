@@ -124,7 +124,10 @@ pub fn highlight_column(canvas: &Canvas, height: usize, col: isize) {
     draw_board_mask_column(canvas, height, col as usize, COLOR_HIGHLIGHT);
 }
 
-pub fn do_falling_piece_frame(canvas: &Canvas, ani: &mut crate::game_object::ChipAnimation) -> bool {
+pub fn do_falling_piece_frame(
+    canvas: &Canvas,
+    ani: &mut crate::game_object::ChipAnimation,
+) -> bool {
     let delta = 1.0 / 60.0; // TODO: get the actual delta
     ani.vy += delta * GRAVITY;
     ani.y += delta * ani.vy;
