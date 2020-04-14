@@ -24,14 +24,14 @@ impl Component for Menu {
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        false
+        true
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
         true
     }
 
-    fn view(&self) -> VNode {
+    fn view(&self) -> Html {
         html! {
             <div class="h-full flex flex-col items-center justify-between">
                 <div class="w-full text-left"> { &self.props.topbar } </div>
