@@ -1,6 +1,6 @@
 use crate::dbhelper::*;
 use bson::doc;
-use connect4_lib::game;
+use connect4_lib::game::BoardState;
 use connect4_coms::types::{GameData, GameStats};
 
 pub fn get_stats(username: &str) -> Option<GameStats> {
@@ -20,16 +20,35 @@ pub fn get_stats(username: &str) -> Option<GameStats> {
     })
 }
 
-fn games_won(db: &mongodb::Database, username: &str) -> isize {
-    0
+fn games_won(games: &Vec<GameData>, username: &str) -> isize {
+    games.iter()
+    .filter(|g| g.users.iter().any(|u| u == username))
+    .collect::<Vec<&GameData>>()
+    .len() as isize
 }
 
-fn games_lost(db: &mongodb::Database, username: &str) -> isize {
-    0
+fn games_lost(games: &Vec<GameData>, username: &str) -> isize {
+    games.iter()
+    .filter(|g| g.users.iter().any(|u| u == username))
+    .filter(|g|
+        g.users
+        .iter()
+        .enumerate()
+        .filter(|(_i, item)| item.as_str() == username)
+        .map(|(i, _item)| i)
+        .collect::<Vec<usize>>()
+        .remove(0) == 0
+    )
+    .collect::<Vec<&GameData>>()
+    .len() as isize
 }
 
-fn ongoing_games(db: &mongodb::Database, username: &str) -> isize {
-    0
+fn ongoing_games(games: &Vec<GameData>, username: &str) -> isize {
+    games.iter()
+    .filter(|g| g.users.iter().any(|u| u == username))
+    .filter(|g| g.board_state == BoardState::Ongoing)
+    .collect::<Vec<&GameData>>()
+    .len() as isize
 }
 
 #[cfg(test)]
