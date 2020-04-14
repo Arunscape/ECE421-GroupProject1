@@ -131,7 +131,7 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[post("/allgames/ongoing")]
+#[get("/allgames/ongoing")]
 fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
@@ -142,7 +142,7 @@ fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[post("/allgames/past")]
+#[get("/allgames/past")]
 fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
