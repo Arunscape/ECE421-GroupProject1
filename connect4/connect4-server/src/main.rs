@@ -23,7 +23,9 @@ mod player;
 mod statshelper;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
-use connect4_coms::types::{GameDataResponse, JoinPlayers, JoinPlayersResponse, Refresh, Signin};
+use connect4_coms::types::{
+    GameDataResponse, GameStatsResponse, JoinPlayers, JoinPlayersResponse, Refresh, Signin,
+};
 use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
 // if a handler has this type in its params,
@@ -81,6 +83,22 @@ fn signin(u: String, p: String) -> content::Json<String> {
             status: String::from("success"),
         },
     };
+    content::Json(serde_json::to_string(&data).unwrap())
+}
+
+#[get("/getstats")]
+fn getstats(wrapper: JwtPayloadWrapper) -> content::Json<String> {
+    let data = match wrapper.get_username() {
+        Some(u) => GameStatsResponse {
+            status: String::from("success"),
+            game_stats: statshelper::get_stats(u),
+        },
+        None => GameStatsResponse {
+            status: String::from("failed"),
+            game_stats: None,
+        },
+    };
+
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
@@ -249,7 +267,10 @@ fn rocket() -> rocket::Rocket {
     rocket::ignite()
         .mount(
             "/api",
-            routes![allpast, allongoing, joingame, signin, playmove, refresh, creategame, getgame],
+            routes![
+                getstats, allpast, allongoing, joingame, signin, playmove, refresh, creategame,
+                getgame
+            ],
         )
         .mount("/pkg", routes![files])
         .register(catchers![not_found])
