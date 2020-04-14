@@ -68,7 +68,7 @@ impl Component for GameComponent {
             _ => todo!(),
         };
 
-        let game = GameObject::new(canvas, game, self.props.gameid.clone());
+        let game = GameObject::new(canvas, self.props.active, game, self.props.gameid.clone());
         self.game_object = Some(game);
         true
     }
@@ -79,7 +79,10 @@ impl Component for GameComponent {
 
     fn view(&self) -> Html {
         html! {
-            <canvas id={&self.canvas_id} height="1080" width="1960" style="height: 90vmin; width: 160vmin; outline: black 3px solid;"/>
+            <div style="position: relative; width: 100%; height: 0; padding-top: 60%;">
+              <canvas id={&self.canvas_id} height="1080" width="1960"
+                  style="position: absolute; top: 0; bottom: 0; width: 100%; outline: black 3px solid;"/>
+            </div>
         }
     }
 }
