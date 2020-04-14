@@ -237,7 +237,7 @@ mod test {
         let game_data = insert_new_game("Alex", game).expect("GameData");
         let roomcode = game_data.roomcode;
         // should panic, Alex hasnt joined game yet
-        update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
+        assert!(update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP).is_none());
     }
 
     #[test]
