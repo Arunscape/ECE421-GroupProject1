@@ -33,7 +33,7 @@ fn games_won(games: &Vec<GameData>, username: &str) -> isize {
     games
         .iter()
         .filter_map(|g| match g.board_state {
-            BoardState::Win(w) => Some((g, w)),
+            BoardState::Win(w) => Some((g, w-1)),
             _ => None,
         })
         .filter(|(g, w)| {
@@ -54,10 +54,7 @@ fn games_lost(games: &Vec<GameData>, username: &str) -> isize {
             _ => None,
         })
         .filter(|(g, w)| {
-            g.users
-                .iter()
-                .enumerate()
-                .all(|(i, u)| u != username && *w != i as isize)
+            g.users[*w as usize - 1] != username
         })
         .collect::<Vec<_>>()
         .len() as isize
@@ -75,36 +72,57 @@ fn ongoing_games(games: &Vec<GameData>, username: &str) -> isize {
 #[cfg(test)]
 mod test {
     use super::*;
-    //use connect4_lib::games;
+    use connect4_lib::games;
+    static P1: &str = "StatsMcGee";
+    static P2: &str = "TestyMcTestface";
+
+    fn mock_game_data(board_state: BoardState, users: Vec<&str>) -> GameData {
+        GameData {
+            roomcode: "".to_string(),
+            board_state: board_state,
+            users: users.iter().map(|s| s.to_string()).collect(),
+            game: games::connect4(),
+        }
+    }
 
     fn mock_games_vec() -> Vec<GameData> {
-        // TODO: return a more complicated set of games
-        vec![]
+        vec![
+        mock_game_data(BoardState::Win(1), vec![P1, P2]),
+        mock_game_data(BoardState::Win(1), vec![P1, P2]),
+        mock_game_data(BoardState::Win(2), vec![P1, P2]),
+        mock_game_data(BoardState::Ongoing, vec![P1,P2]),
+        mock_game_data(BoardState::Draw, vec![P1, P2]),
+        ]
     }
 
     #[test]
-    //#[ignore]
-    fn stats_test() {
-        let user = "StatsMcGee";
-        let games = mock_games_vec();
-        assert_eq!(0, games_lost(&games, user));
-        assert_eq!(0, games_won(&games, user));
-        assert_eq!(0, ongoing_games(&games, user));
-        assert_eq!(0, games_drawed(&games, user));
+    fn lost_stats_test() {
+        assert_eq!(1, games_lost(&mock_games_vec(), P1));
+    }
+    #[test]
+    fn won_stats_test() {
+        assert_eq!(2, games_won(&mock_games_vec(), P1));
+    }
+    #[test]
+    fn ongoing_stats_test() {
+        assert_eq!(1, ongoing_games(&mock_games_vec(), P1));
+    }
+    #[test]
+    fn draw_stats_test() {
+        assert_eq!(1, games_drawed(&mock_games_vec(), P1));
     }
 
     #[test]
-    //#[ignore]
     fn zero_stats_test() {
-        let user = "StatsMcGee";
         let games = vec![];
-        assert_eq!(0, games_lost(&games, user));
-        assert_eq!(0, games_won(&games, user));
-        assert_eq!(0, ongoing_games(&games, user));
-        assert_eq!(0, games_drawed(&games, user));
+        assert_eq!(0, games_lost(&games, P1));
+        assert_eq!(0, games_won(&games, P1));
+        assert_eq!(0, ongoing_games(&games, P1));
+        assert_eq!(0, games_drawed(&games, P1));
     }
 
     #[test]
+    #[ignore]
     fn db_endpoint_test() {
         //db.drop(None); // foo bar everything
         // TODO: this
