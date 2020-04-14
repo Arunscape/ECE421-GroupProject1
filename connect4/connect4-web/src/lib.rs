@@ -23,8 +23,6 @@ use yew::prelude::*;
 
 #[wasm_bindgen]
 pub fn run_app() -> Result<(), JsValue> {
-    log("Starting Yew");
-    coms::test_request();
     yew::initialize();
     web_logger::init();
     App::<ConnectRouter>::new().mount_to_body();

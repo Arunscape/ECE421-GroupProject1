@@ -15,14 +15,6 @@ use connect4_lib::game::{Chip, Game, Player};
 use crate::log;
 
 const SERVER_LOC: &'static str = "127.0.0.1:8000";
-pub fn test_request() {
-    async fn test() {
-        request::<i32>("GET", "getgame", None, None).await;
-    }
-
-    log(&format!("Spawning local for request"));
-    spawn_local(test());
-}
 
 pub async fn getgame(id: &str) -> Option<GameData> {
     let token = LocalStorage::get_token();
