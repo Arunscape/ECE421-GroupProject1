@@ -97,8 +97,8 @@ async fn request<T: Serialize>(
     opts.mode(RequestMode::Cors);
     let has_body = body.is_some();
     if let Some(b) = body {
-        let js_val = JsValue::from_serde(&b).expect("could not serialize body given");
-        opts.body(Some(&js_val));
+        let body = serde_json::to_string(&b).unwrap();
+        opts.body(Some(&body.into()));
     }
 
     log(&format!("Making request to: {}", build_url(path)));
