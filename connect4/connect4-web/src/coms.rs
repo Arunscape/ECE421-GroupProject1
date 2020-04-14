@@ -56,7 +56,7 @@ pub async fn create_game(game: Game) -> Option<GameData> {
 
 pub async fn join_game(game_id: &str) -> Option<Vec<Option<isize>>> {
     let token = LocalStorage::get_token();
-    let body: Vec<i32> = vec![0];
+    let body = JoinPlayers { players: vec![0] };
     let js_json = request("PUT", &format!("joingame/{}", game_id), Some(body), token).await;
     match js_json.map(|x| x.into_serde::<JoinPlayersResponse>()) {
         Ok(Ok(v)) => {
