@@ -8,7 +8,10 @@ use web_sys::{Request, RequestInit, RequestMode, Response};
 
 use connect4_coms::{
     status,
-    types::{GameData, GameDataResponse, JoinPlayers, JoinPlayersResponse, PlayMove, Signin},
+    types::{
+        GameData, GameDataResponse, GameStats, GameStatsResponse, JoinPlayers, JoinPlayersResponse,
+        PlayMove, Signin,
+    },
 };
 use connect4_lib::game::{Chip, Game, Player};
 
@@ -93,9 +96,11 @@ pub async fn playmove(chip: Chip, game_id: String) -> Option<GameData> {
 pub async fn getgamespast() -> Vec<GameData> {
     getgames(true).await
 }
+
 pub async fn getgamespresent() -> Vec<GameData> {
     getgames(false).await
 }
+
 async fn getgames(past: bool) -> Vec<GameData> {
     let token = LocalStorage::get_token();
     let url = if past {
@@ -107,6 +112,15 @@ async fn getgames(past: bool) -> Vec<GameData> {
     match js_json.map(|x| x.into_serde::<Vec<GameData>>()) {
         Ok(Ok(v)) => v,
         _ => Vec::new(),
+    }
+}
+
+pub async fn get_player_stats() -> Option<GameStats> {
+    let token = LocalStorage::get_token();
+    let js_json = request::<i32>("GET", "playerstats", None, token).await;
+    match js_json.map(|x| x.into_serde::<GameStatsResponse>()) {
+        Ok(Ok(v)) => v.game_stats,
+        _ => None,
     }
 }
 

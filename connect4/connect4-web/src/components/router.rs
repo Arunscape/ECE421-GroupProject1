@@ -5,7 +5,7 @@ use yew_router::{prelude::*, Switch};
 
 use crate::components::{Menu, MenuButton, Signin};
 use crate::storage::LocalStorage;
-use crate::views::{GameScreen, OnlineConfigPage, SettingsPage, ViewPage};
+use crate::views::{GameScreen, OnlineConfigPage, SettingsPage, Statistics, ViewPage};
 use crate::{constants, window};
 
 #[global_allocator]
@@ -46,7 +46,8 @@ impl Component for ConnectRouter {
                     AppRoute::PageNotFound(Permissive(None)) => html!{"Page not found"},
                     AppRoute::PageNotFound(Permissive(Some(missed_route))) => html!{format!("Page '{}' not found", missed_route)},
                     AppRoute::OnlineConfig => html!{<OnlineConfigPage/>},
-                    AppRoute::ViewGames => html!{<ViewPage/>}
+                    AppRoute::ViewGames => html!{<ViewPage/>},
+                    AppRoute::Statistics => html!{<Statistics/>},
                 }
             })
 
@@ -120,6 +121,8 @@ fn homescreen() -> VNode {
                 <MenuButton text="Create Game" dest="/newgame"/>
                 <MenuButton text="Current Games" dest="/viewgames/current"/>
                 <MenuButton text="Past Games" dest="/viewgames/past"/>
+                <MenuButton text="Statistics" dest="/statistics"/>
+                <MenuButton text="Settings" dest="/settings"/>
               </div>
             </Menu>
         }
@@ -161,6 +164,8 @@ pub enum AppRoute {
     Settings,
     #[to = "/viewgames"]
     ViewGames,
+    #[to = "/statistics!"]
+    Statistics,
 }
 
 pub fn query(key: &str) -> Option<String> {
