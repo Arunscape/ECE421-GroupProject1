@@ -49,11 +49,10 @@ pub struct Claims {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GameStats {
-    pub game_id: String,
     pub player: String,
     pub games_won: isize,
     pub games_lost: isize,
-    pub games_played: isize,
+    pub games_ongoing: isize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
