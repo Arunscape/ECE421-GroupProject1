@@ -38,7 +38,7 @@ struct JwtPayloadWrapper {
 impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     type Error = ();
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, ()> {
-        println!("{:?}", request.headers());
+        //println!("{:?}", request.headers());
         let token: String = request
             .headers()
             .get("Authorization")
@@ -49,7 +49,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
             .next()
             .expect("no jwt token in header")
             .to_string();
-        println!("Parsed JWT token: {:?}", token);
+        //println!("Parsed JWT token: {:?}", token);
         match claims_from_jwt_token(token) {
             Some(claim) => Outcome::Success(JwtPayloadWrapper {
                 claim_payload: claim.data,
@@ -131,7 +131,7 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[post("/allgames/ongoing")]
+#[get("/allgames/ongoing")]
 fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
@@ -142,7 +142,7 @@ fn allongoing(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[post("/allgames/past")]
+#[get("/allgames/past")]
 fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
@@ -158,7 +158,6 @@ fn creategame(
     wrapper: JwtPayloadWrapper,
     new_game: Result<Json<connect4_lib::game::Game>, JsonError>,
 ) -> content::Json<String> {
-    println!("HELLO: {:?}", new_game);
     let mut data = match wrapper.get_username() {
         Some(u) => GameDataResponse {
             status: String::from("success"),
