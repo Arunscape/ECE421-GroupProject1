@@ -71,7 +71,7 @@ impl Canvas {
     }
     pub fn register_keypress_listener(&self, onkey: Box<dyn FnMut(web_sys::KeyboardEvent)>) {
         let f = Closure::wrap(onkey);
-        self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
+        crate::window().set_onkeypress(Some(f.as_ref().unchecked_ref()));
         f.forget();
     }
 

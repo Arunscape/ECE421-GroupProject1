@@ -3,9 +3,11 @@ name = "connect4-coms"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>"]
 edition = "2018"
+license = "GPL-3.0-or-later"
+description="Stores common structs used in connect4-server and connect4-web"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-connect4-lib = { path="../connect4-lib" }
+connect4-lib = { version="0.1.0", path="../connect4-lib" }
 serde = { version = "1.0", features = ["derive"] }

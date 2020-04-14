@@ -9,6 +9,7 @@ use crate::coms;
 use crate::constants;
 use crate::storage::LocalStorage;
 use crate::window;
+use connect4_coms::types::GameData;
 use connect4_lib::{game, games};
 use wasm_bindgen_futures::spawn_local;
 
@@ -37,37 +38,42 @@ impl Component for OnlineConfigPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         crate::log(&format!("OnlineConfig: {:?}", msg));
-        let url = window().location().href().unwrap();
-        let querystring = url
-            .split('?')
-            .skip(1)
-            .next()
-            .expect("failed to get querystring");
-        async fn get_game(room_code: String, querystring: String) {
+
+        async fn join_game(game_data: GameData) {
+            let url = window().location().href().unwrap();
+            let querystring = url
+                .split('?')
+                .skip(1)
+                .next()
+                .expect("failed to get querystring");
+            let spots = coms::join_game(&game_data.roomcode).await;
+            match spots {
+                Some(s) => {
+                    if !s.iter().any(|x| x.is_none()) {
+                        window().location().set_href(&format!(
+                            "game/{}?{}",
+                            game_data.roomcode.to_string(),
+                            querystring.to_string()
+                        ));
+                    } else {
+                        crate::alert("Room is full!")
+                    }
+                }
+                _ => crate::log("error while joining game"),
+            }
+        }
+
+        async fn get_game(room_code: String) {
             let game = coms::getgame(&room_code).await;
             match game {
                 Some(game_data) => {
-                    let spots = coms::join_game(&game_data.roomcode).await;
-                    if let Some(s) = spots {
-                        if !s.iter().any(|x| x.is_none()) {
-                            window().location().set_href(&format!(
-                                "game/{}?{}",
-                                game_data.roomcode.to_string(),
-                                querystring.to_string()
-                            ));
-                        } else {
-                            crate::alert("Room is full!");
-                        }
-                    } else {
-                        crate::log("something went horribly wrong");
-                        //todo better code style
-                    }
+                    join_game(game_data).await;
                 }
-                None => crate::log("Invalid room code entered"),
+                None => crate::alert("Invalid room code entered"),
             };
         }
 
-        async fn create_game(querystring: String) {
+        async fn create_game() {
             let game_type = match query(&"game").unwrap() {
                 s if s == constants::game::CONNECT4 => games::GameType::Connect4,
                 s if s == constants::game::TOTO => games::GameType::Toto,
@@ -79,33 +85,16 @@ impl Component for OnlineConfigPage {
 
             match game {
                 Some(game_data) => {
-                    let spots = coms::join_game(&game_data.roomcode).await;
-                    if let Some(s) = spots {
-                        if !s.iter().any(|x| x.is_none()) {
-                            window().location().set_href(&format!(
-                                "game/{}?{}",
-                                game_data.roomcode.to_string(),
-                                querystring.to_string()
-                            ));
-                        } else {
-                            crate::alert("Room is full!");
-                        }
-                    } else {
-                        crate::log("something went horribly wrong");
-                        //todo better code style
-                    }
+                    join_game(game_data).await;
                 }
-                None => crate::alert("Invalid room code entered"),
+                None => crate::alert("failed to create game"),
             };
         }
 
         match msg {
             Msg::EditRoomCode(s) => self.roomcode_text = s,
-            Msg::CreateGame => spawn_local(create_game(querystring.to_string())),
-            Msg::SubmitRoomCode => spawn_local(get_game(
-                self.roomcode_text.to_string(),
-                querystring.to_string(),
-            )),
+            Msg::CreateGame => spawn_local(create_game()),
+            Msg::SubmitRoomCode => spawn_local(get_game(self.roomcode_text.to_string())),
         };
         true
     }
