@@ -84,13 +84,24 @@ mod test {
 
     #[test]
     //#[ignore]
-    fn db_stats_helper_functions_test() {
+    fn stats_test() {
+        let user = "StatsMcGee";
+        let games = mock_games_vec();
+        assert_eq!(0, games_lost(&games, user));
+        assert_eq!(0, games_won(&games, user));
+        assert_eq!(0, ongoing_games(&games, user));
+        assert_eq!(0, games_drawed(&games, user));
+    }
+
+    #[test]
+    //#[ignore]
+    fn zero_stats_test() {
         let user = "StatsMcGee";
         let games = vec![];
         assert_eq!(0, games_lost(&games, user));
         assert_eq!(0, games_won(&games, user));
         assert_eq!(0, ongoing_games(&games, user));
-        let games = mock_games_vec();
+        assert_eq!(0, games_drawed(&games, user));
     }
 
     #[test]
