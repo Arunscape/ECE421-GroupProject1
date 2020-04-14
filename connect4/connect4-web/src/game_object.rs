@@ -51,6 +51,7 @@ enum Msg {
     Clicked((i32, i32)),
     KeyPressed(u32),
     FinishedAnimation,
+    Delay,
     ServerReceived,
     AIThought((isize, ChipDescrip)),
 }
@@ -143,6 +144,10 @@ impl GameOnThread {
         // console_log!("[{}] Got Message: {:?}", delta, msg);
         match msg {
             Some(Msg::FinishedAnimation) => {
+                self.repaint();
+                self.sender.send(Msg::Delay);
+            },
+            Some(Msg::Delay) => {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
                     self.repaint();
                     self.move_to_state(*next);
