@@ -5,6 +5,7 @@ use crate::{request_animation_frame, set_timeout};
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
+use connect4_lib::ai::{AIConfig};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -51,6 +52,7 @@ enum Msg {
     KeyPressed(u32),
     FinishedAnimation,
     ServerReceived,
+    AIThought((isize, ChipDescrip)),
 }
 
 impl GameObject {
@@ -128,9 +130,9 @@ impl GameOnThread {
         console_log!("Starting state: {:?}", next);
         self.game_state = next;
         match self.game_state {
-            GameState::WaitingForMove(Remote) => self.request_game_from_server(),
-            GameState::WaitingForMove(Local) => {},
-            GameState::WaitingForMove(AI) => self.request_move_from_ai(),
+            GameState::WaitingForMove(PlayerType::Remote) => self.request_game_from_server(),
+            GameState::WaitingForMove(PlayerType::Local) => {},
+            GameState::WaitingForMove(PlayerType::AI(config)) => self.request_move_from_ai(config),
             GameState::GameOver(board_state) => self.end_game(board_state),
             _ => {}
         }
@@ -145,8 +147,8 @@ impl GameOnThread {
                     self.repaint();
                     self.move_to_state(*next);
                 }
-            }
-            Some(Msg::KeyPressed(key_code)) => {}
+            },
+            Some(Msg::KeyPressed(key_code)) => {},
             Some(Msg::Clicked(loc)) => {
                 let col = controller::canvas_loc_to_column(
                     &self.canvas,
@@ -157,10 +159,13 @@ impl GameOnThread {
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
-            }
+            },
             Some(Msg::ServerReceived) => {
                 console_log!("Got Game Data");
-            }
+            },
+            Some(Msg::AIThought((loc, ty))) => {
+                self.play_move(Chip::new(loc, ty));
+            },
             None => {}
         }
     }
@@ -219,15 +224,12 @@ impl GameOnThread {
         spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
     }
 
-    fn request_move_from_ai(&self) {
-        async fn getgamer(sender: JSender<Msg>, gameid: String) {
-            let data = coms::getgame(&gameid).await;
-            if let Some(gamedata) = data {
-                console_log!("Server Data: {:?}", gamedata);
-                sender.send(Msg::ServerReceived);
-            }
+    fn request_move_from_ai(&self, config: AIConfig) {
+        async fn getgamer(sender: JSender<Msg>, mut game: Game, config: AIConfig) {
+            let mov = connect4_lib::ai::get_best_move(&mut game, config);
+            sender.send(Msg::AIThought(mov));
         }
-        spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
+        spawn_local(getgamer(self.sender.clone(), self.game.clone(), config));
     }
 
     fn derive_state_from_board(&self) -> GameState {
