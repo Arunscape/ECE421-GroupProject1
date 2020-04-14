@@ -77,4 +77,8 @@ impl Canvas {
         self.canvas.set_onkeypress(Some(f.as_ref().unchecked_ref()));
         f.forget();
     }
+
+    pub fn get_id(&self) -> String {
+        self.canvas.id()
+    }
 }
