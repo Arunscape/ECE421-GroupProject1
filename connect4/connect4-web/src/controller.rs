@@ -65,6 +65,12 @@ pub fn draw_board_mask_column(
     let square = 2.0 * CHIP_SEPERATION + CHIP_DIAMETER;
     canvas.context.save();
     canvas.context.set_fill_style(&color.into());
+    canvas.context.clear_rect(
+        (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + square,
+        0.0,
+        -square,
+        square * (height as f64),
+    );
     canvas.context.begin_path();
     for y in 0..height {
         canvas.context.arc(
@@ -114,37 +120,30 @@ pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> 
     }
 }
 
-pub fn highlight_column(canvas: &Canvas, col: isize) {
-    draw_board_mask_column(canvas, 6, col as usize, COLOR_HIGHLIGHT);
+pub fn highlight_column(canvas: &Canvas, height: usize, col: isize) {
+    draw_board_mask_column(canvas, height, col as usize, COLOR_HIGHLIGHT);
 }
 
-pub fn animate_falling_piece(
+pub fn do_falling_piece_frame(
     canvas: &Canvas,
-    chip: connect4_lib::game::ChipDescrip,
-    board: &Board,
-    loc: (isize, f64, f64),
-) {
-    place_chip(
-        canvas,
-        calculate_draw_height(board.height()),
-        chip,
-        loc.0 as f64,
-        loc.1 / (COLUMN_WIDTH),
-    );
-}
-
-pub fn update_falling_piece(
-    board: &Board,
-    mut falling: (isize, f64, f64),
-    delta: f64,
-) -> Option<(isize, f64, f64)> {
-    falling.2 += delta * GRAVITY;
-    falling.1 += delta * falling.2;
-    if (falling.1 / COLUMN_WIDTH) < board.last_move_loc().1 as f64 {
-        None
-    } else {
-        Some(falling)
+    ani: &mut crate::game_object::ChipAnimation,
+) -> bool {
+    let delta = 1.0 / 60.0; // TODO: get the actual delta
+    ani.vy += delta * GRAVITY;
+    ani.y += delta * ani.vy;
+    if (ani.y / COLUMN_WIDTH) > ani.final_y as f64 {
+        // TODO: clear rectangle behind first
+        draw_board_mask_column(canvas, ani.height, ani.x as usize, COLOR_BLUE);
+        place_chip(
+            canvas,
+            calculate_draw_height(ani.height),
+            ani.chip,
+            ani.x as f64,
+            ani.y / (COLUMN_WIDTH),
+        );
+        return true;
     }
+    return false;
 }
 
 pub fn message(canvas: &Canvas, msg: String) {

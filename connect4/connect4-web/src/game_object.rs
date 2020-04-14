@@ -1,9 +1,9 @@
 use crate::canvas::Canvas;
 use crate::controller;
-use crate::set_timeout;
+use crate::{request_animation_frame, set_timeout};
 #[macro_use]
 use crate::{console_log, log};
-use connect4_lib::game::{BoardState, Chip, ChipDescrip, Game, PlayerType};
+use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
@@ -22,13 +22,17 @@ struct GameOnThread {
     game: Game,
     game_state: GameState,
     message_receiver: JReceiver<Msg>,
+    sender: JSender<Msg>,
 }
 
-struct ChipAnimation {
-    x: isize,
-    final_y: isize,
-    y: f64,
-    vy: f64,
+#[derive(Debug)]
+pub struct ChipAnimation {
+    pub chip: ChipDescrip,
+    pub x: isize,
+    pub final_y: isize,
+    pub y: f64,
+    pub vy: f64,
+    pub height: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -42,6 +46,7 @@ enum GameState {
 enum Msg {
     Clicked((i32, i32)),
     KeyPressed(u32),
+    FinishedAnimation,
 }
 
 impl GameObject {
@@ -52,6 +57,7 @@ impl GameObject {
             game,
             game_state: GameState::WaitingForMove(PlayerType::Local),
             message_receiver,
+            sender: sender.clone(),
         };
         let game_state = slf.derive_state_from_board();
         slf.game_state = game_state;
@@ -98,14 +104,23 @@ impl GameOnThread {
         let board = self.game.get_board();
         let loc = chip.get_x();
 
-        // controller::animate_falling_piece(self.canvas, chip: connect4_lib::game::ChipDescrip, board: &Board, loc: (isize, f64, f64))
-        self.game_state = GameState::WaitingForMove(self.game.current_player().player_type);
+        self.game.play(loc, chip_descrip);
+        self.game_state = GameState::PlayingMove(Box::from(GameState::WaitingForMove(
+            self.game.current_player().player_type,
+        )));
+        start_animation(&self.canvas, &self.game.get_board(), self.sender.clone());
     }
 
     pub fn get_message(&mut self) {
         let msg = self.message_receiver.recv();
         console_log!("Got Message: {:?}", msg);
         match msg {
+            Some(Msg::FinishedAnimation) => {
+                if let GameState::PlayingMove(next) = self.game_state.clone() {
+                    self.game_state = *next;
+                    self.repaint();
+                }
+            }
             Some(Msg::KeyPressed(key_code)) => {}
             Some(Msg::Clicked(loc)) => {
                 let col = controller::canvas_loc_to_column(
@@ -123,7 +138,6 @@ impl GameOnThread {
     }
 
     pub fn handle_click(&mut self, column_number: isize) {
-        console_log!("clicked column {}", column_number);
         let state = self.derive_state_from_board();
 
         match state {
@@ -189,4 +203,32 @@ impl GameOnThread {
     }
 }
 
-fn start_animation() {}
+fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
+    // create animation
+    console_log!("Game chips: {:?}", board.chips);
+    let chip = board.chips[board.chips.len() - 1];
+    let (x, y) = board.last_move_loc();
+    let mut ani = ChipAnimation {
+        chip: chip.get_descrip(),
+        x,
+        final_y: y,
+        y: 1100.0,
+        vy: 0.0,
+        height: board.height as usize,
+    };
+
+    // Actually start animation
+    let f = Rc::new(RefCell::new(None));
+    let g = f.clone();
+    let canvas = Canvas::new(canvas.get_id());
+    *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        console_log!("animating piece: {:?}", ani);
+        if controller::do_falling_piece_frame(&canvas, &mut ani) {
+            request_animation_frame(f.borrow().as_ref().unwrap());
+        } else {
+            sender.send(Msg::FinishedAnimation);
+        }
+    }) as Box<dyn FnMut()>));
+
+    request_animation_frame(g.borrow().as_ref().unwrap());
+}

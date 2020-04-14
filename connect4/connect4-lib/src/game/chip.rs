@@ -7,7 +7,7 @@ pub struct ChipDescrip {
     pub graphic: char,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Chip {
     x: isize,
     descrip: ChipDescrip,
