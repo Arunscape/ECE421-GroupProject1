@@ -1,7 +1,7 @@
 use crate::canvas::Canvas;
+use crate::coms;
 use crate::controller;
 use crate::{request_animation_frame, set_timeout};
-use crate::{coms};
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
@@ -138,7 +138,7 @@ impl GameOnThread {
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
-            },
+            }
             Some(Msg::ServerReceived) => {
                 console_log!("Got Game Data");
             }
@@ -190,11 +190,7 @@ impl GameOnThread {
     }
 
     fn request_game_from_server(&self) {
-
-        async fn getgamer(
-            sender: JSender<Msg>,
-            gameid: String,
-        ) {
+        async fn getgamer(sender: JSender<Msg>, gameid: String) {
             let data = coms::getgame(&gameid).await;
             if let Some(gamedata) = data {
                 console_log!("Server Data: {:?}", gamedata);
@@ -202,7 +198,6 @@ impl GameOnThread {
             }
         }
         spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
-
     }
 
     fn derive_state_from_board(&self) -> GameState {
