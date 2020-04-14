@@ -4,8 +4,8 @@ use crate::controller;
 use crate::{request_animation_frame, set_timeout};
 #[macro_use]
 use crate::{console_log, log};
+use connect4_lib::ai::AIConfig;
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
-use connect4_lib::ai::{AIConfig};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -27,6 +27,7 @@ struct GameOnThread {
     message_receiver: JReceiver<Msg>,
     sender: JSender<Msg>,
     gameid: String,
+    selected_move: Option<ChipDescrip>,
 }
 
 #[derive(Debug)]
@@ -49,7 +50,7 @@ enum GameState {
 #[derive(Clone, Debug)]
 enum Msg {
     Clicked((i32, i32)),
-    KeyPressed(u32),
+    KeyPressed(String),
     FinishedAnimation,
     Delay,
     ServerReceived,
@@ -65,6 +66,7 @@ impl GameObject {
             game_state: GameState::WaitingForMove(PlayerType::Local),
             message_receiver,
             gameid,
+            selected_move: None,
             sender: sender.clone(),
         };
         slf.move_to_state(slf.derive_state_from_board());
@@ -80,7 +82,7 @@ impl GameObject {
 
         let key_sender = sender.clone();
         let onkeypress = Box::new(move |e: web_sys::KeyboardEvent| {
-            key_sender.send(Msg::KeyPressed(e.key_code()));
+            key_sender.send(Msg::KeyPressed(e.key()));
         });
 
         slf.canvas.register_onclick_listener(onclick);
@@ -122,6 +124,7 @@ impl GameOnThread {
         let board = self.game.get_board();
         let loc = chip.get_x();
 
+        self.selected_move = None;
         self.game.play(loc, chip_descrip);
         self.game_state = GameState::PlayingMove(Box::from(self.derive_state_from_board()));
         start_animation(&self.canvas, &self.game.get_board(), self.sender.clone());
@@ -132,7 +135,7 @@ impl GameOnThread {
         self.game_state = next;
         match self.game_state {
             GameState::WaitingForMove(PlayerType::Remote) => self.request_game_from_server(),
-            GameState::WaitingForMove(PlayerType::Local) => {},
+            GameState::WaitingForMove(PlayerType::Local) => {}
             GameState::WaitingForMove(PlayerType::AI(config)) => self.request_move_from_ai(config),
             GameState::GameOver(board_state) => self.end_game(board_state),
             _ => {}
@@ -146,14 +149,16 @@ impl GameOnThread {
             Some(Msg::FinishedAnimation) => {
                 self.repaint();
                 self.sender.send(Msg::Delay);
-            },
+            }
             Some(Msg::Delay) => {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
                     self.repaint();
                     self.move_to_state(*next);
                 }
-            },
-            Some(Msg::KeyPressed(key_code)) => {},
+            }
+            Some(Msg::KeyPressed(key_code)) => {
+                self.handle_keyboard_event(key_code);
+            }
             Some(Msg::Clicked(loc)) => {
                 let col = controller::canvas_loc_to_column(
                     &self.canvas,
@@ -164,13 +169,13 @@ impl GameOnThread {
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
-            },
+            }
             Some(Msg::ServerReceived) => {
                 console_log!("Got Game Data");
-            },
+            }
             Some(Msg::AIThought((loc, ty))) => {
                 self.play_move(Chip::new(loc, ty));
-            },
+            }
             None => {}
         }
     }
@@ -183,7 +188,9 @@ impl GameOnThread {
             GameState::PlayingMove(boxed_game_state) => { /* Ignore clicks while animating */ }
             GameState::WaitingForMove(player_type) => match player_type {
                 PlayerType::Local => {
-                    let chip_descrip = self.game.current_player().chip_options[0];
+                    let chip_descrip = self
+                        .selected_move
+                        .unwrap_or(self.game.current_player().chip_options[0]);
                     let chip = Chip::new(column_number, chip_descrip);
                     self.play_move(chip);
                 }
@@ -210,8 +217,20 @@ impl GameOnThread {
         controller::message(&self.canvas, message);
     }
 
-    pub fn handle_keyboard_event(&mut self, key: char) {
-        todo!();
+    pub fn handle_keyboard_event(&mut self, key: String) {
+        let c = key.chars().next();
+        if let Some(c) = c {
+            let x = self
+                .game
+                .current_player()
+                .chip_options
+                .iter()
+                .find(|&x| c == x.graphic);
+            if let Some(&ch) = x {
+                self.selected_move = Some(ch);
+                self.repaint();
+            }
+        }
     }
 
     fn handle_server_event(&self) {
@@ -251,6 +270,11 @@ impl GameOnThread {
     }
 
     fn repaint(&self) {
+        controller::draw_move_selection(
+            &self.canvas,
+            &self.game.current_player(),
+            self.selected_move,
+        );
         controller::draw_gameboard(&self.canvas, &self.game.get_board());
         controller::draw_game_pieces(
             &self.canvas,
@@ -269,7 +293,7 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
         chip: chip.get_descrip(),
         x,
         final_y: y,
-        y: 1100.0,
+        y: controller::get_chip_fall(board),
         vy: 0.0,
         height: board.height,
     };

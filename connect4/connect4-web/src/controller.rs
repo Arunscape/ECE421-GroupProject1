@@ -3,6 +3,8 @@ use crate::log;
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
+use connect4_lib::game::ChipDescrip;
+use connect4_lib::game::Player;
 use connect4_lib::io;
 
 const COLOR_BLUE: &'static str = "blue";
@@ -27,37 +29,44 @@ pub fn draw_chip(
     x: usize,
     y: usize,
 ) {
-    place_chip(canvas, board_height, chip, x as f64, y as f64);
+    draw_chip_at(canvas, board_height, chip, x as f64, y as f64);
 }
-
-pub fn place_chip(
+pub fn draw_chip_at(
     canvas: &Canvas,
     board_height: f64,
     chip: connect4_lib::game::ChipDescrip,
     x: f64,
     y: f64,
 ) {
+    place_chip(
+        canvas,
+        chip,
+        x * (COLUMN_WIDTH) + BOARD_MARGIN_X + CHIP_RADIUS + CHIP_SEPERATION,
+        board_height - (y * (COLUMN_WIDTH) + BOARD_MARGIN_Y + CHIP_RADIUS + CHIP_SEPERATION),
+        CHIP_RADIUS,
+    );
+}
+pub fn place_chip(
+    canvas: &Canvas,
+    chip: connect4_lib::game::ChipDescrip,
+    x: f64,
+    y: f64,
+    radius: f64,
+) {
     let colour = match chip.fg_color {
         io::RED => COLOR_RED,
         io::YEL => COLOR_YELLOW,
         _ => unreachable!(),
     };
-    canvas.draw_circle(
-        x * (COLUMN_WIDTH) + BOARD_MARGIN_X + CHIP_RADIUS + CHIP_SEPERATION,
-        board_height - (y * (COLUMN_WIDTH) + BOARD_MARGIN_Y + CHIP_RADIUS + CHIP_SEPERATION),
-        CHIP_RADIUS,
-        colour.into(),
-        "black".into(),
-    );
+    canvas.draw_circle(x, y, radius, colour.into(), "black".into());
     match chip.graphic {
         io::FILLED => {} // do nothing extra
         c => {
-            canvas.context.set_font("100px Arial");
+            canvas.context.set_font(&font_size(radius as usize));
             canvas.context.fill_text(
                 &format!("{}", c),
-                x * (COLUMN_WIDTH) + BOARD_MARGIN_X + CHIP_RADIUS / 4.0 * 3.0 + CHIP_SEPERATION,
-                board_height
-                    - (y * (COLUMN_WIDTH) + BOARD_MARGIN_Y + CHIP_RADIUS / 2.0 + CHIP_SEPERATION),
+                x - radius * (1.0/4.0),
+                y + radius * (1.0/2.0),
             );
         }
     }
@@ -158,7 +167,7 @@ pub fn do_falling_piece_frame(
     if (ani.y / COLUMN_WIDTH) > ani.final_y as f64 {
         // TODO: clear rectangle behind first
         draw_board_mask_column_above(canvas, ani.height, ani.x as usize, COLOR_BLUE, ani.final_y);
-        place_chip(
+        draw_chip_at(
             canvas,
             calculate_draw_height(ani.height),
             ani.chip,
@@ -169,12 +178,39 @@ pub fn do_falling_piece_frame(
     }
     return false;
 }
+pub fn get_chip_fall(board: &Board) -> f64 {
+    COLUMN_WIDTH * ((board.height + 1) as f64)
+}
 
 pub fn message(canvas: &Canvas, msg: String) {
-    canvas.context.set_font("100px Arial");
+    canvas.context.set_font(&font_size(100));
     canvas.context.fill_text(&msg, 10.0, 150.0);
 }
 
-pub fn get_chip_fall(board: &Board) -> f64 {
-    COLUMN_WIDTH * ((board.height + 1) as f64)
+pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDescrip>) {
+    canvas.context.set_font(&font_size(30));
+    canvas.context.fill_text("Chip options", 0.0, 30.0);
+    for (i, &ch) in player.chip_options.iter().enumerate() {
+        let mut r = 30.0;
+        if let Some(selected) = chip {
+            if selected == ch {
+                r *= 2.5;
+            }
+        } else {
+            if i == 0 {
+                r *= 2.5;
+            }
+        }
+        place_chip(
+            canvas,
+            ch,
+            r + (i as f64) * 3.0 * r,
+            3.0 * r,
+            r,
+        );
+    }
+}
+
+pub fn font_size(size: usize) -> String {
+    format!("{}px Arial", size)
 }
