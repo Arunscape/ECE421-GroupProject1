@@ -98,7 +98,11 @@ pub async fn getgamespresent() -> Vec<GameData> {
 }
 async fn getgames(past: bool) -> Vec<GameData> {
     let token = LocalStorage::get_token();
-    let url = if past {"allgames/past"} else {"allgames/ongoing"};
+    let url = if past {
+        "allgames/past"
+    } else {
+        "allgames/ongoing"
+    };
     let js_json = request::<i32>("GET", url, None, token).await;
     match js_json.map(|x| x.into_serde::<Vec<GameData>>()) {
         Ok(Ok(v)) => v,

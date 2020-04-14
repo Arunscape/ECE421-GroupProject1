@@ -1,13 +1,12 @@
-use yew::prelude::*;
-use wasm_bindgen_futures::spawn_local;
-use connect4_coms::types::GameData;
-use crate::coms;
 use crate::components::GameComponent;
+use crate::coms;
+use connect4_coms::types::GameData;
+use wasm_bindgen_futures::spawn_local;
+use yew::prelude::*;
 
 pub struct ViewPage {
     link: ComponentLink<Self>,
     games: Vec<GameData>,
-
 }
 
 impl Component for ViewPage {
@@ -17,7 +16,7 @@ impl Component for ViewPage {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         ViewPage {
             games: Vec::new(),
-            link
+            link,
         }
     }
 
@@ -43,15 +42,15 @@ impl Component for ViewPage {
 }
 
 fn renderGameView(game: &GameData) -> Html {
-    let game_style="";
-        html! {
-          <div class={game_style}>
-            <GameComponent gameid=game.roomcode.clone()
-                other_player=String::from("")
-                game_type=String::from("")
-                active=false/>
-          </div>
-        }
+    let game_style = "";
+    html! {
+      <div class={game_style}>
+        <GameComponent gameid=game.roomcode.clone()
+            other_player=String::from("")
+            game_type=String::from("")
+            active=false/>
+      </div>
+    }
 }
 
 impl ViewPage {
@@ -64,7 +63,6 @@ impl ViewPage {
             link.send_message(data);
         }
         spawn_local(asyncr(self.link.clone()));
-
     }
 }
 
@@ -75,13 +73,14 @@ enum PastPresent {
 
 fn get_past_present() -> PastPresent {
     let url = crate::window().location().href().unwrap();
-    let val = url.split('?')
+    let val = url
+        .split('?')
         .next()
         .and_then(|x| x.split('/').skip(4).next())
         .map(|x| String::from(x));
     if let Some(s) = val {
         if s == String::from("current") {
-            return PastPresent::Present
+            return PastPresent::Present;
         }
     }
     PastPresent::Past

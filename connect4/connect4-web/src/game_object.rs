@@ -86,8 +86,8 @@ impl GameObject {
         });
 
         if interactive {
-          slf.canvas.register_onclick_listener(onclick);
-          slf.canvas.register_keypress_listener(onkeypress);
+            slf.canvas.register_onclick_listener(onclick);
+            slf.canvas.register_keypress_listener(onkeypress);
         }
 
         slf.repaint();
