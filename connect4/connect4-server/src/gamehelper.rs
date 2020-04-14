@@ -231,7 +231,6 @@ mod test {
 
     #[test]
     #[ignore]
-    #[should_panic]
     fn db_invalid_play_test() {
         let game: game::Game = games::connect4_3player();
         let game_data = insert_new_game("Alex", game).expect("GameData");
