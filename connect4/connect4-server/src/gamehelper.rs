@@ -170,7 +170,7 @@ fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 // add the player to game_data's users as username
 // TODO: verify player type (AI or not)
 // return the player number in the array 0-indexed
-fn insert_player(game_data: &mut GameData, username: &str, _player: game::Player) -> Option<isize> {
+fn insert_player(game_data: &mut GameData, username: &str, _player: i32) -> Option<isize> {
     let players_in_game = game_data.users.len();
     if players_in_game == game_data.game.get_player_count() {
         // Game is full
@@ -183,7 +183,7 @@ fn insert_player(game_data: &mut GameData, username: &str, _player: game::Player
 
 }
 
-fn insert_players(game_data: &mut GameData, username: &str, players: Vec<game::Player>) -> Vec<Option<isize>> {
+fn insert_players(game_data: &mut GameData, username: &str, players: Vec<i32>) -> Vec<Option<isize>> {
     players.iter()
     .map(|p| insert_player(game_data, username, p.clone()))
     .collect()
