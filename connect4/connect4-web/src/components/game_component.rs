@@ -68,7 +68,6 @@ impl Component for GameComponent {
             _ => todo!(),
         };
 
-
         let game = GameObject::new(canvas, game, self.props.gameid.clone());
         self.game_object = Some(game);
         true

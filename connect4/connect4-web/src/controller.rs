@@ -65,8 +65,8 @@ pub fn place_chip(
             canvas.context.set_font(&font_size(radius as usize));
             canvas.context.fill_text(
                 &format!("{}", c),
-                x - radius * (1.0/4.0),
-                y + radius * (1.0/2.0),
+                x - radius * (1.0 / 4.0),
+                y + radius * (1.0 / 2.0),
             );
         }
     }
@@ -192,23 +192,16 @@ pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDe
     canvas.context.fill_text("Chip options", 0.0, 30.0);
     let chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
     let r = 30.0;
-    for (i, &ch) in player.chip_options.iter().filter(|x| Some(**x) != chip).enumerate() {
-        place_chip(
-            canvas,
-            ch,
-            r + (i as f64) * 3.0 * r,
-            3.0 * r,
-            r,
-        );
+    for (i, &ch) in player
+        .chip_options
+        .iter()
+        .filter(|x| Some(**x) != chip)
+        .enumerate()
+    {
+        place_chip(canvas, ch, r + (i as f64) * 3.0 * r, 3.0 * r, r);
     }
     let r = 60.0;
-    place_chip(
-        canvas,
-        chip.unwrap(),
-        3.0 * r,
-        3.0 * r,
-        r,
-    );
+    place_chip(canvas, chip.unwrap(), 3.0 * r, 3.0 * r, r);
 }
 
 pub fn font_size(size: usize) -> String {

@@ -5,7 +5,7 @@ use crate::{request_animation_frame, set_timeout};
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::ai::AIConfig;
-use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType, Player};
+use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, Player, PlayerType};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -46,7 +46,6 @@ enum GameState {
     PlayingMove(Box<GameState>),
     GameOver(BoardState),
 }
-
 
 #[derive(Clone, Debug)]
 enum Msg {

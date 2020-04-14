@@ -79,16 +79,14 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
 pub async fn playmove(chip: Chip, game_id: String) -> Option<GameData> {
     console_log!("Sending move");
     let play = PlayMove {
-        game_id ,
+        game_id,
         column: chip.get_x(),
         chip_descrip: chip.get_descrip(),
     };
     let token = LocalStorage::get_token();
     let js_json = request("PUT", "playmove", Some(play), token).await;
     match js_json.map(|x| x.into_serde::<GameDataResponse>()) {
-        Ok(Ok(v)) => {
-            v.game_data
-        }
+        Ok(Ok(v)) => v.game_data,
         _ => None,
     }
 }
