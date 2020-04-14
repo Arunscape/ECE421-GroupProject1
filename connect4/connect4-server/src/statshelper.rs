@@ -67,7 +67,25 @@ mod test {
     use super::*;
     //use connect4_lib::games;
 
+    fn mock_games_vec() -> Vec<GameData> {
+        // TODO: return a more complicated set of games
+        vec![]
+    }
+
     #[test]
-    #[ignore]
-    fn db_insert_game_test() {}
+    //#[ignore]
+    fn db_stats_helper_functions_test() {
+        let user = "StatsMcGee";
+        let games = vec![];
+        assert_eq!(0, games_lost(&games, user));
+        assert_eq!(0, games_won(&games, user));
+        assert_eq!(0, ongoing_games(&games, user));
+        let games = mock_games_vec();
+    }
+
+    #[test]
+    fn db_endpoint_test() {
+        //db.drop(None); // foo bar everything
+        // TODO: this
+    }
 }
