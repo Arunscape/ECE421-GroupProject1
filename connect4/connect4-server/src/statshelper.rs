@@ -15,8 +15,18 @@ pub fn get_stats(username: &str) -> Option<GameStats> {
         player: username.to_string(),
         games_won: games_won(&all_games, username),
         games_lost: games_lost(&all_games, username),
+        games_drawed: games_drawed(&all_games, username),
         games_ongoing: ongoing_games(&all_games, username),
     })
+}
+
+fn games_drawed(games: &Vec<GameData>, username: &str) -> isize {
+    games
+        .iter()
+        .filter(|g| g.users.iter().any(|u| u == username))
+        .filter(|g| g.board_state == BoardState::Draw)
+        .collect::<Vec<&GameData>>()
+        .len() as isize
 }
 
 fn games_won(games: &Vec<GameData>, username: &str) -> isize {
