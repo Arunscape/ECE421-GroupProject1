@@ -32,10 +32,7 @@ impl Canvas {
             .unwrap();
 
         // create actual Canvas object
-        let mut my_can = Canvas {
-            canvas,
-            context,
-        };
+        let mut my_can = Canvas { canvas, context };
 
         my_can
     }

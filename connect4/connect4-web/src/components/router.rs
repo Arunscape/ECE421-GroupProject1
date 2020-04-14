@@ -29,8 +29,8 @@ impl Component for ConnectRouter {
         true
     }
 
-  fn view(&self) -> VNode {
-    html! {
+    fn view(&self) -> VNode {
+        html! {
         <Router<AppRoute>
             render = Router::render(|switch: AppRoute| {
                 match switch {
@@ -70,36 +70,35 @@ fn create_game() -> VNode {
 }
 
 fn player_config() -> VNode {
-  let preset = query("game").unwrap_or(String::from("connect4"));
-  html! {
-      <Menu title="Setup Players" topbar=""  show_settings=false show_stats=false>
-        <div class="flex flex-col">
-          <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
-          <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::LOCAL)/>
-          <MenuButton text="Online Multiplayer" dest=format!("/setuponline?game={}&player={}", preset, constants::player::REMOTE)/>
-        </div>
-      </Menu>
-  }
+    let preset = query("game").unwrap_or(String::from("connect4"));
+    html! {
+        <Menu title="Setup Players" topbar=""  show_settings=false show_stats=false>
+          <div class="flex flex-col">
+            <MenuButton text="Single player" dest=format!("/setupai?game={}", preset)/>
+            <MenuButton text="Local Multiplayer" dest=format!("/game/offline?game={}&player={}", preset, constants::player::LOCAL)/>
+            <MenuButton text="Online Multiplayer" dest=format!("/setuponline?game={}&player={}", preset, constants::player::REMOTE)/>
+          </div>
+        </Menu>
+    }
 }
 
 fn ai_config() -> VNode {
-  // TODO: do a nicer selection then just 6 buttons
-  // like a radio for dificulty, and a radio for p1/p2
-  let preset = query("game").unwrap_or(String::from("connect4"));
-  html! {
-      <Menu title="Setup AI" topbar=""  show_settings=false show_stats=false>
-        <div class="flex flex-col">
-          <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY)/>
-          <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID)/>
-          <MenuButton text="Player 1 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD)/>
-          <MenuButton text="Player 2 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY2)/>
-          <MenuButton text="Player 2 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID2)/>
-          <MenuButton text="Player 2 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD2)/>
-        </div>
-      </Menu>
-  }
+    // TODO: do a nicer selection then just 6 buttons
+    // like a radio for dificulty, and a radio for p1/p2
+    let preset = query("game").unwrap_or(String::from("connect4"));
+    html! {
+        <Menu title="Setup AI" topbar=""  show_settings=false show_stats=false>
+          <div class="flex flex-col">
+            <MenuButton text="Player 1 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY)/>
+            <MenuButton text="Player 1 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID)/>
+            <MenuButton text="Player 1 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD)/>
+            <MenuButton text="Player 2 Easy" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_EASY2)/>
+            <MenuButton text="Player 2 Medium" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_MID2)/>
+            <MenuButton text="Player 2 Hard" dest=format!("/game/offline?game={}&player={}", preset, constants::player::AI_HARD2)/>
+          </div>
+        </Menu>
+    }
 }
-
 
 fn homescreen() -> VNode {
     if let Some(s) = LocalStorage::get_username() {
@@ -126,28 +125,28 @@ fn homescreen() -> VNode {
 
 #[derive(Debug, Switch, Clone)]
 pub enum AppRoute {
-  #[to = "/!"]
-  Root,
-  #[to = "/signin!"]
-  Signin,
-  #[to = "/page-not-found!"]
-  PageNotFound(Permissive<String>),
-  #[to = "/ScoreBoard!"]
-  ScoreBoard,
-  #[to = "/game"]
-  Game,
-  #[to = "/newgame"]
-  NewGame,
-  #[to = "/setupgame"]
-  PlayerConfig,
-  #[to = "/setupai"]
-  AIConfig,
-  #[to = "/setuponline"]
-  OnlineConfig,
-  #[to = "/Scores!"]
-  Scores,
-  #[to = "/settings!"]
-  Settings,
+    #[to = "/!"]
+    Root,
+    #[to = "/signin!"]
+    Signin,
+    #[to = "/page-not-found!"]
+    PageNotFound(Permissive<String>),
+    #[to = "/ScoreBoard!"]
+    ScoreBoard,
+    #[to = "/game"]
+    Game,
+    #[to = "/newgame"]
+    NewGame,
+    #[to = "/setupgame"]
+    PlayerConfig,
+    #[to = "/setupai"]
+    AIConfig,
+    #[to = "/setuponline"]
+    OnlineConfig,
+    #[to = "/Scores!"]
+    Scores,
+    #[to = "/settings!"]
+    Settings,
 }
 
 pub fn query(key: &str) -> Option<String> {

@@ -8,9 +8,10 @@ use connect4_lib::io::{GameIO, TermIO};
 mod canvas;
 mod components;
 mod coms;
-mod game_object;
 mod constants;
 mod controller;
+mod game_object;
+mod jq;
 mod storage;
 mod views;
 
@@ -52,6 +53,12 @@ fn window() -> web_sys::Window {
 fn request_animation_frame(f: &Closure<dyn FnMut()>) {
     window()
         .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
+fn set_timeout(f: &Closure<dyn FnMut()>, millis: i32) {
+    window()
+        .set_timeout_with_callback_and_timeout_and_arguments_0(f.as_ref().unchecked_ref(), millis)
         .expect("should register `requestAnimationFrame` OK");
 }
 
