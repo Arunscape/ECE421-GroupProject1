@@ -190,17 +190,9 @@ pub fn message(canvas: &Canvas, msg: String) {
 pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDescrip>) {
     canvas.context.set_font(&font_size(30));
     canvas.context.fill_text("Chip options", 0.0, 30.0);
-    for (i, &ch) in player.chip_options.iter().enumerate() {
-        let mut r = 30.0;
-        if let Some(selected) = chip {
-            if selected == ch {
-                r *= 2.5;
-            }
-        } else {
-            if i == 0 {
-                r *= 2.5;
-            }
-        }
+    let chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
+    let r = 30.0;
+    for (i, &ch) in player.chip_options.iter().filter(|x| Some(**x) != chip).enumerate() {
         place_chip(
             canvas,
             ch,
@@ -209,6 +201,14 @@ pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDe
             r,
         );
     }
+    let r = 60.0;
+    place_chip(
+        canvas,
+        chip.unwrap(),
+        3.0 * r,
+        3.0 * r,
+        r,
+    );
 }
 
 pub fn font_size(size: usize) -> String {
