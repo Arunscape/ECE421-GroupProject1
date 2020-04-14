@@ -36,7 +36,7 @@ pub struct ChipAnimation {
     pub final_y: isize,
     pub y: f64,
     pub vy: f64,
-    pub height: usize,
+    pub height: isize,
 }
 
 #[derive(Clone, Debug)]
@@ -271,7 +271,7 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
         final_y: y,
         y: 1100.0,
         vy: 0.0,
-        height: board.height as usize,
+        height: board.height,
     };
 
     // Actually start animation

@@ -3,6 +3,7 @@ use crate::log;
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
+use connect4_lib::io;
 
 const COLOR_BLUE: &'static str = "blue";
 const COLOR_RED: &'static str = "red";
@@ -37,8 +38,8 @@ pub fn place_chip(
     y: f64,
 ) {
     let colour = match chip.fg_color {
-        connect4_lib::io::RED => COLOR_RED,
-        connect4_lib::io::YEL => COLOR_YELLOW,
+        io::RED => COLOR_RED,
+        io::YEL => COLOR_YELLOW,
         _ => unreachable!(),
     };
     canvas.draw_circle(
@@ -48,9 +49,21 @@ pub fn place_chip(
         colour.into(),
         "black".into(),
     );
+    match chip.graphic {
+        io::FILLED => {} // do nothing extra
+        c => {
+            canvas.context.set_font("100px Arial");
+            canvas.context.fill_text(
+                &format!("{}", c),
+                x * (COLUMN_WIDTH) + BOARD_MARGIN_X + CHIP_RADIUS / 4.0 * 3.0 + CHIP_SEPERATION,
+                board_height
+                    - (y * (COLUMN_WIDTH) + BOARD_MARGIN_Y + CHIP_RADIUS / 2.0 + CHIP_SEPERATION),
+            );
+        }
+    }
 }
 
-pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
+pub fn draw_board_mask(canvas: &Canvas, width: usize, height: isize) {
     let bg_color = COLOR_BLUE;
     for x in 0..width {
         draw_board_mask_column(canvas, height, x, bg_color);
@@ -58,21 +71,32 @@ pub fn draw_board_mask(canvas: &Canvas, width: usize, height: usize) {
 }
 pub fn draw_board_mask_column(
     canvas: &Canvas,
-    height: usize,
+    height: isize,
     column_num: usize,
     color: &'static str,
+) {
+    draw_board_mask_column_above(canvas, height, column_num, color, 0);
+}
+pub fn draw_board_mask_column_above(
+    canvas: &Canvas,
+    height: isize,
+    column_num: usize,
+    color: &'static str,
+    above: isize,
 ) {
     let square = 2.0 * CHIP_SEPERATION + CHIP_DIAMETER;
     canvas.context.save();
     canvas.context.set_fill_style(&color.into());
-    canvas.context.clear_rect(
-        (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + square,
-        0.0,
-        -square,
-        square * (height as f64),
-    );
     canvas.context.begin_path();
-    for y in 0..height {
+    // TODO: this isn't quite clearing properly, so the chip looks like it slides over the
+    // boards. It's not a big issue, but it would be nice to fix
+    for y in 0..(height - above) {
+        canvas.context.clear_rect(
+            (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + square,
+            (COLUMN_WIDTH) * y as f64,
+            -square,
+            square,
+        );
         canvas.context.arc(
             (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + CHIP_RADIUS + CHIP_SEPERATION,
             (COLUMN_WIDTH) * y as f64 + BOARD_MARGIN_Y + CHIP_RADIUS + CHIP_SEPERATION,
@@ -92,9 +116,9 @@ pub fn draw_board_mask_column(
 }
 
 pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
-    draw_board_mask(canvas, board.width(), board.height());
+    draw_board_mask(canvas, board.width(), board.height);
 }
-fn calculate_draw_height(board_height: usize) -> f64 {
+fn calculate_draw_height(board_height: isize) -> f64 {
     CHIP_SEPERATION + (COLUMN_WIDTH) * (board_height as f64)
 }
 pub fn draw_game_pieces(canvas: &Canvas, board: &Board, chips: &[Chip]) {
@@ -103,7 +127,7 @@ pub fn draw_game_pieces(canvas: &Canvas, board: &Board, chips: &[Chip]) {
         let x = c.get_x() as usize;
         let y = heights[x];
         heights[x] += 1;
-        let board_height = calculate_draw_height(board.height());
+        let board_height = calculate_draw_height(board.height);
         draw_chip(canvas, board_height, c.get_descrip(), x, y);
     }
 }
@@ -120,7 +144,7 @@ pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> 
     }
 }
 
-pub fn highlight_column(canvas: &Canvas, height: usize, col: isize) {
+pub fn highlight_column(canvas: &Canvas, height: isize, col: isize) {
     draw_board_mask_column(canvas, height, col as usize, COLOR_HIGHLIGHT);
 }
 
@@ -133,7 +157,7 @@ pub fn do_falling_piece_frame(
     ani.y += delta * ani.vy;
     if (ani.y / COLUMN_WIDTH) > ani.final_y as f64 {
         // TODO: clear rectangle behind first
-        draw_board_mask_column(canvas, ani.height, ani.x as usize, COLOR_BLUE);
+        draw_board_mask_column_above(canvas, ani.height, ani.x as usize, COLOR_BLUE, ani.final_y);
         place_chip(
             canvas,
             calculate_draw_height(ani.height),
