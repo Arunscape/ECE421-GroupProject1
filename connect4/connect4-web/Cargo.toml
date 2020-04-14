@@ -3,7 +3,7 @@ name = "connect4-web"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
-license = "GPL-3.0-or-later"]
+license = "GPL-3.0-or-later"
 description = "Webassembly frontend for connect4-lib, connect4-server, connect4-coms"
 
 [build]
