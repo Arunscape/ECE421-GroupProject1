@@ -51,6 +51,7 @@ pub struct GameStats {
     pub player: String,
     pub games_won: isize,
     pub games_lost: isize,
+    pub games_drawed: isize,
     pub games_ongoing: isize,
 }
 
