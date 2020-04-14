@@ -58,7 +58,7 @@ enum Msg {
 }
 
 impl GameObject {
-    pub fn new(canvas: Canvas, game: Game, gameid: String) -> Self {
+    pub fn new(canvas: Canvas, interactive: bool, game: Game, gameid: String) -> Self {
         let (sender, message_receiver) = mpsc();
         let mut slf = GameOnThread {
             canvas,
@@ -85,8 +85,10 @@ impl GameObject {
             key_sender.send(Msg::KeyPressed(e.key()));
         });
 
-        slf.canvas.register_onclick_listener(onclick);
-        slf.canvas.register_keypress_listener(onkeypress);
+        if interactive {
+          slf.canvas.register_onclick_listener(onclick);
+          slf.canvas.register_keypress_listener(onkeypress);
+        }
 
         slf.repaint();
         slf.request_game_from_server();
@@ -175,8 +177,7 @@ impl GameOnThread {
             Some(Msg::ServerReceived(data)) => {
                 self.game = data;
                 self.move_to_state(self.derive_state_from_board());
-                self.repaint();
-                console_log!("Got Game Data");
+                self.repaint(); // TODO: detect if new piece was played, if so, animate it
             }
             Some(Msg::AIThought((loc, ty))) => {
                 self.play_move(Chip::new(loc, ty));
