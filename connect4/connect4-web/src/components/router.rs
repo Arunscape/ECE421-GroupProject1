@@ -58,14 +58,25 @@ impl Component for ConnectRouter {
 }
 
 fn create_game() -> VNode {
-    html! {
-        <Menu title="New Game" topbar="" show_settings=false show_stats=false>
-          <div class="flex flex-col">
-            <MenuButton text="Connect4" dest=format!("/setupgame?game={}", constants::game::CONNECT4)/>
-            <MenuButton text="Toot and Otto" dest=format!("/setupgame?game={}", constants::game::TOTO)/>
-            <MenuButton text="Custom Game" dest=format!("/setupgame?game={}", constants::game::CUSTOM)/>
-          </div>
-        </Menu>
+    if let Some(_) = LocalStorage::get_username() {
+        html! {
+            <Menu title="New Game" topbar="" show_settings=false show_stats=false>
+              <div class="flex flex-col">
+                <MenuButton text="Connect4" dest=format!("/setupgame?game={}", constants::game::CONNECT4)/>
+                <MenuButton text="Toot and Otto" dest=format!("/setupgame?game={}", constants::game::TOTO)/>
+                <MenuButton text="Custom Game" dest=format!("/setupgame?game={}", constants::game::CUSTOM)/>
+              </div>
+            </Menu>
+        }
+    } else {
+        html! {
+            <Menu title="New Game" topbar="" show_settings=false show_stats=false>
+              <div class="flex flex-col">
+                <MenuButton text="Connect4" dest=format!("/setupai?game={}", constants::game::CONNECT4)/>
+                <MenuButton text="Toot and Otto" dest=format!("/setupai?game={}", constants::game::TOTO)/>
+              </div>
+            </Menu>
+        }
     }
 }
 

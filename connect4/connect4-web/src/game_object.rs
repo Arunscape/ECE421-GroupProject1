@@ -116,15 +116,19 @@ impl GameOnThread {
         start_animation(&self.canvas, &self.game.get_board(), self.sender.clone());
     }
 
+    pub fn move_to_state(&mut self, next: GameState) {
+        self.game_state = next;
+        self.request_game_from_server();
+    }
+
     pub fn get_message(&mut self) {
         let msg = self.message_receiver.recv();
         console_log!("Got Message: {:?}", msg);
         match msg {
             Some(Msg::FinishedAnimation) => {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
-                    self.game_state = *next;
                     self.repaint();
-                    self.request_game_from_server();
+                    self.move_to_state(*next);
                 }
             }
             Some(Msg::KeyPressed(key_code)) => {}
@@ -242,7 +246,6 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
     let g = f.clone();
     let canvas = Canvas::new(canvas.get_id());
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        console_log!("animating piece: {:?}", ani);
         if controller::do_falling_piece_frame(&canvas, &mut ani) {
             request_animation_frame(f.borrow().as_ref().unwrap());
         } else {
