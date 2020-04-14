@@ -1,18 +1,35 @@
 use crate::canvas::Canvas;
 use crate::controller;
+use crate::set_timeout;
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{BoardState, Chip, ChipDescrip, Game, PlayerType};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
-use std::sync::mpsc;
+use crate::jq::{JReceiver, JSender, mpsc};
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
 
 pub struct GameObject {
+    channel: JSender<Msg>,
+}
+
+struct GameOnThread {
     canvas: Canvas,
     game: Game,
     game_state: GameState,
-    falling_loc: Option<(isize, f64, f64)>, // x, y, vy
-    message_receiver: mpsc::Receiver<Msg>,
+    message_receiver: JReceiver<Msg>,
+}
+
+struct ChipAnimation {
+    x: isize,
+    final_y: isize,
+    y: f64,
+    vy: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -31,11 +48,10 @@ enum Msg {
 
 impl GameObject {
     pub fn new(canvas: Canvas, game: Game) -> Self {
-        let (sender, message_receiver) = mpsc::channel();
-        let mut slf = Self {
+        let (sender, message_receiver) = mpsc();
+        let mut slf = GameOnThread {
             canvas,
             game,
-            falling_loc: None,
             game_state: GameState::WaitingForMove(PlayerType::Local),
             message_receiver,
         };
@@ -61,9 +77,24 @@ impl GameObject {
 
         slf.repaint();
 
-        slf
+        let handle = GameObject { channel: sender };
+        handle.start_listener_thread(slf);
+        handle
     }
 
+    fn start_listener_thread(&self, mut thread_data: GameOnThread) {
+        let f = Rc::new(RefCell::new(None));
+        let g = f.clone();
+        *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+            thread_data.get_message();
+            set_timeout(f.borrow().as_ref().unwrap(), 200);
+        }) as Box<dyn FnMut()>));
+
+        set_timeout(g.borrow().as_ref().unwrap(), 0);
+    }
+}
+
+impl GameOnThread {
     pub fn play_move(&mut self, chip: Chip) {
         let chip_descrip = chip.get_descrip();
         let board = self.game.get_board();
@@ -73,16 +104,18 @@ impl GameObject {
         self.game_state = GameState::WaitingForMove(self.game.current_player().player_type);
     }
 
-    pub fn wait_for_messages(&mut self) {
-        match self.message_receiver.recv() {
-            Ok(Msg::KeyPressed(key_code)) => {},
-            Ok(Msg::Clicked(loc)) => {
+    pub fn get_message(&mut self) {
+        let msg = self.message_receiver.recv();
+        console_log!("Got Message: {:?}", msg);
+        match msg {
+            Some(Msg::KeyPressed(key_code)) => {},
+            Some(Msg::Clicked(loc)) => {
                 let col = controller::canvas_loc_to_column(&self.canvas, loc.0, loc.1, self.game.get_board());
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
             },
-            Err(err) => {},
+            None => {},
         }
     }
 
@@ -145,6 +178,11 @@ impl GameObject {
 
     fn repaint(&self) {
         controller::draw_gameboard(&self.canvas, &self.game.get_board());
+        controller::draw_game_pieces(&self.canvas, &self.game.get_board(), &self.game.get_board().chips[..]);
     }
 
 }
+
+fn start_animation() {
+}
+
