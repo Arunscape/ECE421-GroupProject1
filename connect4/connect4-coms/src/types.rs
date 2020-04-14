@@ -60,7 +60,7 @@ pub struct GameStatsResponse {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JoinPlayers {
-    pub players: Vec<Player>,
+    pub players: Vec<i32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

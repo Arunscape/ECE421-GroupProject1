@@ -8,9 +8,9 @@ use web_sys::{Request, RequestInit, RequestMode, Response};
 
 use connect4_coms::{
     status,
-    types::{GameData, GameDataResponse, PlayMove, Signin},
+    types::{GameData, GameDataResponse, JoinPlayers, JoinPlayersResponse, PlayMove, Signin},
 };
-use connect4_lib::game::{Chip, Game};
+use connect4_lib::game::{Chip, Game, Player};
 
 use crate::log;
 
@@ -46,6 +46,22 @@ pub async fn create_game(game: Game) -> Option<GameData> {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
                 v.game_data
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+pub async fn join_game(game_id: &str) -> Option<Vec<Option<isize>>> {
+    let token = LocalStorage::get_token();
+    let body: Vec<i32> = vec![0];
+    let js_json = request("PUT", &format!("joingame/{}", game_id), Some(body), token).await;
+    match js_json.map(|x| x.into_serde::<JoinPlayersResponse>()) {
+        Ok(Ok(v)) => {
+            if v.status == status::SUCCESS {
+                Some(v.player_numbers)
             } else {
                 None
             }
