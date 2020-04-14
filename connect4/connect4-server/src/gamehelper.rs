@@ -252,7 +252,7 @@ mod test {
 
         // /api/joinplayers/<roomcode>
         let result = join_players(&roomcode, "Alex", JoinPlayers {
-            players: vec![players[0].clone(), players[1].clone()]
+            players: vec![0, 1]
         });
         assert!(result == vec![Some(0 as isize), Some(1 as isize)]);
 
@@ -261,7 +261,7 @@ mod test {
         // arun joins from a second client
         // /api/joinplayers/<roomcode>
         let result = join_players(&roomcode, "Arun", JoinPlayers {
-            players: vec![players[2].clone()]
+            players: vec![2]
         });
         assert!(result == vec![Some(2 as isize)]);
 
@@ -300,10 +300,10 @@ mod test {
 
         // /api/joinplayers/<roomcode>
         let result = join_players(&roomcode, "Alex", JoinPlayers {
-            players: vec![players[0].clone()]
+            players: vec![0]
         });
         let result = join_players(&roomcode, "Arun", JoinPlayers {
-            players: vec![players[1].clone()]
+            players: vec![1]
         });
 
         // /api/playmove/<roomcode>
