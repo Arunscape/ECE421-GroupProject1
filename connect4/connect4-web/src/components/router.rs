@@ -121,6 +121,7 @@ fn homescreen() -> VNode {
                 <MenuButton text="Current Games" dest="#"/>
                 <MenuButton text="Past Games" dest="#"/>
                 <MenuButton text="Statistics" dest="/statistics"/>
+                <MenuButton text="Settings" dest="/settings"/>
               </div>
             </Menu>
         }

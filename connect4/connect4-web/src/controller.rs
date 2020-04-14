@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::log;
+use crate::{log, storage::LocalStorage};
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
@@ -59,9 +59,21 @@ pub fn place_chip(
         _ => unreachable!(),
     };
     canvas.draw_circle(x, y, radius, colour.into(), "black".into());
-    match chip.graphic {
-        io::FILLED => {} // do nothing extra
-        c => {
+
+    let letter_to_draw = match chip.graphic {
+        io::FILLED => match LocalStorage::get_colorblind_setting() {
+            true => match chip.fg_color {
+                io::RED => Some('R'),
+                io::YEL => Some('Y'),
+                _ => unreachable!(),
+            },
+            false => None,
+        },
+        c => Some(c),
+    };
+    match letter_to_draw {
+        None => {} // do nothing extra
+        Some(c) => {
             canvas.context.set_font(&font_size(radius as usize));
             canvas.context.fill_text(
                 &format!("{}", c),
