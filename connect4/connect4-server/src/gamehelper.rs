@@ -209,7 +209,7 @@ pub fn all_ongoing_games(username: &str) -> Vec<GameData> {
     docs_to_objects(query_collection_for_docs(
         &db,
         GAME_COLLECTION_NAME,
-        doc! {"users":{ "$elemmatch": {"$eq": username}}, "board_state": "Ongoing"},
+        doc! {"$and" : [{"users": {"$elemMatch": {"$eq": username.to_string() }}},{"board_state": "Ongoing"}  ]}
     ))
 }
 pub fn all_not_ongoing_games(username: &str) -> Vec<GameData> {
@@ -217,10 +217,7 @@ pub fn all_not_ongoing_games(username: &str) -> Vec<GameData> {
     docs_to_objects(query_collection_for_docs(
         &db,
         GAME_COLLECTION_NAME,
-        doc! {
-        "users":{ "$elemmatch": {"$eq": username}},
-        "board_state":{"$ne": "Ongoing"}
-        },
+        doc! {"$and" : [{"users": {"$elemMatch": {"$eq": username.to_string()}}},{"board_state": {"$ne": "Ongoing"}}  ]}
     ))
 }
 
