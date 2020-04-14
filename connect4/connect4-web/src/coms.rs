@@ -77,7 +77,6 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
 }
 
 pub async fn playmove(chip: Chip, game_id: String) -> Option<GameData> {
-    console_log!("Sending move");
     let play = PlayMove {
         game_id,
         column: chip.get_x(),

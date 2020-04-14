@@ -175,6 +175,7 @@ impl GameOnThread {
             Some(Msg::ServerReceived(data)) => {
                 self.game = data;
                 self.move_to_state(self.derive_state_from_board());
+                self.repaint();
                 console_log!("Got Game Data");
             }
             Some(Msg::AIThought((loc, ty))) => {
@@ -254,8 +255,11 @@ impl GameOnThread {
     }
 
     pub fn send_move_to_server(&mut self, chip: Chip) {
-        console_log!("object send move");
-        coms::playmove(chip, self.gameid.clone());
+        async fn asyncer(chip: Chip, gameid: String) {
+            console_log!("object send move");
+            coms::playmove(chip, gameid).await;
+        }
+        spawn_local(asyncer(chip, self.gameid.clone()));
     }
 
     fn request_move_from_ai(&self, config: AIConfig) {
