@@ -64,8 +64,9 @@ impl Component for Statistics {
           <div>
             <h2>{format!("Games won: {}", self.stats.games_won)}</h2>
             <h2>{format!("Games lost: {}", self.stats.games_lost)}</h2>
-            <h2>{format!("Games drawn: {}", self.stats.games_played - self.stats.games_lost - self.stats.games_lost)}</h2>
-            <h2>{format!("Games played: {}", self.stats.games_played)}</h2>
+            <h2>{format!("Games drawed: {}", self.stats.games_drawed)}</h2>
+            <h2>{format!("Games ongoing: {}", self.stats.games_ongoing)}</h2>
+            <h2>{format!("Games completed: {}", self.stats.games_won + self.stats.games_lost + self.stats.games_drawed)}</h2>
           </div>
         }
     }

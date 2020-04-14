@@ -86,7 +86,7 @@ fn signin(u: String, p: String) -> content::Json<String> {
     content::Json(serde_json::to_string(&data).unwrap())
 }
 
-#[get("/getstats")]
+#[get("/playerstats")]
 fn getstats(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     let data = match wrapper.get_username() {
         Some(u) => GameStatsResponse {
