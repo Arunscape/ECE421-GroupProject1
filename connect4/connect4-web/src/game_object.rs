@@ -4,15 +4,14 @@ use crate::set_timeout;
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::game::{BoardState, Chip, ChipDescrip, Game, PlayerType};
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
 
-use crate::jq::{JReceiver, JSender, mpsc};
+use crate::jq::{mpsc, JReceiver, JSender};
 
 use std::cell::RefCell;
 use std::rc::Rc;
-
 
 pub struct GameObject {
     channel: JSender<Msg>,
@@ -44,7 +43,6 @@ enum Msg {
     Clicked((i32, i32)),
     KeyPressed(u32),
 }
-
 
 impl GameObject {
     pub fn new(canvas: Canvas, game: Game) -> Self {
@@ -108,14 +106,19 @@ impl GameOnThread {
         let msg = self.message_receiver.recv();
         console_log!("Got Message: {:?}", msg);
         match msg {
-            Some(Msg::KeyPressed(key_code)) => {},
+            Some(Msg::KeyPressed(key_code)) => {}
             Some(Msg::Clicked(loc)) => {
-                let col = controller::canvas_loc_to_column(&self.canvas, loc.0, loc.1, self.game.get_board());
+                let col = controller::canvas_loc_to_column(
+                    &self.canvas,
+                    loc.0,
+                    loc.1,
+                    self.game.get_board(),
+                );
                 if let Some(col) = col {
                     self.handle_click(col);
                 }
-            },
-            None => {},
+            }
+            None => {}
         }
     }
 
@@ -178,11 +181,12 @@ impl GameOnThread {
 
     fn repaint(&self) {
         controller::draw_gameboard(&self.canvas, &self.game.get_board());
-        controller::draw_game_pieces(&self.canvas, &self.game.get_board(), &self.game.get_board().chips[..]);
+        controller::draw_game_pieces(
+            &self.canvas,
+            &self.game.get_board(),
+            &self.game.get_board().chips[..],
+        );
     }
-
 }
 
-fn start_animation() {
-}
-
+fn start_animation() {}

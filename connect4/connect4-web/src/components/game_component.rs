@@ -1,10 +1,16 @@
-use yew::prelude::*;
-use crate::game_object::GameObject;
-use connect4_lib::{game::Game, game::Board, games, game::PlayerType::{AI, Local, Remote}, ai::{EASY_AI, MID_AI, HARD_AI}};
 use crate::canvas::Canvas;
 use crate::constants::{game, player};
-use rand::{thread_rng, Rng};
+use crate::game_object::GameObject;
+use connect4_lib::{
+    ai::{EASY_AI, HARD_AI, MID_AI},
+    game::Board,
+    game::Game,
+    game::PlayerType::{Local, Remote, AI},
+    games,
+};
 use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
+use yew::prelude::*;
 
 pub struct GameComponent {
     link: ComponentLink<Self>,
@@ -26,12 +32,19 @@ impl Component for GameComponent {
     type Properties = Props;
     // I OWN THE GAME OBJECT AND DECIDE WHAT TO DO WITH THE PROPS I RECEIVE
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let canvas_id: String = String::from("canvas") + &thread_rng()
-          .sample_iter(&Alphanumeric)
-          .take(10)
-          .collect::<String>().to_ascii_lowercase();
+        let canvas_id: String = String::from("canvas")
+            + &thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(10)
+                .collect::<String>()
+                .to_ascii_lowercase();
 
-        Self { props, link, canvas_id, game_object: None }
+        Self {
+            props,
+            link,
+            canvas_id,
+            game_object: None,
+        }
     }
 
     fn mounted(&mut self) -> ShouldRender {
@@ -49,8 +62,8 @@ impl Component for GameComponent {
             player::AI_MID => games::build_game(game_type, AI(MID_AI), Local),
             player::AI_MID2 => games::build_game(game_type, Local, AI(MID_AI)),
             player::AI_HARD => games::build_game(game_type, AI(HARD_AI), Local),
-            player::AI_HARD2  => games::build_game(game_type, Local, AI(HARD_AI)),
-            player::LOCAL   =>  games::build_game(game_type, Local, Local),
+            player::AI_HARD2 => games::build_game(game_type, Local, AI(HARD_AI)),
+            player::LOCAL => games::build_game(game_type, Local, Local),
             player::REMOTE => games::build_game(game_type, Local, Remote),
             _ => todo!(),
         };

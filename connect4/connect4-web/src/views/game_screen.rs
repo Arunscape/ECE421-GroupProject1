@@ -1,10 +1,7 @@
-use yew::prelude::*;
 use crate::constants;
+use yew::prelude::*;
 
-use crate::{
-    components::GameComponent,
-    game_object::GameObject
-};
+use crate::{components::GameComponent, game_object::GameObject};
 
 use crate::components::router::query;
 
@@ -17,7 +14,7 @@ impl Component for GameScreen {
     type Properties = ();
     // I OWN THE GAME COMPONENT
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self {  link }
+        Self { link }
     }
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
         false
