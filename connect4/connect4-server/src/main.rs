@@ -43,7 +43,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
             .headers()
             .get("Authorization")
             .next()
-            .expect("no authorization in header")
+            .expect("no authorization in header") // TODO: dont panic
             .split(" ")
             .skip(1) // skip the word bearer
             .next()
