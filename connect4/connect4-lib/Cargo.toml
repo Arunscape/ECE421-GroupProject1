@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
 default-run="connect_game"
+license = "GPL-3.0-or-later"
+description="A library containing logic and AI for connect4 and Toot and Otto"
 
 [target.x86_64-unknown-linux-gnu]
 rustflags = ["-Ctarget-cpu=native"]

@@ -3,6 +3,8 @@ name = "connect4-server"
 version = "0.1.0"
 authors = ["Jacob Reckhard <jacobreckhard@gmail.com>", "Arun Woosaree <arun@woosaree.xyz>"]
 edition = "2018"
+license = "GPL-3.0-or-later"
+description="A server which interacts with connect4-lib"
 
 [target.x86_64-unknown-linux-gnu]
 rustflags = ["-Ctarget-cpu=native"]
@@ -13,8 +15,8 @@ rustflags = ["-Ctarget-cpu=native"]
 mongodb = "0.9.2"
 bson = "0.14.1"
 jsonwebtoken = "7.1.0"
-connect4-lib = { path="../connect4-lib" }
-connect4-coms = { path="../connect4-coms" }
+connect4-lib = { version="0.1.0", path="../connect4-lib" }
+connect4-coms = { version="0.1.0", path="../connect4-coms" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.51"
 rand = "0.7.3"
