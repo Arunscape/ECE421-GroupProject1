@@ -38,7 +38,7 @@ struct JwtPayloadWrapper {
 impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     type Error = ();
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, ()> {
-        println!("{:?}", request.headers());
+        //println!("{:?}", request.headers());
         let token: String = request
             .headers()
             .get("Authorization")
@@ -49,7 +49,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
             .next()
             .expect("no jwt token in header")
             .to_string();
-        println!("Parsed JWT token: {:?}", token);
+        //println!("Parsed JWT token: {:?}", token);
         match claims_from_jwt_token(token) {
             Some(claim) => Outcome::Success(JwtPayloadWrapper {
                 claim_payload: claim.data,
@@ -158,7 +158,6 @@ fn creategame(
     wrapper: JwtPayloadWrapper,
     new_game: Result<Json<connect4_lib::game::Game>, JsonError>,
 ) -> content::Json<String> {
-    println!("HELLO: {:?}", new_game);
     let mut data = match wrapper.get_username() {
         Some(u) => GameDataResponse {
             status: String::from("success"),
