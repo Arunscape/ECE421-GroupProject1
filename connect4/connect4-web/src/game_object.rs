@@ -115,15 +115,12 @@ impl GameOnThread {
         let msg = self.message_receiver.recv();
         console_log!("Got Message: {:?}", msg);
         match msg {
-<<<<<<< HEAD
-=======
             Some(Msg::FinishedAnimation) => {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
                     self.game_state = *next;
                     self.repaint();
                 }
-            },
->>>>>>> webio-refactor
+            }
             Some(Msg::KeyPressed(key_code)) => {}
             Some(Msg::Clicked(loc)) => {
                 let col = controller::canvas_loc_to_column(
