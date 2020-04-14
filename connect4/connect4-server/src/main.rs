@@ -181,7 +181,7 @@ fn creategame(
 fn joingame(
     wrapper: JwtPayloadWrapper,
     id: String,
-    new_players: Json<JoinPlayers>,
+    new_players: Json<Vec<i32>>,
 ) -> content::Json<String> {
     let mut data = match wrapper.get_username() {
         Some(u) => JoinPlayersResponse {
