@@ -93,14 +93,18 @@ impl GameObject {
     fn start_listener_thread(&self, mut thread_data: GameOnThread) {
         let f = Rc::new(RefCell::new(None));
         let g = f.clone();
+        let mut time = crate::seconds();
         *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            thread_data.get_message();
+            let newtime = crate::seconds();
+            let delta = newtime - time;
+            time = newtime;
+            thread_data.get_message(delta);
             let timeout = match thread_data.game_state {
-                GameState::WaitingForMove(Remote) => 1000,
-                GameState::WaitingForMove(Local) => 100,
-                GameState::WaitingForMove(AI) => 400,
+                GameState::WaitingForMove(PlayerType::Remote) => 1000,
+                GameState::WaitingForMove(PlayerType::Local) => 200,
+                GameState::WaitingForMove(PlayerType::AI(_)) => 400,
                 GameState::PlayingMove(_) => 20,
-                GameState::GameOver(_) => 200,
+                GameState::GameOver(_) => 500,
             };
             set_timeout(f.borrow().as_ref().unwrap(), timeout);
         }) as Box<dyn FnMut()>));
@@ -125,16 +129,16 @@ impl GameOnThread {
         self.game_state = next;
         match self.game_state {
             GameState::WaitingForMove(Remote) => self.request_game_from_server(),
-            GameState::WaitingForMove(Local) => self.request_game_from_server(),
-            GameState::WaitingForMove(AI) => self.request_game_from_server(),
+            GameState::WaitingForMove(Local) => {},
+            GameState::WaitingForMove(AI) => self.request_move_from_ai(),
             GameState::GameOver(board_state) => self.end_game(board_state),
             _ => {}
         }
     }
 
-    pub fn get_message(&mut self) {
+    pub fn get_message(&mut self, delta: f64) {
         let msg = self.message_receiver.recv();
-        console_log!("Got Message: {:?}", msg);
+        // console_log!("[{}] Got Message: {:?}", delta, msg);
         match msg {
             Some(Msg::FinishedAnimation) => {
                 if let GameState::PlayingMove(next) = self.game_state.clone() {
@@ -205,6 +209,17 @@ impl GameOnThread {
     }
 
     fn request_game_from_server(&self) {
+        async fn getgamer(sender: JSender<Msg>, gameid: String) {
+            let data = coms::getgame(&gameid).await;
+            if let Some(gamedata) = data {
+                console_log!("Server Data: {:?}", gamedata);
+                sender.send(Msg::ServerReceived);
+            }
+        }
+        spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
+    }
+
+    fn request_move_from_ai(&self) {
         async fn getgamer(sender: JSender<Msg>, gameid: String) {
             let data = coms::getgame(&gameid).await;
             if let Some(gamedata) = data {
