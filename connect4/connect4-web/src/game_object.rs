@@ -64,8 +64,7 @@ impl GameObject {
             gameid,
             sender: sender.clone(),
         };
-        let game_state = slf.derive_state_from_board();
-        slf.game_state = game_state;
+        slf.move_to_state(slf.derive_state_from_board());
 
         let mouse_sender = sender.clone();
         let bounds = slf.canvas.canvas.get_bounding_client_rect();
@@ -96,7 +95,14 @@ impl GameObject {
         let g = f.clone();
         *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
             thread_data.get_message();
-            set_timeout(f.borrow().as_ref().unwrap(), 200);
+            let timeout = match thread_data.game_state {
+                GameState::WaitingForMove(Remote) => 1000,
+                GameState::WaitingForMove(Local) => 100,
+                GameState::WaitingForMove(AI) => 400,
+                GameState::PlayingMove(_) => 20,
+                GameState::GameOver(_) => 200,
+            };
+            set_timeout(f.borrow().as_ref().unwrap(), timeout);
         }) as Box<dyn FnMut()>));
 
         set_timeout(g.borrow().as_ref().unwrap(), 0);
@@ -110,15 +116,20 @@ impl GameOnThread {
         let loc = chip.get_x();
 
         self.game.play(loc, chip_descrip);
-        self.game_state = GameState::PlayingMove(Box::from(GameState::WaitingForMove(
-            self.game.current_player().player_type,
-        )));
+        self.game_state = GameState::PlayingMove(Box::from(self.derive_state_from_board()));
         start_animation(&self.canvas, &self.game.get_board(), self.sender.clone());
     }
 
     pub fn move_to_state(&mut self, next: GameState) {
+        console_log!("Starting state: {:?}", next);
         self.game_state = next;
-        self.request_game_from_server();
+        match self.game_state {
+            GameState::WaitingForMove(Remote) => self.request_game_from_server(),
+            GameState::WaitingForMove(Local) => self.request_game_from_server(),
+            GameState::WaitingForMove(AI) => self.request_game_from_server(),
+            GameState::GameOver(board_state) => self.end_game(board_state),
+            _ => {}
+        }
     }
 
     pub fn get_message(&mut self) {
