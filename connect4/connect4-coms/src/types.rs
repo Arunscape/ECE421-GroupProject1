@@ -46,7 +46,7 @@ pub struct Claims {
     pub exp: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct GameStats {
     pub game_id: String,
     pub player: String,
