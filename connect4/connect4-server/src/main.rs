@@ -258,6 +258,13 @@ fn files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(path).ok()
 }
 
+fn allow_default_cors() -> rocket_cors::Cors {
+    match rocket_cors::CorsOptions::default().to_cors() {
+        Err(e) => panic!("Rocket Cors Error: {:?}", e),
+        Ok(cors) => cors,
+    }
+}
+
 fn rocket() -> rocket::Rocket {
     let _path = std::env::current_dir()
         .unwrap()
@@ -273,6 +280,7 @@ fn rocket() -> rocket::Rocket {
             ],
         )
         .mount("/pkg", routes![files])
+        .attach(allow_default_cors())
         .register(catchers![not_found])
 }
 
