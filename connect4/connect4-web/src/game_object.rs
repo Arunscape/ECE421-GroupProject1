@@ -5,7 +5,7 @@ use crate::{request_animation_frame, set_timeout};
 #[macro_use]
 use crate::{console_log, log};
 use connect4_lib::ai::AIConfig;
-use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
+use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType, Player};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -47,13 +47,14 @@ enum GameState {
     GameOver(BoardState),
 }
 
+
 #[derive(Clone, Debug)]
 enum Msg {
     Clicked((i32, i32)),
     KeyPressed(String),
     FinishedAnimation,
     Delay,
-    ServerReceived,
+    ServerReceived(Game),
     AIThought((isize, ChipDescrip)),
 }
 
@@ -89,6 +90,7 @@ impl GameObject {
         slf.canvas.register_keypress_listener(onkeypress);
 
         slf.repaint();
+        slf.request_game_from_server();
 
         let handle = GameObject { channel: sender };
         handle.start_listener_thread(slf);
@@ -127,6 +129,7 @@ impl GameOnThread {
         self.selected_move = None;
         self.game.play(loc, chip_descrip);
         self.game_state = GameState::PlayingMove(Box::from(self.derive_state_from_board()));
+        self.send_move_to_server(chip);
         start_animation(&self.canvas, &self.game.get_board(), self.sender.clone());
     }
 
@@ -170,7 +173,9 @@ impl GameOnThread {
                     self.handle_click(col);
                 }
             }
-            Some(Msg::ServerReceived) => {
+            Some(Msg::ServerReceived(data)) => {
+                self.game = data;
+                self.move_to_state(self.derive_state_from_board());
                 console_log!("Got Game Data");
             }
             Some(Msg::AIThought((loc, ty))) => {
@@ -239,13 +244,19 @@ impl GameOnThread {
 
     fn request_game_from_server(&self) {
         async fn getgamer(sender: JSender<Msg>, gameid: String) {
+            console_log!("Requesting Gamedata for {}", gameid);
             let data = coms::getgame(&gameid).await;
             if let Some(gamedata) = data {
                 console_log!("Server Data: {:?}", gamedata);
-                sender.send(Msg::ServerReceived);
+                sender.send(Msg::ServerReceived(gamedata.game));
             }
         }
         spawn_local(getgamer(self.sender.clone(), self.gameid.clone()));
+    }
+
+    pub fn send_move_to_server(&mut self, chip: Chip) {
+        console_log!("object send move");
+        coms::playmove(chip, self.gameid.clone());
     }
 
     fn request_move_from_ai(&self, config: AIConfig) {

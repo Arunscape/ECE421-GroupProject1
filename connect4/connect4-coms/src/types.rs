@@ -14,7 +14,6 @@ pub struct Refresh {
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PlayMove {
-    pub status: String,
     pub game_id: String,
     pub column: isize,
     pub chip_descrip: ChipDescrip,

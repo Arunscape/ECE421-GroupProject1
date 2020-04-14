@@ -68,9 +68,8 @@ impl Component for GameComponent {
             _ => todo!(),
         };
 
-        let gameid = String::from("offline");
 
-        let game = GameObject::new(canvas, game, gameid);
+        let game = GameObject::new(canvas, game, self.props.gameid.clone());
         self.game_object = Some(game);
         true
     }
