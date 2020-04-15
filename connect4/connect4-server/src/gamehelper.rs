@@ -82,7 +82,7 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
 
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
 
-    let game_doc = object_to_doc(&new_game).expect("GameData should go into a doc??");
+    let game_doc = object_to_doc(&new_game)?;
 
     if db.collection(GAME_COLLECTION_NAME)
         .insert_one(game_doc, None).is_err() {
@@ -111,7 +111,7 @@ pub fn update_game_with_play(
         // update the DB
         if db.collection(GAME_COLLECTION_NAME).replace_one(
             doc! {"roomcode": roomcode.to_string()},
-            object_to_doc(&game_data).expect("should go todoc??"),
+            object_to_doc(&game_data)?,
             None,
         ).is_err() {
             return None;

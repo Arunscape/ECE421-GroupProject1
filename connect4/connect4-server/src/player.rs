@@ -15,38 +15,38 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
     let user_doc = object_to_doc(&User {
         username: username.to_string(),
         password: password.to_string(),
-    })
-    .expect("Should be able to Doc Users?");
+    })?;
 
     // can connect to DB
-    if let Some(db) = new_db(DATABASE_NAME) {
-        // not in db, add then JWT
-        if !exists_any_in(
-            &db,
-            USER_COLLECTION_NAME,
-            doc! {"username": username.to_owned()},
-        ) {
+    let db = new_db(DATABASE_NAME)?;
+    // username not in db, add then JWT
+    if !exists_any_in(
+        &db,
+        USER_COLLECTION_NAME,
+        doc! {"username": username.to_owned()},
+    ) {
 
-            // insert into db, return None if that fails
-            if db.collection(USER_COLLECTION_NAME).insert_one(user_doc, None).is_err() {
-                return None;
-            }
-
-            return Some(gen_jwt_token(
-                ClaimPayload{username: username.to_string()},
-                JWT_LIFETIME_SECONDS,
-            ));
+        // insert into db, return None if that fails
+        if db.collection(USER_COLLECTION_NAME).insert_one(user_doc, None).is_err() {
+            return None;
         }
 
-        // They exist in the database
-        if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
-            return Some(gen_jwt_token(
-                ClaimPayload{username: username.to_string()},
-                JWT_LIFETIME_SECONDS,
-            ));
-        }
+        return Some(gen_jwt_token(
+            ClaimPayload{username: username.to_string()},
+            JWT_LIFETIME_SECONDS,
+        ));
     }
-    None
+
+    // They exist in the database
+    if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
+        Some(gen_jwt_token(
+            ClaimPayload{username: username.to_string()},
+            JWT_LIFETIME_SECONDS,
+        ))
+    } else {
+        // invalid password
+        None
+    }
 }
 
 #[cfg(test)]

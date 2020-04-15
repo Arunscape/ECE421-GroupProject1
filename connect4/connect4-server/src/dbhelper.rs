@@ -37,14 +37,12 @@ pub fn object_to_doc<T>(object: &T) -> Option<bson::Document>
 where
     T: Serialize,
 {
-    //to_bson(object)?.as_document().unwrap().clone()
     match to_bson(object) {
         Err(_) => None,
-        Ok(bson) => Some(
-            bson.as_document()
-                .expect("bson should be a document")
-                .clone(),
-        ),
+        Ok(bson) => match bson.as_document() {
+            Some(doc) => Some(doc.clone()),
+            None => None,
+        }
     }
 }
 

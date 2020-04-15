@@ -14,7 +14,6 @@ use std::path::PathBuf;
 //use rocket_contrib::serve::StaticFiles;
 //use rocket_contrib::templates::Template;
 //use std::fs::File;
-use rocket_contrib::json::JsonError;
 
 mod dbhelper;
 mod gamehelper;
@@ -175,12 +174,12 @@ fn allpast(wrapper: JwtPayloadWrapper) -> content::Json<String> {
 #[put("/creategame", format = "application/json", data = "<new_game>")]
 fn creategame(
     wrapper: JwtPayloadWrapper,
-    new_game: Result<Json<connect4_lib::game::Game>, JsonError>,
+    new_game: Json<connect4_lib::game::Game>,
 ) -> content::Json<String> {
     let mut data = match wrapper.get_username() {
         Some(u) => GameDataResponse {
             status: String::from("success"),
-            game_data: gamehelper::insert_new_game(u, new_game.unwrap().into_inner()),
+            game_data: gamehelper::insert_new_game(u, new_game.into_inner()),
         },
         None => GameDataResponse {
             status: String::from("No Username in JWT"),
