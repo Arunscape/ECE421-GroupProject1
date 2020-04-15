@@ -3,6 +3,7 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::{AllowMissing, Permissive};
 use yew_router::{prelude::*, Switch};
 
+use crate::coms;
 use crate::components::{Menu, MenuButton, Signin};
 use crate::storage::LocalStorage;
 use crate::views::{GameScreen, OnlineConfigPage, SettingsPage, Statistics, ViewPage};
@@ -26,6 +27,7 @@ impl Component for ConnectRouter {
     }
 
     fn mounted(&mut self) -> ShouldRender {
+        coms::sync_refresh();
         true
     }
 

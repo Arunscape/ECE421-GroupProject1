@@ -53,7 +53,7 @@ impl Component for GameComponent {
         let game_type = match self.props.game_type.as_str() {
             game::CONNECT4 => games::GameType::Connect4,
             game::TOTO => games::GameType::Toto,
-            _ => unreachable!(),
+            _ => games::GameType::Connect4, // TODO: better default
         };
 
         let game = match self.props.other_player.as_str() {
@@ -65,7 +65,7 @@ impl Component for GameComponent {
             player::AI_HARD2 => games::build_game(game_type, Local, AI(HARD_AI)),
             player::LOCAL => games::build_game(game_type, Local, Local),
             player::REMOTE => games::build_game(game_type, Local, Remote),
-            _ => todo!(),
+            _ => games::build_game(game_type, Remote, Remote), // server will just replace this anyways
         };
 
         let game = GameObject::new(canvas, self.props.active, game, self.props.gameid.clone());
