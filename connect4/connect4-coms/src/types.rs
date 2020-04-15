@@ -1,5 +1,5 @@
 use connect4_lib::game::ChipDescrip;
-use connect4_lib::game::{BoardState, Game, Player};
+use connect4_lib::game::{BoardState, Game};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,8 +31,8 @@ pub struct GameDataResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum ClaimPayload {
-    username(String),
+pub struct ClaimPayload {
+    pub username: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
