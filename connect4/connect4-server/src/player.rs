@@ -33,7 +33,7 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
             }
 
             return Some(gen_jwt_token(
-                ClaimPayload::username(username.to_string()),
+                ClaimPayload{username: username.to_string()},
                 JWT_LIFETIME_SECONDS,
             ));
         }
@@ -41,7 +41,7 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
         // They exist in the database
         if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
             return Some(gen_jwt_token(
-                ClaimPayload::username(username.to_string()),
+                ClaimPayload{username: username.to_string()},
                 JWT_LIFETIME_SECONDS,
             ));
         }

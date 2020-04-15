@@ -31,8 +31,8 @@ pub struct GameDataResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum ClaimPayload {
-    username(String),
+pub struct ClaimPayload {
+    pub username: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
