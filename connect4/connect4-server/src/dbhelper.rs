@@ -39,11 +39,10 @@ where
 {
     match to_bson(object) {
         Err(_) => None,
-        Ok(bson) => Some(
-            bson.as_document()
-                .expect("bson should be a document")
-                .clone(),
-        ),
+        Ok(bson) => match bson.as_document() {
+            Some(doc) => Some(doc.clone()),
+            None => None,
+        }
     }
 }
 
