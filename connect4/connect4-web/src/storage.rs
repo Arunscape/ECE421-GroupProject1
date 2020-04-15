@@ -22,6 +22,14 @@ impl LocalStorage {
             .unwrap()
             .set_item(&"auth", value);
     }
+    pub fn clear_token() {
+        window()
+            .unwrap()
+            .local_storage()
+            .unwrap()
+            .unwrap()
+            .remove_item(&"auth");
+    }
 
     pub fn get_username() -> Option<String> {
         Self::get_token()

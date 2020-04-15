@@ -65,6 +65,28 @@ pub async fn join_game(game_id: &str) -> Option<Vec<Option<isize>>> {
     }
 }
 
+pub async fn refresh() {
+    let token = LocalStorage::get_token();
+    let js_json = request::<i32>("GET", "refresh", None, token).await;
+    match js_json.map(|x| x.into_serde::<Signin>()) {
+        Ok(Ok(v)) => {
+            if v.status == status::SUCCESS {
+              LocalStorage::set_token(&v.tok);
+            } else {
+              LocalStorage::clear_token();
+            }
+        }
+        _ => (),
+    }
+}
+pub fn sync_refresh() {
+    async fn asyncr() {
+        refresh().await;
+        console_log!("Refreshed Token");
+    }
+    spawn_local(asyncr());
+}
+
 pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
     let js_json = request::<i32>("GET", &format!("signin/{}/{}", usr, passwd), None, None).await;
     match js_json.map(|x| x.into_serde::<Signin>()) {
