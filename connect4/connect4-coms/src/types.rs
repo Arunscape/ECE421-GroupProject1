@@ -8,11 +8,6 @@ pub struct Signin {
     pub tok: String,
 }
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Refresh {
-    pub status: String,
-    pub new_tok: String,
-}
-#[derive(Debug, Serialize, Deserialize)]
 pub struct PlayMove {
     pub game_id: String,
     pub column: isize,

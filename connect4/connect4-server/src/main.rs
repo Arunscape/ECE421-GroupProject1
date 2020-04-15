@@ -24,7 +24,7 @@ mod statshelper;
 
 use connect4_coms::types::{ClaimPayload, PlayMove};
 use connect4_coms::types::{
-    GameDataResponse, GameStatsResponse, JoinPlayers, JoinPlayersResponse, Refresh, Signin,
+    GameDataResponse, GameStatsResponse, JoinPlayers, JoinPlayersResponse, Signin,
 };
 use jwthelper::{claims_from_jwt_token, gen_jwt_token};
 
@@ -133,16 +133,16 @@ fn playmove(wrapper: JwtPayloadWrapper, move_data: Json<PlayMove>) -> content::J
 fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
     // get data according to jwt username extraction success
     let data = match wrapper.get_username() {
-        Some(u) => Refresh {
+        Some(u) => Signin {
             status: String::from("success"),
-            new_tok: gen_jwt_token(
+            tok: gen_jwt_token(
                 ClaimPayload::username(u.to_string()),
                 dbhelper::JWT_LIFETIME_SECONDS,
             ),
         },
-        None => Refresh {
+        None => Signin {
             status: String::from("failed"),
-            new_tok: String::from(""),
+            tok: String::from(""),
         },
     };
 
@@ -201,7 +201,7 @@ fn joingame(
     id: String,
     new_players: Json<JoinPlayers>,
 ) -> content::Json<String> {
-    let mut data = match wrapper.get_username() {
+    let data = match wrapper.get_username() {
         Some(u) => JoinPlayersResponse {
             status: String::from("success"),
             player_numbers: gamehelper::join_players(&id, u, new_players.into_inner()),
