@@ -17,7 +17,7 @@ use connect4_lib::game::{Chip, Game, Player};
 
 use crate::{console_log, log};
 
-const SERVER_LOC: &'static str = "127.0.0.1:8000";
+const SERVER_LOC: &'static str = env!("SERVER_URL");
 
 pub async fn getgame(id: &str) -> Option<GameData> {
     let token = LocalStorage::get_token();
@@ -71,9 +71,9 @@ pub async fn refresh() {
     match js_json.map(|x| x.into_serde::<Signin>()) {
         Ok(Ok(v)) => {
             if v.status == status::SUCCESS {
-              LocalStorage::set_token(&v.tok);
+                LocalStorage::set_token(&v.tok);
             } else {
-              LocalStorage::clear_token();
+                LocalStorage::clear_token();
             }
         }
         _ => (),

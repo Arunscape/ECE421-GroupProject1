@@ -2,5 +2,6 @@
 #!/bin/bash
 reset
 set -e
+cargo install wasm-pack
 wasm-pack build --target web
 rollup ./main.js --format iife --file ./pkg/bundle.js
