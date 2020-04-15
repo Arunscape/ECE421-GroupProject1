@@ -6,7 +6,7 @@ ENV ROCKET_ENV=production
 RUN cargo install connect4-server --git 'https://github.com/Arunscape/ECE421-GroupProject1.git'
 RUN git clone https://github.com/Arunscape/ECE421-GroupProject1.git
 WORKDIR /usr/src/myapp/ECE421-GroupProject1/connect4/connect4-web
-ENV SERVER_URL=http://connect4.woosaree.xyz
+ENV SERVER_URL=connect4.woosaree.xyz
 RUN cargo install wasm-pack
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
 RUN apt-get install -y nodejs
