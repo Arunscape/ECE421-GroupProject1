@@ -40,16 +40,19 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     type Error = ();
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, ()> {
         //println!("{:?}", request.headers());
-        let token: String = request
+        let token: String = match request
             .headers()
             .get("Authorization")
             .next()
-            .expect("no authorization in header") // TODO: dont panic
+            .and_then(|x|
+            x
             .split(" ")
             .skip(1) // skip the word bearer
             .next()
-            .expect("no jwt token in header")
-            .to_string();
+            ) {
+                Some(s) => s.to_string(),
+                None => "".to_string(),
+            };
         //println!("Parsed JWT token: {:?}", token);
         match claims_from_jwt_token(token) {
             Some(claim) => Outcome::Success(JwtPayloadWrapper {
