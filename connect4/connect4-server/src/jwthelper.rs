@@ -51,9 +51,13 @@ mod test {
     use super::*;
     use std::{thread, time};
 
+    fn get_token() -> String {
+        gen_jwt_token(ClaimPayload{username:"cats".to_owned()}, 2)
+    }
+
     #[test]
     fn valid_jwt_test() {
-        let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 2);
+        let token = get_token();
 
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
@@ -62,9 +66,9 @@ mod test {
 
     #[test]
     fn invalid_jwt_test() {
-        let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 1);
+        let token = get_token();
 
-        thread::sleep(time::Duration::from_millis(2 * 1000));
+        thread::sleep(time::Duration::from_millis(3 * 1000));
 
         match claims_from_jwt_token(token) {
             Some(_) => assert!(false),
@@ -74,12 +78,11 @@ mod test {
 
     #[test]
     fn jwt_payload_test() {
-        let token = gen_jwt_token(ClaimPayload::username("cats".to_owned()), 2);
-
+        let token = get_token();
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
         let claims = claims_from_jwt_token(token).expect("Still valid");
-        if let ClaimPayload::username(u) = claims.data {
+        if let ClaimPayload { username: u} = claims.data {
             assert!(u == "cats".to_string());
         }
     }
