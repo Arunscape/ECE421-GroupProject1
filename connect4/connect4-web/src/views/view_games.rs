@@ -1,5 +1,6 @@
 use crate::components::GameComponent;
 use crate::coms;
+use crate::{console_log, log};
 use connect4_coms::types::GameData;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -9,8 +10,13 @@ pub struct ViewPage {
     games: Vec<GameData>,
 }
 
+pub enum Msg {
+    Server(Vec<GameData>),
+    Link(usize),
+}
+
 impl Component for ViewPage {
-    type Message = Vec<GameData>;
+    type Message = Msg;
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
@@ -25,8 +31,14 @@ impl Component for ViewPage {
         false
     }
 
-    fn update(&mut self, msg: Vec<GameData>) -> ShouldRender {
-        self.games = msg;
+    fn update(&mut self, msg: Msg) -> ShouldRender {
+        match msg {
+            Msg::Server(data) => self.games = data,
+            Msg::Link(i) => {
+                let s = self.games[i].roomcode.clone();
+                crate::window().location().set_href(&format!("/game/{}", s));
+            },
+        }
         true
     }
 
@@ -35,16 +47,22 @@ impl Component for ViewPage {
         html! {
             <div>
               <h1>{"View"}</h1>
-              <ul class={list_styles}>{ self.games.iter().map(renderGameView).collect::<Html>() }</ul>
+              <ul class={list_styles}>{
+                  self.games.iter().enumerate()
+                      .map(|(i, x)| renderGameView(x, i, self.link.clone())).collect::<Html>()
+              }</ul>
             </div>
         }
     }
 }
 
-fn renderGameView(game: &GameData) -> Html {
+fn renderGameView(game: &GameData, index: usize, link: ComponentLink<ViewPage>) -> Html {
     let game_style = "";
+
+    let id = index;
+    let onclick = link.callback(move |_| Msg::Link(id));
     html! {
-      <div class={game_style}>
+      <div onclick=onclick class={game_style}>
         <GameComponent gameid=game.roomcode.clone()
             other_player=String::from("")
             game_type=String::from("")
@@ -60,7 +78,7 @@ impl ViewPage {
                 PastPresent::Present => coms::getgamespresent().await,
                 PastPresent::Past => coms::getgamespast().await,
             };
-            link.send_message(data);
+            link.send_message(Msg::Server(data));
         }
         spawn_local(asyncr(self.link.clone()));
     }
