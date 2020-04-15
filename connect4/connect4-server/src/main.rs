@@ -40,19 +40,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
     type Error = ();
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, ()> {
         //println!("{:?}", request.headers());
-        let token: String = match request
-            .headers()
-            .get("Authorization")
-            .next()
-            .and_then(|x|
-            x
-            .split(" ")
-            .skip(1) // skip the word bearer
-            .next()
-            ) {
-                Some(s) => s.to_string(),
-                None => "".to_string(),
-            };
+        let token: String = match request.headers().get("Authorization").next().and_then(|x| {
+            x.split(" ")
+                .skip(1) // skip the word bearer
+                .next()
+        }) {
+            Some(s) => s.to_string(),
+            None => "".to_string(),
+        };
         //println!("Parsed JWT token: {:?}", token);
         match claims_from_jwt_token(token) {
             Some(claim) => Outcome::Success(JwtPayloadWrapper {
@@ -139,7 +134,9 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
         Some(u) => Signin {
             status: String::from("success"),
             tok: gen_jwt_token(
-                ClaimPayload { username: u.to_string() },
+                ClaimPayload {
+                    username: u.to_string(),
+                },
                 dbhelper::JWT_LIFETIME_SECONDS,
             ),
         },

@@ -25,14 +25,19 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
         USER_COLLECTION_NAME,
         doc! {"username": username.to_owned()},
     ) {
-
         // insert into db, return None if that fails
-        if db.collection(USER_COLLECTION_NAME).insert_one(user_doc, None).is_err() {
+        if db
+            .collection(USER_COLLECTION_NAME)
+            .insert_one(user_doc, None)
+            .is_err()
+        {
             return None;
         }
 
         return Some(gen_jwt_token(
-            ClaimPayload{username: username.to_string()},
+            ClaimPayload {
+                username: username.to_string(),
+            },
             JWT_LIFETIME_SECONDS,
         ));
     }
@@ -40,7 +45,9 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
     // They exist in the database
     if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
         Some(gen_jwt_token(
-            ClaimPayload{username: username.to_string()},
+            ClaimPayload {
+                username: username.to_string(),
+            },
             JWT_LIFETIME_SECONDS,
         ))
     } else {

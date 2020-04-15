@@ -52,7 +52,12 @@ mod test {
     use std::{thread, time};
 
     fn get_token() -> String {
-        gen_jwt_token(ClaimPayload{username:"cats".to_owned()}, 2)
+        gen_jwt_token(
+            ClaimPayload {
+                username: "cats".to_owned(),
+            },
+            2,
+        )
     }
 
     #[test]
