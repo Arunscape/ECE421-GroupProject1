@@ -1,5 +1,5 @@
 use connect4_lib::game::ChipDescrip;
-use connect4_lib::game::{BoardState, Game, Player};
+use connect4_lib::game::{BoardState, Game};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
