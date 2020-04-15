@@ -34,10 +34,7 @@ impl LocalStorage {
     pub fn get_username() -> Option<String> {
         Self::get_token()
             .and_then(|x| claims_from_jwt_token(x))
-            .and_then(|x| match x.data {
-                ClaimPayload::username(s) => Some(s),
-                _ => None,
-            })
+            .map(|x| x.data.username)
     }
 
     pub fn set_colorblind_setting(val: bool) {

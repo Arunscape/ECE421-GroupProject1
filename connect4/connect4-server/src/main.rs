@@ -63,9 +63,10 @@ impl<'a, 'r> FromRequest<'a, 'r> for JwtPayloadWrapper {
 
 impl JwtPayloadWrapper {
     fn get_username(&self) -> Option<&str> {
-        match &self.claim_payload {
-            ClaimPayload::username(u) => Some(u),
-            _ => None,
+        if &self.claim_payload.username != "" {
+            Some(&self.claim_payload.username)
+        } else {
+            None
         }
     }
 }
@@ -136,7 +137,7 @@ fn refresh(wrapper: JwtPayloadWrapper) -> content::Json<String> {
         Some(u) => Signin {
             status: String::from("success"),
             tok: gen_jwt_token(
-                ClaimPayload::username(u.to_string()),
+                ClaimPayload { username: u.to_string() },
                 dbhelper::JWT_LIFETIME_SECONDS,
             ),
         },

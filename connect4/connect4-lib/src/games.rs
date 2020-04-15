@@ -1,7 +1,6 @@
 use crate::ai::*;
-use crate::game::{check_linear_pattern, Board, Checker, ChipDescrip, Game, Player, PlayerType};
+use crate::game::{Board, ChipDescrip, Game, Player, PlayerType};
 use crate::io::{BLK, BLU, BRIGHTEN, FILLED, RED, YEL};
-use std::rc::Rc;
 
 pub enum GameType {
     Connect4,
