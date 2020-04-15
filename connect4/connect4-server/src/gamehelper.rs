@@ -246,7 +246,6 @@ mod test {
     #[ignore]
     fn db_multi_client_join_play_test() {
         let game: game::Game = games::connect4_3player();
-        let players = game.players.clone();
 
         // /api/newgame
         let game_data = insert_new_game("Alex", game).expect("GameData");
@@ -301,8 +300,8 @@ mod test {
         let roomcode = game_data.roomcode;
 
         // /api/joinplayers/<roomcode>
-        let result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![0] });
-        let result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![1] });
+        let _result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![0] });
+        let _result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![1] });
 
         // /api/playmove/<roomcode>
         for i in 0..3 {

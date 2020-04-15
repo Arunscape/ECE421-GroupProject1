@@ -61,7 +61,7 @@ mod test {
 
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
-        let claims = claims_from_jwt_token(token).expect("still valid");
+        let _claims = claims_from_jwt_token(token).expect("still valid");
     }
 
     #[test]
@@ -82,8 +82,6 @@ mod test {
         thread::sleep(time::Duration::from_millis(1 * 1000));
 
         let claims = claims_from_jwt_token(token).expect("Still valid");
-        if let ClaimPayload { username: u} = claims.data {
-            assert!(u == "cats".to_string());
-        }
+        assert!(claims.data.username == "cats".to_string());
     }
 }

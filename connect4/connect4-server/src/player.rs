@@ -56,9 +56,9 @@ mod test {
     #[test]
     #[ignore]
     fn db_sign_in_test() {
-        let token = sign_in("Alex", "Yeet").expect("Alex shouldn't be in the DB yet");
+        let _token = sign_in("Alex", "Yeet").expect("Alex shouldn't be in the DB yet");
 
-        let token = sign_in("Alex", "Yeet").expect("Alex must sign in again");
+        let _token = sign_in("Alex", "Yeet").expect("Alex must sign in again");
 
         // this isnt Alex's password!!
         let token = sign_in("Alex", "Yote");

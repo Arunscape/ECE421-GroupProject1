@@ -117,7 +117,10 @@ mod test {
         let doc = object_to_doc(&p).expect("Object shuould convert to doc?");
 
         // TODO: handle result
-        db.collection(collection_name).insert_one(doc, None);
+        if db.collection(collection_name).insert_one(doc, None).is_err() {
+            panic!("collection insert failed!");
+        }
+
 
         assert!(exists_any_in(&db, collection_name, doc! {"name":"Alex"}));
 
