@@ -37,7 +37,6 @@ pub fn object_to_doc<T>(object: &T) -> Option<bson::Document>
 where
     T: Serialize,
 {
-    //to_bson(object)?.as_document().unwrap().clone()
     match to_bson(object) {
         Err(_) => None,
         Ok(bson) => Some(
