@@ -26,9 +26,11 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
             USER_COLLECTION_NAME,
             doc! {"username": username.to_owned()},
         ) {
-            // TODO: error handle insertion
-            db.collection(USER_COLLECTION_NAME)
-                .insert_one(user_doc, None);
+
+            // insert into db, return None if that fails
+            if db.collection(USER_COLLECTION_NAME).insert_one(user_doc, None).is_err() {
+                return None;
+            }
 
             return Some(gen_jwt_token(
                 ClaimPayload::username(username.to_string()),

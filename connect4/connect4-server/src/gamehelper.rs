@@ -84,8 +84,10 @@ pub fn insert_new_game(game_maker: &str, game: game::Game) -> Option<GameData> {
 
     let game_doc = object_to_doc(&new_game).expect("GameData should go into a doc??");
 
-    db.collection(GAME_COLLECTION_NAME)
-        .insert_one(game_doc, None); // TODO: error handle
+    if db.collection(GAME_COLLECTION_NAME)
+        .insert_one(game_doc, None).is_err() {
+        return None;
+    }
 
     adjust_local_perspective(&mut new_game, game_maker);
     Some(new_game)
@@ -107,11 +109,13 @@ pub fn update_game_with_play(
         game_data.board_state = game_data.game.play(col, color);
 
         // update the DB
-        db.collection(GAME_COLLECTION_NAME).replace_one(
+        if db.collection(GAME_COLLECTION_NAME).replace_one(
             doc! {"roomcode": roomcode.to_string()},
             object_to_doc(&game_data).expect("should go todoc??"),
             None,
-        );
+        ).is_err() {
+            return None;
+        }
 
         // return updated data
         adjust_local_perspective(&mut game_data, username);
@@ -195,13 +199,15 @@ pub fn join_players(roomcode: &str, username: &str, joining: JoinPlayers) -> Vec
     // write new users to the database
     // todo: return vec of none's if the write fails
     let db = new_db(DATABASE_NAME).expect("No mongo, is it running?");
-    db.collection(GAME_COLLECTION_NAME).replace_one(
+    if db.collection(GAME_COLLECTION_NAME).replace_one(
         doc! {"roomcode": roomcode.to_string()},
         object_to_doc(&game_data).expect("should go todoc??"),
         None,
-    );
-
-    return res;
+    ).is_err() {
+        vec![None; res.len()]
+    } else {
+        res
+    }
 }
 
 pub fn all_ongoing_games(username: &str) -> Vec<GameData> {
