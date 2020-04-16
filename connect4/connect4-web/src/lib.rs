@@ -6,11 +6,11 @@ use connect4_lib::games;
 use connect4_lib::io::{GameIO, TermIO};
 
 mod canvas;
-mod game_manager;
 mod components;
 mod coms;
 mod constants;
 mod controller;
+mod game_manager;
 mod game_object;
 mod jq;
 mod storage;

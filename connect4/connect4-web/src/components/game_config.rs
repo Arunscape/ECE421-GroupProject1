@@ -1,6 +1,6 @@
-use yew::{prelude::*, Properties};
 use crate::components::{Menu, MenuButton};
 use crate::constants;
+use yew::{prelude::*, Properties};
 
 pub struct GameConfig {
     props: Props,

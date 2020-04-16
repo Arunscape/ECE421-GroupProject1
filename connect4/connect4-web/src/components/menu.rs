@@ -1,5 +1,5 @@
-use yew::{prelude::*, virtual_dom::VNode, Properties};
 use crate::components::router::render_if;
+use yew::{prelude::*, virtual_dom::VNode, Properties};
 
 pub struct Menu {
     props: Props,
@@ -63,7 +63,7 @@ fn icon(i: ConnectIcon, dest: &str) -> VNode {
 
 fn icon_to_html(i: ConnectIcon) -> Html {
     match i {
-        ConnectIcon::Settings => html!{<span class="material-icons">{"settings"}</span>},
-        ConnectIcon::Stats    => html!{<span class="material-icons">{"bar_chart"}</span>},
+        ConnectIcon::Settings => html! {<span class="material-icons">{"settings"}</span>},
+        ConnectIcon::Stats => html! {<span class="material-icons">{"bar_chart"}</span>},
     }
 }

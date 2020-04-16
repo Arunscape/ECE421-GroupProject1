@@ -3,11 +3,11 @@ use yew::virtual_dom::{VList, VNode};
 use yew_router::switch::{AllowMissing, Permissive};
 use yew_router::{prelude::*, Switch};
 
-use crate::coms;
+use crate::components::{GameConfig, Signin}; // TODO: move these to views
 use crate::components::{Menu, MenuButton};
+use crate::coms;
 use crate::storage::LocalStorage;
 use crate::views::{GameScreen, OnlineConfigPage, SettingsPage, Statistics, ViewPage};
-use crate::components::{GameConfig, Signin}; // TODO: move these to views
 use crate::{constants, window};
 
 #[global_allocator]
@@ -41,7 +41,7 @@ impl Component for ConnectRouter {
                     AppRoute::Root => homescreen(),
                     AppRoute::Signin => html!{<Signin/>},
                     AppRoute::NewGame =>  player_config(),
-                    AppRoute::GameConfig => game_config(), 
+                    AppRoute::GameConfig => game_config(),
                     AppRoute::AIConfig => ai_config(),
                     AppRoute::Game => html!{<GameScreen/>},
                     AppRoute::ScoreBoard => html!{"Todo, put scoreboard page here"},
@@ -62,10 +62,9 @@ impl Component for ConnectRouter {
     }
 }
 
-
 fn game_config() -> Html {
     let next = query("player").unwrap_or(String::from("local"));
-    html!{<GameConfig player=next/>}
+    html! {<GameConfig player=next/>}
 }
 
 fn player_config() -> VNode {

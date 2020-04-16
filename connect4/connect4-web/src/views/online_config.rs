@@ -2,9 +2,9 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew::InputData;
 
-use crate::game_manager;
 use crate::components::router::query;
-use crate::components::{Menu};
+use crate::components::Menu;
+use crate::game_manager;
 pub struct OnlineConfigPage {
     link: ComponentLink<Self>,
     roomcode_text: String,
@@ -16,7 +16,6 @@ pub enum Msg {
     CreateGame,
     SubmitRoomCode,
 }
-
 
 impl Component for OnlineConfigPage {
     type Message = Msg;
@@ -34,9 +33,9 @@ impl Component for OnlineConfigPage {
 
         match msg {
             Msg::EditRoomCode(s) => self.roomcode_text = s,
-            Msg::CreateGame => game_manager::create_game_and_go(
-                game_manager::create_game(query("game").unwrap_or(String::from("connect4")))
-            ),
+            Msg::CreateGame => game_manager::create_game_and_go(game_manager::create_game(
+                query("game").unwrap_or(String::from("connect4")),
+            )),
             Msg::SubmitRoomCode => game_manager::join_game_and_go(self.roomcode_text.to_string()),
         };
         true

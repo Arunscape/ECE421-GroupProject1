@@ -1,7 +1,7 @@
 use wasm_bindgen_futures::spawn_local;
 
-use crate::{window, constants};
 use crate::coms;
+use crate::{constants, window};
 use connect4_lib::{game, game::Game, games};
 
 pub fn create_game(game_type: String) -> Game {
@@ -16,17 +16,15 @@ pub fn create_game(game_type: String) -> Game {
 pub async fn initiate_game(game: Game) -> String {
     let game = coms::create_game(game).await;
     match game {
-        Some(game_data) => {
-            join_game(game_data.roomcode).await
-        }
+        Some(game_data) => join_game(game_data.roomcode).await,
         None => {
             crate::alert("failed to create game");
             String::new()
-        },
+        }
     }
 }
 
-pub async fn join_game(roomcode: String) -> String{
+pub async fn join_game(roomcode: String) -> String {
     let url = window().location().href().unwrap();
     let querystring = url
         .split('?')
@@ -37,17 +35,16 @@ pub async fn join_game(roomcode: String) -> String{
     match spots {
         Some(s) => {
             if !s.iter().any(|x| x.is_none()) {
-                format!(
-                    "game/{}?{}",
-                    roomcode,
-                    querystring.to_string()
-                )
+                format!("game/{}?{}", roomcode, querystring.to_string())
             } else {
                 crate::alert("Room is full!");
                 String::new()
             }
         }
-        _ => { crate::alert("Could not find game"); String::new() },
+        _ => {
+            crate::alert("Could not find game");
+            String::new()
+        }
     }
 }
 
