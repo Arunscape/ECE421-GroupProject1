@@ -7,6 +7,7 @@ RUN cargo install connect4-server --git 'https://github.com/Arunscape/ECE421-Gro
 RUN git clone https://github.com/Arunscape/ECE421-GroupProject1.git
 WORKDIR /usr/src/myapp/ECE421-GroupProject1/connect4/connect4-web
 ENV SERVER_URL=connect4.woosaree.xyz
+ENV DB_URL=mongodb://mongo:27017
 RUN cargo install wasm-pack
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
 RUN apt-get install -y nodejs

@@ -1,6 +1,6 @@
 #!/bin/bash
 reset
 set -e
-wasm-pack build --target web
+SERVER_URL=localhost:8000 wasm-pack build --target web
 rollup ./main.js --format iife --file ./pkg/bundle.js
-cargo run --release --manifest-path=../connect4-server/Cargo.toml
+DB_URL=mongodb://localhost:27017 cargo run --release --manifest-path=../connect4-server/Cargo.toml
