@@ -10,40 +10,30 @@ static ROOM_CODE_LEN: usize = 3;
 use connect4_coms::types::{GameData, JoinPlayers};
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-    if let Some(player_num) = whats_my_player_number(game_data, username) {
-        let valid_turn_num = (game_data.game.get_turn() as usize
-            % game_data.game.get_player_count()) as isize
-            == player_num;
-        let valid_chip = game_data
-            .game
-            .current_player()
-            .chip_options
-            .iter()
-            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-        let valid_col = !game_data.game.invalid_column(col);
 
-        valid_turn_num && valid_chip && valid_col
-    } else {
-        // panic!("player isnt in DB for some reason?")
-        false
-    }
-}
+    let valid_chip = game_data
+        .game
+        .current_player()
+        .chip_options
+        .iter()
+        .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+    let valid_col = !game_data.game.invalid_column(col);
 
-fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
-    let res: Vec<usize> = game_data
+    let valid_turn_num = game_data
         .users
         .iter()
         .enumerate()
-        .filter(|(_i, item)| item.as_str() == username)
-        .map(|(i, _item)| i)
-        .collect();
+        .filter(|(_i, u)| username == u.to_string())
+        .map(|(i, _)| i)
+        .any(|player_num|
+        (game_data.game.get_turn() as usize
+            % game_data.game.get_player_count())
+            == player_num
+        );
 
-    if res.len() == 0 {
-        None
-    } else {
-        Some(res[0] as isize)
-    }
+    valid_turn_num && valid_chip && valid_col
 }
+
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
