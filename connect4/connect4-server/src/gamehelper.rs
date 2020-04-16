@@ -10,23 +10,28 @@ static ROOM_CODE_LEN: usize = 3;
 use connect4_coms::types::{GameData, JoinPlayers};
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-    if let Some(player_num) = whats_my_player_number(game_data, username) {
-        let valid_turn_num = (game_data.game.get_turn() as usize
-            % game_data.game.get_player_count()) as isize
-            == player_num;
-        let valid_chip = game_data
-            .game
-            .current_player()
-            .chip_options
-            .iter()
-            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-        let valid_col = !game_data.game.invalid_column(col);
 
-        valid_turn_num && valid_chip && valid_col
-    } else {
-        // panic!("player isnt in DB for some reason?")
-        false
-    }
+    let valid_chip = game_data
+        .game
+        .current_player()
+        .chip_options
+        .iter()
+        .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+    let valid_col = !game_data.game.invalid_column(col);
+
+    let valid_turn_num = game_data
+        .users
+        .iter()
+        .enumerate()
+        .filter(|(_i, u)| username == u.to_string())
+        .map(|(i, _)| i)
+        .any(|player_num|
+        (game_data.game.get_turn() as usize
+            % game_data.game.get_player_count())
+            == player_num
+        );
+
+    valid_turn_num && valid_chip && valid_col
 }
 
 fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
