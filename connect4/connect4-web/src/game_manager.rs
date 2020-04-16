@@ -4,13 +4,13 @@ use crate::coms;
 use crate::{constants, window};
 use connect4_lib::{game, game::Game, games};
 
-pub fn create_game(game_type: String) -> Game {
+pub fn create_game(game_type: String, player1: game::PlayerType, player2: game::PlayerType) -> Game {
     let game_type = match game_type {
         s if s == constants::game::CONNECT4 => games::GameType::Connect4,
         s if s == constants::game::TOTO => games::GameType::Toto,
         _ => unreachable!(),
     };
-    games::build_game(game_type, game::PlayerType::Local, game::PlayerType::Remote)
+    games::build_game(game_type, player1, player2)
 }
 
 pub async fn initiate_game(game: Game) -> String {
