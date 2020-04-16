@@ -176,7 +176,7 @@ fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 // add the player to game_data's users as username
 // TODO: verify player type (AI or not)
 // return the player number in the array 0-indexed
-fn insert_player(game_data: &mut GameData, username: &str, _player: i32) -> Option<isize> {
+fn insert_player(game_data: &mut GameData, username: &str, _player: game::PlayerType) -> Option<isize> {
     let players_in_game = game_data.users.len();
     if players_in_game == game_data.game.get_player_count() {
         // Game is full
@@ -191,7 +191,7 @@ fn insert_player(game_data: &mut GameData, username: &str, _player: i32) -> Opti
 fn insert_players(
     game_data: &mut GameData,
     username: &str,
-    players: Vec<i32>,
+    players: Vec<game::PlayerType>,
 ) -> Vec<Option<isize>> {
     players
         .iter()
@@ -267,7 +267,7 @@ mod test {
             &roomcode,
             "Alex",
             JoinPlayers {
-                players: vec![0, 1],
+                players: vec![game::PlayerType::Local, game::PlayerType::Local],
             },
         );
         assert!(result == vec![Some(0 as isize), Some(1 as isize)]);
@@ -276,7 +276,7 @@ mod test {
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
         // arun joins from a second client
         // /api/joinplayers/<roomcode>
-        let result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![2] });
+        let result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![game::PlayerType::Local] });
         assert!(result == vec![Some(2 as isize)]);
     }
 
@@ -311,8 +311,8 @@ mod test {
         let roomcode = game_data.roomcode;
 
         // /api/joinplayers/<roomcode>
-        let _result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![0] });
-        let _result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![1] });
+        let _result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![game::PlayerType::Local] });
+        let _result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![game::PlayerType::Local] });
 
         // /api/playmove/<roomcode>
         for i in 0..3 {
