@@ -327,3 +327,4 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
 
     request_animation_frame(g.borrow().as_ref().unwrap());
 }
+

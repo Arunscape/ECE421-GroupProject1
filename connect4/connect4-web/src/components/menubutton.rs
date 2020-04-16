@@ -1,4 +1,4 @@
-use yew::{prelude::*, virtual_dom::VList, virtual_dom::VNode, Properties};
+use yew::{prelude::*, Properties};
 
 pub struct MenuButton {
     props: Props,
@@ -24,7 +24,7 @@ impl Component for MenuButton {
         false
     }
 
-    fn view(&self) -> VNode {
+    fn view(&self) -> Html {
         html! {
             <a href={ yew::html::Href::from(self.props.dest.as_str()) } class="">
               { &self.props.text }

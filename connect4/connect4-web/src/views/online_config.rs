@@ -1,18 +1,9 @@
-use web_sys::MouseEvent;
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew::InputData;
 
 use crate::components::router::query;
-use crate::components::{Menu, MenuButton};
-use crate::coms;
-use crate::constants;
-use crate::storage::LocalStorage;
-use crate::window;
-use connect4_coms::types::GameData;
-use connect4_lib::{game, games};
-use wasm_bindgen_futures::spawn_local;
-
+use crate::components::{Menu};
 pub struct OnlineConfigPage {
     link: ComponentLink<Self>,
     roomcode_text: String,
@@ -24,6 +15,8 @@ pub enum Msg {
     CreateGame,
     SubmitRoomCode,
 }
+
+use crate::game_manager;
 
 impl Component for OnlineConfigPage {
     type Message = Msg;
@@ -39,76 +32,18 @@ impl Component for OnlineConfigPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         crate::log(&format!("OnlineConfig: {:?}", msg));
 
-        async fn join_game(game_data: GameData) {
-            let url = window().location().href().unwrap();
-            let querystring = url
-                .split('?')
-                .skip(1)
-                .next()
-                .expect("failed to get querystring");
-            let spots = coms::join_game(&game_data.roomcode).await;
-            match spots {
-                Some(s) => {
-                    if !s.iter().any(|x| x.is_none()) {
-                        window().location().set_href(&format!(
-                            "game/{}?{}",
-                            game_data.roomcode.to_string(),
-                            querystring.to_string()
-                        ));
-                    } else {
-                        crate::alert("Room is full!")
-                    }
-                }
-                _ => crate::log("error while joining game"),
-            }
-        }
-
-        async fn get_game(room_code: String) {
-            let game = coms::getgame(&room_code).await;
-            match game {
-                Some(game_data) => {
-                    join_game(game_data).await;
-                }
-                None => crate::alert("Invalid room code entered"),
-            };
-        }
-
-        async fn create_game() {
-            let game_type = match query(&"game").unwrap() {
-                s if s == constants::game::CONNECT4 => games::GameType::Connect4,
-                s if s == constants::game::TOTO => games::GameType::Toto,
-                _ => unreachable!(),
-            };
-            let game =
-                games::build_game(game_type, game::PlayerType::Local, game::PlayerType::Remote);
-            let game = coms::create_game(game).await;
-
-            match game {
-                Some(game_data) => {
-                    join_game(game_data).await;
-                }
-                None => crate::alert("failed to create game"),
-            };
-        }
-
         match msg {
             Msg::EditRoomCode(s) => self.roomcode_text = s,
-            Msg::CreateGame => spawn_local(create_game()),
-            Msg::SubmitRoomCode => spawn_local(get_game(self.roomcode_text.to_string())),
+            Msg::CreateGame => game_manager::create_game_and_go(
+                game_manager::create_game(query("game").unwrap_or(String::from("connect4")))
+            ),
+            Msg::SubmitRoomCode => game_manager::join_game_and_go(self.roomcode_text.to_string()),
         };
         true
     }
 
     fn view(&self) -> VNode {
-        let is_colorblind = LocalStorage::get_colorblind_setting();
-        let game = query("game").expect("game not in querystring");
-        let url = window().location().href().unwrap();
-        let querystring = url
-            .split('?')
-            .skip(1)
-            .next()
-            .expect("failed to get querystring");
-
+        let game = query("game").unwrap_or(String::from("connect4"));
         html! {
         <Menu title=format!("Online {}", game) topbar="" show_settings=false show_stats=false>
           <div class="flex flex-col">

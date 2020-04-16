@@ -1,4 +1,5 @@
-use yew::{prelude::*, virtual_dom::VList, virtual_dom::VNode, Properties};
+use yew::{prelude::*, virtual_dom::VNode, Properties};
+use crate::components::router::render_if;
 
 pub struct Menu {
     props: Props,
@@ -57,13 +58,6 @@ impl Component for Menu {
 fn icon(i: ConnectIcon, dest: &str) -> VNode {
     html! {
       <a href={ yew::html::Href::from(dest)}> { icon_to_html(i) } </a>
-    }
-}
-fn render_if(render: VNode, condition: bool) -> VNode {
-    if condition {
-        render
-    } else {
-        VNode::from(VList::new())
     }
 }
 

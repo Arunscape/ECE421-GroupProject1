@@ -7,6 +7,7 @@ pub mod player {
     pub const AI_HARD2: &'static str = "ai_hard2";
     pub const LOCAL: &'static str = "local";
     pub const REMOTE: &'static str = "remote";
+    pub const AI: &'static str = "ai";
 }
 
 pub mod game {
