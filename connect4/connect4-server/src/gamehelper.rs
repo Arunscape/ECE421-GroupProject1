@@ -34,21 +34,6 @@ fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::Chi
     valid_turn_num && valid_chip && valid_col
 }
 
-fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
-    let res: Vec<usize> = game_data
-        .users
-        .iter()
-        .enumerate()
-        .filter(|(_i, item)| item.as_str() == username)
-        .map(|(i, _item)| i)
-        .collect();
-
-    if res.len() == 0 {
-        None
-    } else {
-        Some(res[0] as isize)
-    }
-}
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
