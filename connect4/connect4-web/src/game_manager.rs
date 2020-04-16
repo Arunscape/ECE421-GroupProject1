@@ -25,17 +25,11 @@ pub async fn initiate_game(game: Game) -> String {
 }
 
 pub async fn join_game(roomcode: String) -> String {
-    let url = window().location().href().unwrap();
-    let querystring = url
-        .split('?')
-        .skip(1)
-        .next()
-        .expect("failed to get querystring");
     let spots = coms::join_game(&roomcode).await;
     match spots {
         Some(s) => {
             if !s.iter().any(|x| x.is_none()) {
-                format!("game/{}?{}", roomcode, querystring.to_string())
+                format!("game/{}", roomcode)
             } else {
                 crate::alert("Room is full!");
                 String::new()

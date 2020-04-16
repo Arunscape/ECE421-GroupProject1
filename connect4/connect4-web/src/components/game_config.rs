@@ -26,12 +26,13 @@ impl Component for GameConfig {
     }
 
     fn view(&self) -> Html {
+        let player = &self.props.player;
         html! {
             <Menu topbar="" title="Create Game"  show_settings=false show_stats=false>
               <div class="flex flex-col">
-                <MenuButton text="Connect4" dest=format!("/setupgame?game={}", constants::game::CONNECT4)/>
-                <MenuButton text="Toot and Otto" dest=format!("/setupgame?game={}", constants::game::TOTO)/>
-                <MenuButton text="Custom Game" dest=format!("/setupgame?game={}", constants::game::CUSTOM)/>
+                <MenuButton text="Connect4" dest=format!("/finalizegame?game={}&player={}", constants::game::CONNECT4, player)/>
+                <MenuButton text="Toot and Otto" dest=format!("/finalizegame?game={}&player={}", constants::game::TOTO, player)/>
+                <MenuButton text="Custom Game" dest=format!("/finalizegame?game={}&player={}", constants::game::CUSTOM, player)/>
               </div>
             </Menu>
         }
