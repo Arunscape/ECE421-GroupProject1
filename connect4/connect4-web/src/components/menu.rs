@@ -1,13 +1,11 @@
 use crate::components::router::render_if;
 use yew::{prelude::*, virtual_dom::VNode, Properties};
 
+use crate::components::icon;
+use crate::components::icon::ConnectIcon;
+
 pub struct Menu {
     props: Props,
-}
-
-pub enum ConnectIcon {
-    Settings,
-    Stats,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -58,13 +56,6 @@ impl Component for Menu {
 }
 fn icon(i: ConnectIcon, dest: &str) -> VNode {
     html! {
-      <a href={ yew::html::Href::from(dest)}> { icon_to_html(i) } </a>
-    }
-}
-
-fn icon_to_html(i: ConnectIcon) -> Html {
-    match i {
-        ConnectIcon::Settings => html! {<span class="material-icons">{"settings"}</span>},
-        ConnectIcon::Stats => html! {<span class="material-icons">{"bar_chart"}</span>},
+      <a href={ yew::html::Href::from(dest)}> { icon::html(i) } </a>
     }
 }
