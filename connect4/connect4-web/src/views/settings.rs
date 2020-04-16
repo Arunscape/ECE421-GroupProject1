@@ -30,7 +30,7 @@ impl Component for SettingsPage {
         match msg {
             Msg::ToggleColorBlind => {
                 LocalStorage::set_colorblind_setting(!LocalStorage::get_colorblind_setting());
-                crate::window().location().reload();
+                while let Err(_) = crate::window().location().reload() {};
                 true
             }
         }
