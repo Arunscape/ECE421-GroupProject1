@@ -13,7 +13,7 @@ use connect4_coms::{
         PlayMove, Signin,
     },
 };
-use connect4_lib::game::{Chip, Game, Player};
+use connect4_lib::game::{Chip, Game, Player, PlayerType};
 
 use crate::{console_log, log};
 
@@ -49,9 +49,9 @@ pub async fn create_game(game: Game) -> Option<GameData> {
     }
 }
 
-pub async fn join_game(game_id: &str) -> Option<Vec<Option<isize>>> {
+pub async fn join_game(game_id: &str, plays: Vec<PlayerType>) -> Option<Vec<Option<isize>>> {
     let token = LocalStorage::get_token();
-    let body = JoinPlayers { players: vec![0] };
+    let body = JoinPlayers { players: plays };
     let js_json = request("PUT", &format!("joingame/{}", game_id), Some(body), token).await;
     match js_json.map(|x| x.into_serde::<JoinPlayersResponse>()) {
         Ok(Ok(v)) => {
