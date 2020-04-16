@@ -110,10 +110,11 @@ pub async fn signin(usr: &str, passwd: &str) -> Option<String> {
 }
 
 fn hash_password(passwd: &str) -> Option<String> {
+    // NOTE: this salt is not secret, for security, it is okay for anyone to know this
     let salt = b"DQ63&CUSv@s&@g1I&mC0MP4mTuoA0yU^V45ChiO6Z&$^$nS&TOy2381u*TBdJMEoewZp6jkn5E4lec8#8UblyKZ1yiyQRAupmvr3sumvjXbH1Iu!5*FOekAI6upIun1tPRO^z9HuV1mMm#mIP3MqcPDtW7j7OJOUQdvrwNoM$g8H0RV&Yb%h!wz&9Qz9e%uEqT^Q1BjcDhk&En^Zy08$FL8tqfJtYpxi*SHbnpkKEEo2nPLh2pItvjDo7mj2lY1v";
     let config = argon2::Config::default();
     match argon2::hash_encoded(passwd.as_bytes(), salt, &config) {
-        Ok(h) => Some(js_sys::encode_uri(&h)),
+        Ok(h) => Some(String::from(js_sys::encode_uri(&h))),
         _ => None,
     }
 }
