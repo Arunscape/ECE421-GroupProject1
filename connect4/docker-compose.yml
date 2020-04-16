@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+################################################################################
+  connect4:
+    image: arunscape/connect4-server
+    container_name: connect4
+    ports:
+            - 80:8000
+################################################################################
+  mongo:
+      image: mongo
+      container_name: mongo
