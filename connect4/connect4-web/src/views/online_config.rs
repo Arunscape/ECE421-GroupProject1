@@ -2,6 +2,7 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew::InputData;
 
+use crate::game_manager;
 use crate::components::router::query;
 use crate::components::{Menu};
 pub struct OnlineConfigPage {
@@ -16,7 +17,6 @@ pub enum Msg {
     SubmitRoomCode,
 }
 
-use crate::game_manager;
 
 impl Component for OnlineConfigPage {
     type Message = Msg;
