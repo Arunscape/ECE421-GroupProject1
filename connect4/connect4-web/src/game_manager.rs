@@ -25,7 +25,7 @@ pub async fn initiate_game(game: Game) -> String {
 }
 
 pub async fn join_game(roomcode: String) -> String {
-    let spots = coms::join_game(&roomcode).await;
+    let spots = coms::join_game(&roomcode, vec![game::PlayerType::Local]).await;
     match spots {
         Some(s) => {
             if !s.iter().any(|x| x.is_none()) {
