@@ -87,7 +87,7 @@ fn ai_config() -> VNode {
     // like a radio for dificulty, and a radio for p1/p2
     html! {
         <Menu title="Setup AI" topbar=""  show_settings=false show_stats=false>
-          <div class="flex flex-col">
+          <div class="grid grid-cols-1 md:grid-rows-6 md:grid-cols-2 md:grid-rows-3">
             <MenuButton text="Player 1 Easy" dest=format!("/setupgame?player={}", constants::player::AI_EASY)/>
             <MenuButton text="Player 1 Medium" dest=format!("/setupgame?player={}", constants::player::AI_MID)/>
             <MenuButton text="Player 1 Hard" dest=format!("/setupgame?player={}", constants::player::AI_HARD)/>
@@ -102,7 +102,7 @@ fn ai_config() -> VNode {
 fn homescreen() -> VNode {
     if let Some(s) = LocalStorage::get_username() {
         html! {
-            <Menu topbar=format!("Hello, {}", s) title="Connecty"  show_settings=true show_stats=true>
+            <Menu topbar=format!("Welcome, {}", s) title="Connecty"  show_settings=true show_stats=true>
               <div class="flex flex-col">
                 <MenuButton text="Create Game" dest="/newgame"/>
                 <MenuButton text="Current Games" dest="/viewgames/current"/>
