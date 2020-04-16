@@ -1,8 +1,8 @@
 use crate::canvas::Canvas;
 use crate::coms;
 use crate::controller;
-use crate::{request_animation_frame, set_timeout};
 use crate::{console_log, log};
+use crate::{request_animation_frame, set_timeout};
 use connect4_lib::ai::AIConfig;
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, Player, PlayerType};
 use wasm_bindgen::prelude::*;
@@ -72,10 +72,11 @@ impl GameObject {
         let bounds = slf.canvas.canvas.get_bounding_client_rect();
         let left = bounds.x() as i32;
         let top = bounds.y() as i32;
-        let onclick: Box<dyn FnMut(web_sys::MouseEvent)> = Box::new(move |e: web_sys::MouseEvent| {
-            let loc = (e.client_x() - left, e.client_y() - top);
-            mouse_sender.send(Msg::Clicked(loc));
-        });
+        let onclick: Box<dyn FnMut(web_sys::MouseEvent)> =
+            Box::new(move |e: web_sys::MouseEvent| {
+                let loc = (e.client_x() - left, e.client_y() - top);
+                mouse_sender.send(Msg::Clicked(loc));
+            });
 
         let key_sender = sender.clone();
         let onkeypress = Box::new(move |e: web_sys::KeyboardEvent| {

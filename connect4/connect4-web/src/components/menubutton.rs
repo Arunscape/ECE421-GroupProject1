@@ -25,8 +25,9 @@ impl Component for MenuButton {
     }
 
     fn view(&self) -> Html {
+        let c = "";
         html! {
-            <a href={ yew::html::Href::from(self.props.dest.as_str()) } class="">
+            <a href={ yew::html::Href::from(self.props.dest.as_str()) } class=c >
               { &self.props.text }
             </a>
         }

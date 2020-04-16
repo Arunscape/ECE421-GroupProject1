@@ -8,7 +8,7 @@ impl Component for GameFinalized {
     type Properties = ();
 
     fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Self { }
+        Self {}
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {

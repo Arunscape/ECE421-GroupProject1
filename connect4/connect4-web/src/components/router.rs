@@ -7,7 +7,9 @@ use crate::components::{GameConfig, Signin}; // TODO: move these to views
 use crate::components::{Menu, MenuButton};
 use crate::coms;
 use crate::storage::LocalStorage;
-use crate::views::{GameScreen, OnlineConfigPage, SettingsPage, Statistics, ViewPage, GameFinalized};
+use crate::views::{
+    GameFinalized, GameScreen, OnlineConfigPage, SettingsPage, Statistics, ViewPage,
+};
 use crate::{constants, window};
 
 #[global_allocator]
@@ -150,7 +152,6 @@ pub enum AppRoute {
     Statistics,
     #[to = "/finalizegame"]
     Finalize,
-
 }
 
 pub fn query(key: &str) -> Option<String> {
