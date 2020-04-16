@@ -38,9 +38,10 @@ impl Component for Menu {
     }
 
     fn view(&self) -> Html {
+        let welcome_style = "w-full text-2xl text-left";
         html! {
             <div class="h-full flex flex-col items-center justify-between">
-                <div class="w-full text-left"> { &self.props.topbar } </div>
+                <div class=welcome_style> { &self.props.topbar } </div>
                 <h1 class="font-comic text-6xl">{ &self.props.title }</h1>
                 <div>
                     { self.props.children.render() }
