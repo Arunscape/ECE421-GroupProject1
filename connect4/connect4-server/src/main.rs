@@ -68,8 +68,13 @@ impl JwtPayloadWrapper {
     }
 }
 
+#[macro_use] extern crate rocket_contrib;
+use rocket_contrib::databases::mongodb;
+#[database("mongodb://localhost:27017")]
+struct MongoDB(mongodb::db::Database);
+
 #[get("/signin/<u>/<p>")]
-fn signin(u: String, p: String) -> content::Json<String> {
+fn signin(u: String, p: String, _db:MongoDB) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
     let data = match player::sign_in(u.as_str(), p.as_str()) {
         Some(s) => Signin {
