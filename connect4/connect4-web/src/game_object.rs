@@ -2,14 +2,11 @@ use crate::canvas::Canvas;
 use crate::coms;
 use crate::controller;
 use crate::{request_animation_frame, set_timeout};
-#[macro_use]
 use crate::{console_log, log};
 use connect4_lib::ai::AIConfig;
 use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, Player, PlayerType};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::jq::{mpsc, JReceiver, JSender};
 
@@ -75,8 +72,8 @@ impl GameObject {
         let bounds = slf.canvas.canvas.get_bounding_client_rect();
         let left = bounds.x() as i32;
         let top = bounds.y() as i32;
-        let onclick: Box<FnMut(web_sys::MouseEvent)> = Box::new(move |e: web_sys::MouseEvent| {
-            let loc = ((e.client_x() - left, e.client_y() - top));
+        let onclick: Box<dyn FnMut(web_sys::MouseEvent)> = Box::new(move |e: web_sys::MouseEvent| {
+            let loc = (e.client_x() - left, e.client_y() - top);
             mouse_sender.send(Msg::Clicked(loc));
         });
 
@@ -124,7 +121,6 @@ impl GameObject {
 impl GameOnThread {
     pub fn play_move(&mut self, chip: Chip) {
         let chip_descrip = chip.get_descrip();
-        let board = self.game.get_board();
         let loc = chip.get_x();
 
         self.selected_move = None;
@@ -135,7 +131,7 @@ impl GameOnThread {
     }
 
     pub fn move_to_state(&mut self, next: GameState) {
-        console_log!("Starting state: {:?}", next);
+        // console_log!("Starting state: {:?}", next);
         self.game_state = next;
         match self.game_state {
             GameState::WaitingForMove(PlayerType::Remote) => self.request_game_from_server(),
@@ -146,7 +142,7 @@ impl GameOnThread {
         }
     }
 
-    pub fn get_message(&mut self, delta: f64) {
+    pub fn get_message(&mut self, _delta: f64) {
         let msg = self.message_receiver.recv();
         // console_log!("[{}] Got Message: {:?}", delta, msg);
         match msg {
@@ -191,7 +187,7 @@ impl GameOnThread {
 
         match state {
             GameState::GameOver(board_state) => self.end_game(board_state),
-            GameState::PlayingMove(boxed_game_state) => { /* Ignore clicks while animating */ }
+            GameState::PlayingMove(_next_state) => { /* Ignore clicks while animating */ }
             GameState::WaitingForMove(player_type) => match player_type {
                 PlayerType::Local => {
                     let chip_descrip = self
@@ -239,16 +235,12 @@ impl GameOnThread {
         }
     }
 
-    fn handle_server_event(&self) {
-        todo!();
-    }
-
     fn request_game_from_server(&self) {
         async fn getgamer(sender: JSender<Msg>, gameid: String) {
-            console_log!("Requesting Gamedata for {}", gameid);
+            // console_log!("Requesting Gamedata for {}", gameid);
             let data = coms::getgame(&gameid).await;
             if let Some(gamedata) = data {
-                console_log!("Server Data: {:?}", gamedata);
+                // console_log!("Server Data: {:?}", gamedata);
                 sender.send(Msg::ServerReceived(gamedata.game));
             }
         }
@@ -257,7 +249,7 @@ impl GameOnThread {
 
     pub fn send_move_to_server(&mut self, chip: Chip) {
         async fn asyncer(chip: Chip, gameid: String) {
-            console_log!("object send move");
+            console_log!("send move to server[{}]: {:?}", &gameid, chip);
             coms::playmove(chip, gameid).await;
         }
         spawn_local(asyncer(chip, self.gameid.clone()));
@@ -301,7 +293,7 @@ impl GameOnThread {
 
 fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
     // create animation
-    console_log!("Game chips: {:?}", board.chips);
+    // console_log!("Game chips: {:?}", board.chips);
     let chip = board.chips[board.chips.len() - 1];
     let (x, y) = board.last_move_loc();
     let mut ani = ChipAnimation {
