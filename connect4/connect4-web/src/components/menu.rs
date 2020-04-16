@@ -4,6 +4,11 @@ pub struct Menu {
     props: Props,
 }
 
+pub enum ConnectIcon {
+    Settings,
+    Stats,
+}
+
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub topbar: String,
@@ -39,17 +44,19 @@ impl Component for Menu {
                 <div>
                     { self.props.children.render() }
                 </div>
-                <div>
-                  { render_if(html!{icon()}, self.props.show_stats) }
-                  { render_if(html!{icon()}, self.props.show_settings) }
+                <div class="w-full flex md:justify-end">
+                  <div class="w-full flex md:w-32 justify-around">
+                    { render_if(html!{icon(ConnectIcon::Stats, "/statistics")}, self.props.show_stats) }
+                    { render_if(html!{icon(ConnectIcon::Settings, "/settings")}, self.props.show_settings) }
+                  </div>
                 </div>
             </div>
         }
     }
 }
-fn icon() -> VNode {
+fn icon(i: ConnectIcon, dest: &str) -> VNode {
     html! {
-        <p> { "#" } </p>
+      <a href={ yew::html::Href::from(dest)}> { icon_to_html(i) } </a>
     }
 }
 fn render_if(render: VNode, condition: bool) -> VNode {
@@ -57,5 +64,12 @@ fn render_if(render: VNode, condition: bool) -> VNode {
         render
     } else {
         VNode::from(VList::new())
+    }
+}
+
+fn icon_to_html(i: ConnectIcon) -> Html {
+    match i {
+        ConnectIcon::Settings => html!{<span class="material-icons">{"settings"}</span>},
+        ConnectIcon::Stats    => html!{<span class="material-icons">{"bar_chart"}</span>},
     }
 }

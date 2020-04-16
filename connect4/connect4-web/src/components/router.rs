@@ -118,19 +118,17 @@ fn ai_config() -> VNode {
 fn homescreen() -> VNode {
     if let Some(s) = LocalStorage::get_username() {
         html! {
-            <Menu topbar=format!("Hello, {}", s) title="Connecty"  show_settings=false show_stats=true>
+            <Menu topbar=format!("Hello, {}", s) title="Connecty"  show_settings=true show_stats=true>
               <div class="flex flex-col">
                 <MenuButton text="Create Game" dest="/newgame"/>
                 <MenuButton text="Current Games" dest="/viewgames/current"/>
                 <MenuButton text="Past Games" dest="/viewgames/past"/>
-                <MenuButton text="Statistics" dest="/statistics"/>
-                <MenuButton text="Settings" dest="/settings"/>
               </div>
             </Menu>
         }
     } else {
         html! {
-            <Menu topbar="" title="Connecty"  show_settings=false show_stats=false>
+            <Menu topbar="" title="Connecty"  show_settings=true show_stats=false>
               <div class="flex flex-col">
                 <MenuButton text="Sign In" dest="/signin"/>
                 <MenuButton text="Play Offline" dest="/newgame"/>
