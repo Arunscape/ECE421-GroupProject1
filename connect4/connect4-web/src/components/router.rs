@@ -86,8 +86,8 @@ fn ai_config() -> VNode {
     // TODO: do a nicer selection then just 6 buttons
     // like a radio for dificulty, and a radio for p1/p2
     html! {
-        <Menu title="Setup AI" topbar=""  show_settings=false show_stats=false>
-          <div class="grid grid-cols-1 md:grid-rows-6 md:grid-cols-2 md:grid-rows-3">
+        <Menu title="Setup AI" topbar="" show_settings=false show_stats=false>
+          <div class="grid grid-flow-col grid-cols-1 grid-rows-6 md:grid-cols-2 md:grid-rows-3">
             <MenuButton text="Player 1 Easy" dest=format!("/setupgame?player={}", constants::player::AI_EASY)/>
             <MenuButton text="Player 1 Medium" dest=format!("/setupgame?player={}", constants::player::AI_MID)/>
             <MenuButton text="Player 1 Hard" dest=format!("/setupgame?player={}", constants::player::AI_HARD)/>

@@ -5,6 +5,7 @@ pub mod menu;
 pub mod menubutton;
 pub mod router;
 pub mod signin;
+pub mod icon;
 
 pub use game_component::GameComponent;
 pub use game_config::GameConfig;
