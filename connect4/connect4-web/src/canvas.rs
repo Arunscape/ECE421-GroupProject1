@@ -35,28 +35,9 @@ impl Canvas {
         self.context.set_fill_style(&fill.into());
         self.context.set_stroke_style(&stroke.into());
         self.context.begin_path();
-        self.context.arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI);
+        self.context.arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI).unwrap();
         self.context.fill();
         self.context.restore();
-    }
-
-    pub fn draw_rect(&self, x: f64, y: f64, w: f64, h: f64, fill: String, stroke: String) {
-        self.context.save();
-        self.context.set_fill_style(&fill.into());
-        self.context.set_stroke_style(&stroke.into());
-        self.context.begin_path();
-        self.context.rect(x, y, w, h);
-        self.context.fill();
-        self.context.restore();
-    }
-
-    pub fn clear(&self) {
-        self.context.clear_rect(
-            0.0,
-            0.0,
-            self.canvas.width().into(),
-            self.canvas.height().into(),
-        );
     }
 
     pub fn register_onclick_listener(&self, onclick: Box<dyn FnMut(web_sys::MouseEvent)>) {

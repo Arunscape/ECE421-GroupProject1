@@ -99,7 +99,7 @@ pub fn place_chip(
                 &format!("{}", c),
                 x - radius * (1.0 / 4.0),
                 y + radius * (1.0 / 2.0),
-            );
+            ).unwrap();
         }
     }
 }
@@ -127,7 +127,7 @@ pub fn draw_board_mask_column_above(
     color: &'static str,
     above: isize,
 ) {
-    let (off_x, off_y, pwidth, pheight, box_size) =
+    let (off_x, off_y, _pwidth, _pheight, box_size) =
         get_rendering_gameboard_bounds(canvas, width, height);
     let chip_seperation = (box_size / COLUMN_WIDTH) * CHIP_SEPERATION;
     let chip_radius = (box_size / COLUMN_WIDTH) * CHIP_RADIUS;
@@ -151,7 +151,7 @@ pub fn draw_board_mask_column_above(
             chip_radius,
             0.0,
             2.0 * std::f64::consts::PI,
-        );
+        ).unwrap();
         canvas.context.rect(
             (box_size) * column_num as f64 + off_x + square,
             (box_size) * y as f64 + off_y,
@@ -261,7 +261,7 @@ pub fn message(canvas: &Canvas, msg: String) {
     console_log!("Wrapped to: {:?}", lines);
     let mut y = y;
     for line in lines {
-        canvas.context.fill_text(&line, x, y + fsize as f64);
+        canvas.context.fill_text(&line, x, y + fsize as f64).unwrap();
         y += fsize as f64;
     }
 }
@@ -331,7 +331,7 @@ fn draw_selected_move_selection(
     canvas.context.set_font(&font_size(fontsize as usize));
     canvas
         .context
-        .fill_text("Selected", x + w / 2.0, y + h / 2.0 + fontsize + r);
+        .fill_text("Selected", x + w / 2.0, y + h / 2.0 + fontsize + r).unwrap();
     canvas.context.set_text_align("left");
 }
 fn draw_unselected_move_selection(
@@ -364,7 +364,7 @@ fn draw_unselected_move_selection(
     canvas.context.set_font(&font_size(fontsize as usize));
     canvas
         .context
-        .fill_text("Options", x + w / 2.0, y + h - fontsize - pad);
+        .fill_text("Options", x + w / 2.0, y + h - fontsize - pad).unwrap();
     canvas.context.set_text_align("left");
 }
 
