@@ -84,6 +84,7 @@ pub async fn refresh() {
         }
     }
 }
+
 pub fn sync_refresh() {
     async fn asyncr() {
         refresh().await;
