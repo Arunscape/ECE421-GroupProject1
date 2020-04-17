@@ -1,4 +1,6 @@
-# Connect 4 like games in rust
+# Connect 4 Server
+
+## ![Connect 4 Server](https://github.com/Arunscape/ECE421-GroupProject1/workflows/Connect%204%20Server/badge.svg)
 
 ## AI
 A lot of the AI stuff is based off this

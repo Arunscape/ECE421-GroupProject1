@@ -1,7 +1,42 @@
-# Build status
+## How to get it running:
 
-## ![Connect 4 WASM](https://github.com/Arunscape/ECE421-GroupProject1/workflows/Connect%204%20WASM/badge.svg)
+### The easy way (If you have docker and docker-compose):
 
-## ![Connect 4 Server](https://github.com/Arunscape/ECE421-GroupProject1/workflows/Connect%204%20Server/badge.svg)
+    cd connect4
+    docker-compose up -d
 
-## ![Connect 4 Lib](https://github.com/Arunscape/ECE421-GroupProject1/workflows/Connect%204%20Lib/badge.svg)
+By default, this method will attempt to run on port 80. Feel free to modify the ports if you cannot run on port 80
+
+If you just want to try it out without installing anything,
+try visiting http://connect4.woosaree.xyz
+
+
+### If you don't have docker,
+You'll need to have an instance of mongodb running.
+You will also need wasm-pack, and rollup
+
+    cd connect4/connect4-web
+    
+    # install external dependencies
+    npm -i -g rollup
+    
+    rustup override set nightly
+    
+    rustup update
+    
+    cargo install wasm-pack
+    
+    mongod
+    
+    SERVER_URL=localhost:8000 wasm-pack build --target web
+    
+    rollup ./main.js --format iife --file ./pkg/bundle.js
+    
+    DB_URL=mongodb://localhost:27017 cargo run --release --manifest-path=../connect4-server/Cargo.toml
+
+By default, this method will run mongodb on port 27017, and the rust rocket web server on port 8000. If you change either port number, be sure to also make sure that the environment variables SERVER_URL and DB_URL reflect this.
+
+
+
+
+

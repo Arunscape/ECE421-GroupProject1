@@ -81,8 +81,21 @@ design?}
 
 \section{Innovations (Additional to the specification)}
 \begin{enumerate}
-    \item Online multiplayer. Users can even leave mid-game and continue later.
-    \item Secure sign in. Passwords are hashed using argon2
+    \item Mobile friendliness
+    \item Online multiplayer.
+        \begin{enumerate}
+            \item Users can be on different computers
+            \item Users can even leave mid-game and continue later.
+            \item Users can leave and continue playing on a different computer
+        \end{enumerate}
+    \item Secure sign in. Passwords are hashed using argon2. JSON Web tokens are used to ensure a user
+        is authorized 
+    \item Online deployment. The games are available to play at \url{http://connect4.woosaree.xyz}
+    \item Continuous Integration and Deployment. Builds are automatically done when code is pushed,
+        which will publish updated images to DockerHub on success \url{https://hub.docker.com/repository/docker/arunscape/connect4-server}
+        the updated image is then pulled, and deployed automatically to \url{http://connect4.woosaree.xyz}
+    \item Published on crates.io
+        
 \end{enumerate}
 
 \section{Rationale}
@@ -91,8 +104,8 @@ design?}
 
 \section{Remaining MEAN stack code}
 The only thing left over from the MEAN stack is mongodb. Everything else has been written
-in Rust and WebAssembly. In a project with over 4800 lines of code,
-less than 40 lines of code are HTML + JavaScript. 
+in Rust and WebAssembly. In a project with over 5000 lines of code,
+less than 40 lines are HTML + JavaScript. 
 
 
 \section{User Manual}
