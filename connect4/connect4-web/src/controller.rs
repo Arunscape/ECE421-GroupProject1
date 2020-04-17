@@ -95,11 +95,14 @@ pub fn place_chip(
         None => {} // do nothing extra
         Some(c) => {
             canvas.context.set_font(&font_size(radius as usize));
-            canvas.context.fill_text(
-                &format!("{}", c),
-                x - radius * (1.0 / 4.0),
-                y + radius * (1.0 / 2.0),
-            ).unwrap();
+            canvas
+                .context
+                .fill_text(
+                    &format!("{}", c),
+                    x - radius * (1.0 / 4.0),
+                    y + radius * (1.0 / 2.0),
+                )
+                .unwrap();
         }
     }
 }
@@ -145,13 +148,16 @@ pub fn draw_board_mask_column_above(
             -square,
             square,
         );
-        canvas.context.arc(
-            (box_size) * column_num as f64 + off_x + chip_radius + chip_seperation,
-            (box_size) * y as f64 + off_y + chip_radius + chip_seperation,
-            chip_radius,
-            0.0,
-            2.0 * std::f64::consts::PI,
-        ).unwrap();
+        canvas
+            .context
+            .arc(
+                (box_size) * column_num as f64 + off_x + chip_radius + chip_seperation,
+                (box_size) * y as f64 + off_y + chip_radius + chip_seperation,
+                chip_radius,
+                0.0,
+                2.0 * std::f64::consts::PI,
+            )
+            .unwrap();
         canvas.context.rect(
             (box_size) * column_num as f64 + off_x + square,
             (box_size) * y as f64 + off_y,
@@ -261,7 +267,10 @@ pub fn message(canvas: &Canvas, msg: String) {
     console_log!("Wrapped to: {:?}", lines);
     let mut y = y;
     for line in lines {
-        canvas.context.fill_text(&line, x, y + fsize as f64).unwrap();
+        canvas
+            .context
+            .fill_text(&line, x, y + fsize as f64)
+            .unwrap();
         y += fsize as f64;
     }
 }
@@ -331,7 +340,8 @@ fn draw_selected_move_selection(
     canvas.context.set_font(&font_size(fontsize as usize));
     canvas
         .context
-        .fill_text("Selected", x + w / 2.0, y + h / 2.0 + fontsize + r).unwrap();
+        .fill_text("Selected", x + w / 2.0, y + h / 2.0 + fontsize + r)
+        .unwrap();
     canvas.context.set_text_align("left");
 }
 fn draw_unselected_move_selection(
@@ -364,8 +374,56 @@ fn draw_unselected_move_selection(
     canvas.context.set_font(&font_size(fontsize as usize));
     canvas
         .context
-        .fill_text("Options", x + w / 2.0, y + h - fontsize - pad).unwrap();
+        .fill_text("Options", x + w / 2.0, y + h - fontsize - pad)
+        .unwrap();
     canvas.context.set_text_align("left");
+}
+
+pub fn selected_new_move(
+    canvas: &Canvas,
+    loc: (i32, i32),
+    chips: &[ChipDescrip],
+) -> Option<ChipDescrip> {
+    let x = loc.0;
+    let y = loc.1;
+
+    let visual_width = canvas.canvas.get_bounding_client_rect().width();
+    let render_width = canvas.canvas.width() as f64;
+    let visual_height = canvas.canvas.get_bounding_client_rect().height();
+    let render_height = canvas.canvas.height() as f64;
+    let tx = render_width * (x as f64) / visual_width;
+    let ty = render_height * (y as f64) / visual_height;
+
+    let (x, y, w, h) = get_chipselect_bounds(canvas);
+    // TODO: move this math somewhere else.
+    // It needs to be the same as in draw_move_selection
+    let fs = (w / 10.0).min(h / 10.0).floor();
+    let (x, y, w, h) = if canvas.is_skinny() {
+        (x + w / 3.0, y, 2.0 * w / 3.0, h)
+    } else {
+        (x, y + h / 2.0, w, h / 2.0)
+    };
+
+    let ratio = 2.0 / 6.0;
+    let rbox_size = w.min(h - fs);
+    let box_size = rbox_size * ratio;
+    let r = box_size / 2.0;
+    let pad = r / 3.0;
+
+    let sw = 3.0 * r;
+    let tw = sw * chips.len() as f64 - sw;
+
+    let off_x = x + w / 2.0 - tw / 2.0 - r - r/2.0; // r/2 is for spaceing, r is cause circles are drawn from center
+    let off_y = y + h - 2.0 * fs - 2.0 * pad - 2.0 * r;
+    let sloc = (tx - off_x, ty - off_y + r);
+    console_log!("Touched at: {:?}, which is {:?} relativly -> {:?}", loc, sloc, chips.get((sloc.0 / sw) as usize));
+    console_log!("    touch data: i={} r={}, tw={}, sw={}", (sloc.0 / sw), r, tw, sw);
+    let i = sloc.0 / sw;
+    if sloc.1.abs() <= (r * 2.0) && i >= 0.0 && i < chips.len() as f64 {
+        return Some(chips[i as usize]);
+    }
+
+    None
 }
 
 pub fn font_size(size: usize) -> String {
@@ -443,3 +501,4 @@ fn get_rendering_gameboard_bounds(
 
     (x, y, bwidth * mm, bheight * mm, mm)
 }
+

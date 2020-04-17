@@ -183,7 +183,7 @@ async fn request<T: Serialize>(
         opts.body(Some(&body.into()));
     }
 
-    log(&format!("Making request to: {}", build_url(path)));
+    //log(&format!("Making request to: {}", build_url(path)));
     let request: Result<Request, JsValue> = Request::new_with_str_and_init(&build_url(path), &opts);
     let request = request?;
 
@@ -203,9 +203,9 @@ async fn request<T: Serialize>(
     assert!(resp_value.is_instance_of::<Response>());
     let resp: Response = resp_value.dyn_into().unwrap();
 
-    log(&format!("Got data: {:?}", resp));
+    //log(&format!("Got data: {:?}", resp));
     // Convert this other `Promise` into a rust `Future`.
     let res = JsFuture::from(resp.json()?).await?;
-    log(&format!("It was Okay"));
+    //log(&format!("It was Okay"));
     Ok(res)
 }

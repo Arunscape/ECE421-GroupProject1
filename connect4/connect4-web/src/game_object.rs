@@ -173,6 +173,15 @@ impl GameOnThread {
                 );
                 if let Some(col) = col {
                     self.handle_click(col);
+                } else {
+                    if let Some(ch) = controller::selected_new_move(
+                        &self.canvas,
+                        loc,
+                        &self.game.current_player().chip_options,
+                    ) {
+                        self.selected_move = Some(ch);
+                        self.repaint();
+                    }
                 }
             }
             Some(Msg::ServerReceived(data)) => {
