@@ -28,10 +28,12 @@ impl Component for GameScreen {
         console_log!("Creating game component for room: {}", id);
         html! {
           <div class="w-screen h-screen flex md:flex-col flex-col-reverse md:justify-end md:justify-start">
-            <div class="w-full flex justify-center md:justify-end md:py-4">
-              <MenuButtonLight dest="/" text="Home"/>
+            <div class="flex-none w-full">
+              <div class="w-full flex justify-center md:justify-end">
+                <MenuButtonLight dest="/" text="Home"/>
+              </div>
             </div>
-            <div class="h-full w-full">
+            <div class="w-full flex-grow" style="max-height: calc(100vh - 50px);"> // style is workaround css not doing what I want
               <GameComponent game_type=gt other_player=op gameid=id active=true/>
             </div>
           </div>

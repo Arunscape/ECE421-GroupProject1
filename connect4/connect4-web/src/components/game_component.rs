@@ -75,10 +75,8 @@ impl Component for GameComponent {
 
     fn view(&self) -> Html {
         html! {
-            <div style="position: relative; width: 100%; height: 0; padding-top: 60%;">
-              <canvas id={&self.canvas_id} height="1080" width="1960"
-                  style="position: absolute; top: 0; bottom: 0; width: 100%; outline: black 3px solid;"/>
-            </div>
+           <canvas id={&self.canvas_id} height="1080" width="1960"
+                      class="h-full w-full" style="outline: black 3px solid;"/>
         }
     }
 }
