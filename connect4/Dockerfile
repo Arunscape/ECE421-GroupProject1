@@ -15,7 +15,9 @@ RUN npm i -g rollup
 RUN ./build
 RUN pwd
 RUN ls -la
-ENV JWT_KEY=$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM
+RUN apt-get intall -y uuid-runtime
+RUN uuidgen
+ENV JWT_KEY=$uuid
 
 FROM rust:slim-stretch
 #RUN addgroup -S rust && adduser -S -G rust rust
