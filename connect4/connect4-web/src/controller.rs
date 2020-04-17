@@ -204,6 +204,8 @@ pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, y: i32, board: &Board) -> O
     }
 }
 
+// TODO: hook this up to something
+#[allow(dead_code)]
 pub fn highlight_column(canvas: &Canvas, width: isize, height: isize, col: isize) {
     draw_board_mask_column(canvas, width, height, col as usize, COLOR_HIGHLIGHT);
 }
