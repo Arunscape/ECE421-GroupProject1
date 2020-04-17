@@ -94,13 +94,13 @@ impl Component for Signin {
     fn view(&self) -> VNode {
         let update_username = |e: InputData| Msg::UpdateUserName(e.value);
         let update_password = |e: InputData| Msg::UpdatePassword(e.value);
-        let input_class = "mx-3 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline";
+        let input_class = "mx-3 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mx-3 my-3";
         let but_class = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline";
         html! {
         <div class="bg-gray-400 h-full flex flex-col justify-around items-center">
           <div class="bg-white shadow  rounded h-64 flex flex-col justify-around items-center">
             <h1 class="font-popper">{"Sign in for more features!"}</h1>
-            <div class="flex justify-around">
+            <div class="flex flex-col justify-center items-center px-4">
               <input class={input_class} type="text" value={&self.username} oninput=self.link.callback(update_username) placeholder={"Username"}/>
               <input class={input_class} type="password" value={&self.password} oninput=self.link.callback(update_password) placeholder={"Password"}/>
             </div>
