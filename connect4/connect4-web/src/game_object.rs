@@ -50,6 +50,7 @@ enum Msg {
     KeyPressed(String),
     FinishedAnimation,
     Delay,
+    InvalidMove,
     ServerReceived(Game),
     AIThought((isize, ChipDescrip)),
 }
@@ -147,6 +148,10 @@ impl GameOnThread {
         let msg = self.message_receiver.recv();
         // console_log!("[{}] Got Message: {:?}", delta, msg);
         match msg {
+            Some(Msg::InvalidMove) => {
+                crate::alert("Invalid Move");
+                while let Err(_) = crate::window().location().reload() {}
+            }
             Some(Msg::FinishedAnimation) => {
                 self.repaint();
                 self.sender.send(Msg::Delay);
@@ -249,11 +254,18 @@ impl GameOnThread {
     }
 
     pub fn send_move_to_server(&mut self, chip: Chip) {
-        async fn asyncer(chip: Chip, gameid: String) {
+        async fn asyncer(sender: JSender<Msg>, chip: Chip, gameid: String) {
             console_log!("send move to server[{}]: {:?}", &gameid, chip);
-            coms::playmove(chip, gameid).await;
+            let gd = coms::playmove(chip, gameid).await;
+            if let Some(gd) = gd {
+              sender.send(Msg::ServerReceived(gd.game));
+            } else {
+              sender.send(Msg::InvalidMove);
+            }
         }
-        spawn_local(asyncer(chip, self.gameid.clone()));
+        if &self.gameid.clone() != "" || &self.gameid.clone() != "offline" {
+            spawn_local(asyncer(self.sender.clone(), chip, self.gameid.clone()));
+        }
     }
 
     fn request_move_from_ai(&self, config: AIConfig) {
