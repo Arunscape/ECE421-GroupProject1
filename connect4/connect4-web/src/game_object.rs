@@ -264,7 +264,6 @@ impl GameOnThread {
             }
         }
         if !(&self.gameid == "" || &self.gameid == "offline") {
-            console_log!("gameID: {}", self.gameid.clone());
             spawn_local(asyncer(self.sender.clone(), chip, self.gameid.clone()));
         }
     }
