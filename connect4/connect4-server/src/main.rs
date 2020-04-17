@@ -68,13 +68,20 @@ impl JwtPayloadWrapper {
     }
 }
 
+use rocket_contrib::databases;
 #[macro_use] extern crate rocket_contrib;
-use rocket_contrib::databases::mongodb;
-#[database("mongodb://localhost:27017")]
-struct MongoDB(mongodb::db::Database);
+
+//use rocket_contrib::databases::diesel;
+#[database("my_db")]
+struct MongoDB(databases::mongodb::db::Database);
+
+#[get("/dbthere")]
+fn dbthere(db: MongoDB) -> content::Json<&'static str> {
+    content::Json("{ \"DB\": \"connected\" }")
+}
 
 #[get("/signin/<u>/<p>")]
-fn signin(u: String, p: String, _db:MongoDB) -> content::Json<String> {
+fn signin(u: String, p: String) -> content::Json<String> {
     println!("Signin called [{}, {}]", u, p);
     let data = match player::sign_in(u.as_str(), p.as_str()) {
         Some(s) => Signin {
@@ -270,6 +277,8 @@ fn allow_default_cors() -> rocket_cors::Cors {
     }
 }
 
+
+
 fn rocket() -> rocket::Rocket {
     let _path = std::env::current_dir()
         .unwrap()
@@ -280,10 +289,11 @@ fn rocket() -> rocket::Rocket {
         .mount(
             "/api",
             routes![
-                getstats, allpast, allongoing, joingame, signin, playmove, refresh, creategame,
+                dbthere, getstats, allpast, allongoing, joingame, signin, playmove, refresh, creategame,
                 getgame
             ],
         )
+        .attach(MongoDB::fairing())
         .mount("/pkg", routes![files])
         .attach(allow_default_cors())
         .register(catchers![not_found])
