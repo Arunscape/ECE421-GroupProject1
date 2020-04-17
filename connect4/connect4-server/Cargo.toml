@@ -36,4 +36,3 @@ features = ["handlebars_templates", "tera_templates", "json"]
 [dependencies.rocket]
 version = "0.4.4"
 default-features = false
-features = ["tls"]
