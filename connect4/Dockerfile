@@ -4,6 +4,7 @@ RUN rustup default nightly \
  && rustup update
 ENV ROCKET_ENV=production
 ENV DB_URL=mongodb://mongo:27017
+ENV ROCKET_TLS={certs="/etc/letsencrypt/live/connect4.woosaree.xyz/fullchain.pem",key="/etc/letsencrypt/live/connect4.woosaree.xyz/privkey.pem"}
 RUN cargo install connect4-server --git 'https://github.com/Arunscape/ECE421-GroupProject1.git'
 RUN git clone https://github.com/Arunscape/ECE421-GroupProject1.git
 WORKDIR /usr/src/myapp/ECE421-GroupProject1/connect4/connect4-web
