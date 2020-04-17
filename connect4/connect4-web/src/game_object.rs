@@ -4,7 +4,7 @@ use crate::controller;
 use crate::{console_log, log};
 use crate::{request_animation_frame, set_timeout};
 use connect4_lib::ai::AIConfig;
-use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, Player, PlayerType};
+use connect4_lib::game::{Board, BoardState, Chip, ChipDescrip, Game, PlayerType};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
@@ -263,7 +263,7 @@ impl GameOnThread {
                 sender.send(Msg::InvalidMove);
             }
         }
-        if &self.gameid.clone() != "" || &self.gameid.clone() != "offline" {
+        if !(&self.gameid == "" || &self.gameid == "offline") {
             spawn_local(asyncer(self.sender.clone(), chip, self.gameid.clone()));
         }
     }

@@ -28,7 +28,7 @@ impl Component for GameComponent {
     type Message = ();
     type Properties = Props;
     // I OWN THE GAME OBJECT AND DECIDE WHAT TO DO WITH THE PROPS I RECEIVE
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
         let canvas_id: String = String::from("canvas")
             + &thread_rng()
                 .sample_iter(&Alphanumeric)

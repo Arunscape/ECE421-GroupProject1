@@ -67,7 +67,7 @@ fn signout() {
 }
 
 fn signout_or_home(is_home: bool) -> Html {
-    let c = "bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-center my-1 mx-1";
+    let c = crate::components::menubutton::MENU_LIGHT_CLASSES;
     if is_home {
         render_if(
             html! {<button class=c onclick={Callback::from(|_| signout())}> { "Sign out" } </button>},
