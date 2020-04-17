@@ -2,29 +2,41 @@ use crate::dbhelper::*;
 use crate::jwthelper::*;
 use bson::doc;
 use connect4_coms::types::ClaimPayload;
+use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     username: String,
     password: String,
+    random_salt: String,
 }
 
 // given username and password, possibly sign in for JWT token
 pub fn sign_in(username: &str, password: &str) -> Option<String> {
-    let user_doc = object_to_doc(&User {
-        username: username.to_string(),
-        password: password.to_string(),
-    })?;
-
     // can connect to DB
     let db = new_db(DATABASE_NAME)?;
+    let mut query =
+        query_collection_for_docs(&db, USER_COLLECTION_NAME, doc! {"username": username});
+    let config = argon2::Config::default();
     // username not in db, add then JWT
-    if !exists_any_in(
-        &db,
-        USER_COLLECTION_NAME,
-        doc! {"username": username.to_owned()},
-    ) {
+    if query.len() == 0 {
+        let random_salt = thread_rng()
+            .sample_iter(&rand::distributions::Alphanumeric)
+            .take(64)
+            .collect::<String>();
+
+        let hashed_password =
+            match argon2::hash_encoded(password.as_bytes(), &random_salt.as_bytes(), &config) {
+                Ok(h) => Some(String::from(h)),
+                _ => None,
+            }?;
+
+        let user_doc = object_to_doc(&User {
+            username: username.to_string(),
+            password: hashed_password,
+            random_salt,
+        })?;
         // insert into db, return None if that fails
         if db
             .collection(USER_COLLECTION_NAME)
@@ -42,8 +54,16 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
         ));
     }
 
+    if query.len() > 1 {
+        panic!("Username should be UNIQUE in database, but that's not the case here");
+    }
+
+    let user: User = bson_to_object(query.remove(0))?;
+
+    let matches = argon2::verify_encoded(&user.password, password.as_bytes()).unwrap();
+
     // They exist in the database
-    if exists_any_in(&db, USER_COLLECTION_NAME, user_doc) {
+    if matches {
         Some(gen_jwt_token(
             ClaimPayload {
                 username: username.to_string(),
@@ -51,7 +71,6 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
             JWT_LIFETIME_SECONDS,
         ))
     } else {
-        // invalid password
         None
     }
 }
