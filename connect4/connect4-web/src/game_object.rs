@@ -108,9 +108,9 @@ impl GameObject {
             time = newtime;
             thread_data.get_message(delta);
             let timeout = match thread_data.game_state {
-                GameState::WaitingForMove(PlayerType::Remote) => 1000,
+                GameState::WaitingForMove(PlayerType::Remote) => 500,
                 GameState::WaitingForMove(PlayerType::Local) => 200,
-                GameState::WaitingForMove(PlayerType::AI(_)) => 400,
+                GameState::WaitingForMove(PlayerType::AI(_)) => 200,
                 GameState::PlayingMove(_) => 20,
                 GameState::GameOver(_) => 500,
             };

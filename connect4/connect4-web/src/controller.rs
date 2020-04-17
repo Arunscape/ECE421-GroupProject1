@@ -234,6 +234,7 @@ pub fn get_chip_fall(board: &Board) -> f64 {
 
 pub fn message(canvas: &Canvas, msg: String) {
     let (x, y, w, h) = get_message_bounds(canvas);
+    canvas.context.clear_rect(x, y, w, h);
     let fsize = (h / if canvas.is_skinny() { 4.0 } else { 7.0 }) as usize;
 
     canvas.context.set_font(&font_size(fsize));
@@ -274,13 +275,24 @@ fn is_msg_width_okay(canvas: &Canvas, msg: &str) -> bool {
 
 pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDescrip>) {
     let (x, y, w, h) = get_chipselect_bounds(canvas);
-    canvas.context.set_font(&font_size((h / 4.0) as usize));
+    let fs = (w / 10.0).min(h / 4.0);
+
+    canvas.context.clear_rect(x, y, w, h);
     let all_chips = &player.chip_options;
     let selected_chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
 
     if let Some(selected_chip) = selected_chip {
-        draw_selected_move_selection(canvas, selected_chip, x, y, w, h);
-        draw_unselected_move_selection(canvas, selected_chip, all_chips, x, y, w, h);
+        if canvas.is_skinny() {
+            let x1 = x; let y1 = y; let w1 = w; let h1 = h;
+            draw_selected_move_selection(canvas, selected_chip, x1, y1, w1, h1, fs);
+            let x2 = x; let y2 = y; let w2 = w; let h2 = h;
+            draw_unselected_move_selection(canvas, selected_chip, all_chips, x2, y2, w2, h2, fs);
+        } else {
+            let x1 = x; let y1 = y; let w1 = w; let h1 = h;
+            draw_selected_move_selection(canvas, selected_chip, x1, y1, w1, h1, fs);
+            let x2 = x; let y2 = y; let w2 = w; let h2 = h;
+            draw_unselected_move_selection(canvas, selected_chip, all_chips, x2, y2, w2, h2, fs);
+        }
     } else {
         console_log!("No available chips");
     }
@@ -293,9 +305,29 @@ fn draw_selected_move_selection(
     y: f64,
     w: f64,
     h: f64,
+    fontsize: f64,
 ) {
-    let r = 60.0;
-    place_chip(canvas, chip, x + 3.0 * r, y + 3.0 * r, r);
+    canvas.context.set_font(&font_size(fontsize as usize));
+    let msg = "Selected";
+    canvas.context.fill_rect(x, y, w, h);
+
+    let ratio = 2.0 / 6.0;
+    let rbox_size = w.min(h - fontsize);
+    let box_size = rbox_size * ratio;
+    let r = box_size / 2.0;
+    let pad = r / 3.0;
+    place_chip(canvas, chip, x + w / 2.0, y + box_size / 2.0 + pad, r);
+    canvas
+        .context
+        .set_fill_style(&String::from(COLOR_WHITE).into());
+    canvas.context.set_text_align("center");
+    canvas
+        .context
+        .fill_text("Selected", x + w / 2.0, y + fontsize + box_size + pad + pad);
+    canvas.context.set_text_align("left");
+    canvas
+        .context
+        .set_fill_style(&String::from(COLOR_BLACK).into());
 }
 fn draw_unselected_move_selection(
     canvas: &Canvas,
@@ -305,13 +337,43 @@ fn draw_unselected_move_selection(
     y: f64,
     w: f64,
     h: f64,
+    fontsize: f64,
 ) {
-    let r = 30.0;
+    canvas
+        .context
+        .set_fill_style(&String::from(COLOR_GREEN).into());
+    canvas.context.fill_rect(x, y, w, h);
+
+    canvas.context.set_font(&font_size(fontsize as usize));
+    let ratio = 1.0 / 6.0;
+    let rbox_size = w.min(h - fontsize);
+    let box_size = rbox_size * ratio;
+    let r = box_size / 2.0;
+    let pad = r / 3.0;
+
+    let sw = 3.0 * r;
+    let tw = sw * chips.len() as f64 - sw;
     for (i, &ch) in chips.iter().enumerate() {
-        if ch != selected {
-            place_chip(canvas, ch, x + r + (i as f64) * 3.0 * r, y + 3.0 * r, r);
-        }
+        place_chip(
+            canvas,
+            ch,
+            x + w/2.0 - tw/2.0 + (i as f64) * sw,
+            y + h - 2.0 * fontsize - 2.0 * pad - 2.0 * r,
+            r,
+        );
     }
+
+    canvas
+        .context
+        .set_fill_style(&String::from(COLOR_WHITE).into());
+    canvas.context.set_text_align("center");
+    canvas
+        .context
+        .fill_text("Options", x + w / 2.0, y + h - fontsize - pad);
+    canvas.context.set_text_align("left");
+    canvas
+        .context
+        .set_fill_style(&String::from(COLOR_BLACK).into());
 }
 
 pub fn font_size(size: usize) -> String {
@@ -376,10 +438,12 @@ fn get_rendering_gameboard_bounds(
     let bheight = bheight as f64;
     let (x, y, w, h) = get_gameboard_bounds(canvas);
 
-    let cw = w / (bwidth * CHIP_SEPERATION / CHIP_DIAMETER + bwidth + CHIP_SEPERATION / CHIP_DIAMETER);
+    let cw =
+        w / (bwidth * CHIP_SEPERATION / CHIP_DIAMETER + bwidth + CHIP_SEPERATION / CHIP_DIAMETER);
     let sw = CHIP_SEPERATION / CHIP_DIAMETER * cw;
     let tmw = cw + sw;
-    let ch = h / (bheight * CHIP_SEPERATION / CHIP_DIAMETER + bheight + CHIP_SEPERATION / CHIP_DIAMETER);
+    let ch =
+        h / (bheight * CHIP_SEPERATION / CHIP_DIAMETER + bheight + CHIP_SEPERATION / CHIP_DIAMETER);
     let sh = CHIP_SEPERATION / CHIP_DIAMETER * ch;
     let tmh = ch + sh;
 
