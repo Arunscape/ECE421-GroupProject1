@@ -13,9 +13,7 @@ use crate::jq::{mpsc, JReceiver, JSender};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub struct GameObject {
-    channel: JSender<Msg>,
-}
+pub struct GameObject {}
 
 struct GameOnThread {
     canvas: Canvas,
@@ -93,7 +91,7 @@ impl GameObject {
         slf.repaint();
         slf.request_game_from_server();
 
-        let handle = GameObject { channel: sender };
+        let handle = GameObject {};
         handle.start_listener_thread(slf);
         handle
     }

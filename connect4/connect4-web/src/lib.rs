@@ -1,10 +1,6 @@
 #![recursion_limit = "1024"]
 #![feature(async_closure)]
 
-
-
-
-
 mod canvas;
 mod components;
 mod coms;
@@ -67,9 +63,9 @@ fn document() -> web_sys::Document {
         .expect("should have a document on window")
 }
 
-fn body() -> web_sys::HtmlElement {
-    document().body().expect("document should have a body")
-}
+//fn body() -> web_sys::HtmlElement {
+//    document().body().expect("document should have a body")
+//}
 
 fn seconds() -> f64 {
     window()

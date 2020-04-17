@@ -1,12 +1,9 @@
 use super::super::window;
 use crate::{coms, storage::LocalStorage};
 
-
 use wasm_bindgen_futures::spawn_local;
 
-
 use yew::{prelude::*, virtual_dom::VNode, InputData, Properties};
-
 
 pub struct Signin {
     link: ComponentLink<Self>,
@@ -46,7 +43,7 @@ impl Component for Signin {
                 self.link
                     .send_message(Msg::UpdateMessage(String::from("Signing in...")));
 
-                async fn handleSignin(
+                async fn handle_signin(
                     username: String,
                     password: String,
                     msg: ComponentLink<Signin>,
@@ -63,7 +60,10 @@ impl Component for Signin {
                                 )));
                             } else {
                                 LocalStorage::set_token(&s);
-                                window().location().set_href("/");
+                                window()
+                                    .location()
+                                    .set_href("/")
+                                    .expect("failed to set redirect to root");
                             }
                         }
                         None => {
@@ -71,7 +71,7 @@ impl Component for Signin {
                         }
                     };
                 }
-                spawn_local(handleSignin(
+                spawn_local(handle_signin(
                     self.username.clone(),
                     self.password.clone(),
                     self.link.clone(),

@@ -1,4 +1,4 @@
-use connect4_coms::types::{Claims};
+use connect4_coms::types::Claims;
 use jsonwebtoken::dangerous_unsafe_decode;
 use web_sys::window;
 
@@ -20,7 +20,8 @@ impl LocalStorage {
             .local_storage()
             .unwrap()
             .unwrap()
-            .set_item(&"auth", value);
+            .set_item(&"auth", value)
+            .expect("failed to set token");
     }
     pub fn clear_token() {
         window()
@@ -28,7 +29,8 @@ impl LocalStorage {
             .local_storage()
             .unwrap()
             .unwrap()
-            .remove_item(&"auth");
+            .remove_item(&"auth")
+            .expect("failed to clear token");
     }
 
     pub fn get_username() -> Option<String> {
@@ -43,7 +45,8 @@ impl LocalStorage {
             .local_storage()
             .unwrap()
             .unwrap()
-            .set_item(&"colorblind", &format!("{}", val));
+            .set_item(&"colorblind", &format!("{}", val))
+            .expect("failed to set colourblind setting");
     }
     pub fn get_colorblind_setting() -> bool {
         window()

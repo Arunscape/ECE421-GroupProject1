@@ -3,7 +3,7 @@ use yew::{prelude::*, virtual_dom::VNode, Properties};
 
 use crate::components::icon;
 use crate::components::icon::ConnectIcon;
-use crate::components::{MenuButtonLight};
+use crate::components::MenuButtonLight;
 
 pub struct Menu {
     props: Props,
@@ -16,10 +16,6 @@ pub struct Props {
     pub show_stats: bool,
     pub show_settings: bool,
     pub children: Children,
-}
-
-pub enum Msg {
-    Msg,
 }
 
 impl Component for Menu {
@@ -63,7 +59,10 @@ impl Component for Menu {
 
 fn signout() {
     crate::storage::LocalStorage::clear_token();
-    crate::window().location().set_href("/");
+    crate::window()
+        .location()
+        .set_href("/")
+        .expect("failed to go to root after signout");
 }
 
 fn signout_or_home(is_home: bool) -> Html {
