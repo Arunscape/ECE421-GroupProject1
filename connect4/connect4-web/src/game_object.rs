@@ -148,7 +148,7 @@ impl GameOnThread {
         // console_log!("[{}] Got Message: {:?}", delta, msg);
         match msg {
             Some(Msg::InvalidMove) => {
-                crate::alert("Invalid Move");
+                crate::alert("Invalid Move from Server");
                 while let Err(_) = crate::window().location().reload() {}
             }
             Some(Msg::FinishedAnimation) => {
