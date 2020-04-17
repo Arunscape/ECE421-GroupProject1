@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::{storage::LocalStorage};
+use crate::storage::LocalStorage;
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
@@ -16,35 +16,36 @@ const COLOR_WHITE: &'static str = "white";
 const COLOR_MAGENTA: &'static str = "fuchsia";
 const COLOR_CYAN: &'static str = "cyan";
 
-const COLOR_HIGHLIGHT: &'static str = "#0099CC";
+const COLOR_HIGHLIGHT: &'static str = COLOR_CYAN;
 
 const CHIP_RADIUS: f64 = 60.0;
 const CHIP_DIAMETER: f64 = 2.0 * CHIP_RADIUS;
 const CHIP_DIAMETER_CM: f64 = 6.0;
 const CHIP_SEPERATION: f64 = 53.0;
-const BOARD_MARGIN_X: f64 = 348.0;
-const BOARD_MARGIN_Y: f64 = 0.0;
 const COLUMN_WIDTH: f64 = CHIP_DIAMETER + CHIP_SEPERATION; // also height of the square around a circle
 const GRAVITY: f64 = -9.81 * 100.0/*cm/m*/ * CHIP_DIAMETER / CHIP_DIAMETER_CM;
 
 pub fn draw_chip(
     canvas: &Canvas,
-    board_height: f64,
+    width: isize,
+    height: isize,
     chip: connect4_lib::game::ChipDescrip,
     x: usize,
     y: usize,
 ) {
-    draw_chip_at(canvas, board_height, chip, x as f64, y as f64);
+    draw_chip_at(canvas, width, height, chip, x as f64, y as f64);
 }
 // in draw_chip, and draw_chip_at, both x and y are in board coordinates
 pub fn draw_chip_at(
     canvas: &Canvas,
-    board_height: f64, // in pixels
+    width: isize,
+    height: isize,
     chip: connect4_lib::game::ChipDescrip,
     x: f64,
     y: f64,
 ) {
-    let (board_margin_x, board_margin_y, pwidth, pheight, box_size) = get_rendering_gameboard_bounds(canvas, 7, 6);
+    let (board_margin_x, board_margin_y, _pwidth, pheight, box_size) =
+        get_rendering_gameboard_bounds(canvas, width, height);
     let chip_seperation = (box_size / COLUMN_WIDTH) * CHIP_SEPERATION;
     let chip_radius = (box_size / COLUMN_WIDTH) * CHIP_RADIUS;
     let column_width = box_size;
@@ -71,7 +72,7 @@ pub fn place_chip(
         io::YEL => COLOR_YELLOW,
         io::BLK => COLOR_RED,
         io::WHT => COLOR_WHITE,
-        io::GRN => COLOR_BLACK,
+        io::GRN => COLOR_GREEN,
         io::BLU => COLOR_BLUE,
         io::MAG => COLOR_MAGENTA,
         io::CYN => COLOR_CYAN,
@@ -126,7 +127,8 @@ pub fn draw_board_mask_column_above(
     color: &'static str,
     above: isize,
 ) {
-    let (off_x, off_y, pwidth, pheight, box_size) = get_rendering_gameboard_bounds(canvas, width, height);
+    let (off_x, off_y, pwidth, pheight, box_size) =
+        get_rendering_gameboard_bounds(canvas, width, height);
     let chip_seperation = (box_size / COLUMN_WIDTH) * CHIP_SEPERATION;
     let chip_radius = (box_size / COLUMN_WIDTH) * CHIP_RADIUS;
     let chip_diameter = (box_size / COLUMN_WIDTH) * CHIP_DIAMETER;
@@ -164,17 +166,14 @@ pub fn draw_board_mask_column_above(
 pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
     draw_board_mask(canvas, board.width, board.height);
 }
-fn calculate_draw_height(board_height: isize) -> f64 {
-    CHIP_SEPERATION + (COLUMN_WIDTH) * (board_height as f64)
-}
+
 pub fn draw_game_pieces(canvas: &Canvas, board: &Board, chips: &[Chip]) {
     let mut heights = vec![0; board.width()];
     for c in chips {
         let x = c.get_x() as usize;
         let y = heights[x];
         heights[x] += 1;
-        let board_height = calculate_draw_height(board.height);
-        draw_chip(canvas, board_height, c.get_descrip(), x, y);
+        draw_chip(canvas, board.width, board.height, c.get_descrip(), x, y);
     }
 }
 
@@ -184,7 +183,11 @@ pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> 
     let render_width = canvas.canvas.width() as f64;
     let tx = render_width * (x as f64) / visual_width;
     let (x, _y, w, h_, _) = get_rendering_gameboard_bounds(canvas, board.width, board.height);
-    console_log!("TX: {} -> COL: {}", tx, ((tx - x) / w) * (board.width as f64));
+    console_log!(
+        "TX: {} -> COL: {}",
+        tx,
+        ((tx - x) / w) * (board.width as f64)
+    );
     if tx < x || tx >= w + x {
         None
     } else {
@@ -205,10 +208,18 @@ pub fn do_falling_piece_frame(
     ani.y += delta * ani.vy;
     if (ani.y / COLUMN_WIDTH) > ani.final_y as f64 {
         // TODO: clear rectangle behind first
-        draw_board_mask_column_above(canvas, ani.width, ani.height, ani.x as usize, COLOR_BLUE, ani.final_y);
+        draw_board_mask_column_above(
+            canvas,
+            ani.width,
+            ani.height,
+            ani.x as usize,
+            COLOR_BLUE,
+            ani.final_y,
+        );
         draw_chip_at(
             canvas,
-            calculate_draw_height(ani.height),
+            ani.width,
+            ani.height,
             ani.chip,
             ani.x as f64,
             ani.y / (COLUMN_WIDTH),
@@ -252,25 +263,55 @@ pub fn message(canvas: &Canvas, msg: String) {
 }
 
 fn is_msg_width_okay(canvas: &Canvas, msg: &str) -> bool {
-    let (_, _, w, h) = get_message_bounds(canvas);
-    canvas.context.measure_text(msg).ok().map(|t| t.width() < w).unwrap_or(true)
+    let (_, _, w, _) = get_message_bounds(canvas);
+    canvas
+        .context
+        .measure_text(msg)
+        .ok()
+        .map(|t| t.width() < w)
+        .unwrap_or(true)
 }
 
 pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDescrip>) {
-    canvas.context.set_font(&font_size(30));
-    // canvas.context.fill_text("Chip options", 0.0, 30.0);
-    let chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
-    let r = 30.0;
-    for (i, &ch) in player
-        .chip_options
-        .iter()
-        .filter(|x| Some(**x) != chip)
-        .enumerate()
-    {
-        place_chip(canvas, ch, r + (i as f64) * 3.0 * r, 3.0 * r, r);
+    let (x, y, w, h) = get_chipselect_bounds(canvas);
+    canvas.context.set_font(&font_size((h / 4.0) as usize));
+    let all_chips = &player.chip_options;
+    let selected_chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
+
+    if let Some(selected_chip) = selected_chip {
+        draw_selected_move_selection(canvas, selected_chip, x, y, w, h);
+        draw_unselected_move_selection(canvas, selected_chip, all_chips, x, y, w, h);
+    } else {
+        console_log!("No available chips");
     }
+}
+
+fn draw_selected_move_selection(
+    canvas: &Canvas,
+    chip: ChipDescrip,
+    x: f64,
+    y: f64,
+    w: f64,
+    h: f64,
+) {
     let r = 60.0;
-    place_chip(canvas, chip.unwrap(), 3.0 * r, 3.0 * r, r);
+    place_chip(canvas, chip, x + 3.0 * r, y + 3.0 * r, r);
+}
+fn draw_unselected_move_selection(
+    canvas: &Canvas,
+    selected: ChipDescrip,
+    chips: &[ChipDescrip],
+    x: f64,
+    y: f64,
+    w: f64,
+    h: f64,
+) {
+    let r = 30.0;
+    for (i, &ch) in chips.iter().enumerate() {
+        if ch != selected {
+            place_chip(canvas, ch, x + r + (i as f64) * 3.0 * r, y + 3.0 * r, r);
+        }
+    }
 }
 
 pub fn font_size(size: usize) -> String {
@@ -326,15 +367,23 @@ fn get_chipselect_bounds(canvas: &Canvas) -> (f64, f64, f64, f64) {
     }
 }
 
-fn get_rendering_gameboard_bounds(canvas: &Canvas, bwidth: isize, bheight: isize) -> (f64, f64, f64, f64, f64) {
+fn get_rendering_gameboard_bounds(
+    canvas: &Canvas,
+    bwidth: isize,
+    bheight: isize,
+) -> (f64, f64, f64, f64, f64) {
     let bwidth = bwidth as f64;
     let bheight = bheight as f64;
     let (x, y, w, h) = get_gameboard_bounds(canvas);
-    let mw = w / bwidth;
-    let mh = h / bheight;
 
-    let mm = mw.floor().min(mh.floor());
+    let cw = w / (bwidth * CHIP_SEPERATION / CHIP_DIAMETER + bwidth + CHIP_SEPERATION / CHIP_DIAMETER);
+    let sw = CHIP_SEPERATION / CHIP_DIAMETER * cw;
+    let tmw = cw + sw;
+    let ch = h / (bheight * CHIP_SEPERATION / CHIP_DIAMETER + bheight + CHIP_SEPERATION / CHIP_DIAMETER);
+    let sh = CHIP_SEPERATION / CHIP_DIAMETER * ch;
+    let tmh = ch + sh;
 
-    // TODO: adjust calculated min, to account for the extra board border on bottom
+    let mm = tmw.floor().min(tmh.floor());
+
     (x, y, bwidth * mm, bheight * mm, mm)
 }

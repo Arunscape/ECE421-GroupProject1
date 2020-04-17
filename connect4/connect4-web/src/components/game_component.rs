@@ -92,9 +92,10 @@ impl GameComponent {
                 .dyn_into::<web_sys::HtmlCanvasElement>()
                 .map_err(|_| ())
                 .unwrap();
+            let sharpness = 3;
             let bounds = parent.get_bounding_client_rect();
-            canvas.set_height(bounds.height() as u32);
-            canvas.set_width(bounds.width() as u32);
+            canvas.set_height(sharpness * (bounds.height() as u32));
+            canvas.set_width(sharpness * (bounds.width() as u32));
         }
     }
 }
