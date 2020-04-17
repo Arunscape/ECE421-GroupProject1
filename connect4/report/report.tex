@@ -76,6 +76,7 @@ Jacob Reckhard
         which will publish updated images to DockerHub on success \url{https://hub.docker.com/repository/docker/arunscape/connect4-server}
         the updated image is then pulled, and deployed automatically to \url{http://connect4.woosaree.xyz}
     \item Published on crates.io
+    \item Open source at \url{github.com/Arunscape/ECE421-GroupProject1}
 
 \end{enumerate}
 
@@ -149,6 +150,18 @@ We wanted to use rocket\_contrib database pools but that was a later objective a
 The documentation we were following for this feature comes from:
 \url{https://api.rocket.rs/v0.4/rocket\_contrib/databases/index.html}
 \url{https://rocket.rs/v0.4/guide/state/#databases}
+
+Another feature we wanted to add was support for custom
+games. Connect4 and Toot and Otto are very similar games, so we built
+a system that allows you to play any similar game. In the code, you
+specify a board size, then the number of players, which doesn't need
+to be 2. For each player you specify the type of chips they can play,
+and also the patterns that lead to them winning. This makes it very
+easy to create new games that involve dropping chips down a board to
+match into patterns. Unfortunately, while we did have all this working
+in our command line version, and the actually game playing screen will
+support custom games, we were not able to build a nice looking UI for
+creating custom games in time, and so it is not in the submitted code.
 
 \section{Remaining MEAN stack code}
 The only thing left over from the MEAN stack is mongodb. Everything
