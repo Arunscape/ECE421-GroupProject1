@@ -134,16 +134,27 @@ From those guiding decisions, the rest of the app sort of fell into place. We we
 \subsection{What can we do on a computer than we can’t do on a printed board?}
 
 \subsection{What is a computerized opponent? What are its objectives?}
-- What characteristics should it possess? Do we need an opponent or opponents?
+A computerized opponent is some logic that can play the game. In the case of connect 4 and toot and otto,
+it is essentially trying to minimize a score, and the algorithm considers that to be `winning'.
+\url{https://en.wikipedia.org/wiki/Minimax}
 
 
 \subsection{What design choices exist for the Interface components?}
-- Color? Font? Dimensions of Windows? Rescale-ability? Scroll Bars? \dots
+- Color? Font? Dimensions of Windows? Rescale-ability? Scroll Bars?
+We tried to make the website mobile friendly. 
+We decided to not use scroll bars at all, because we found it makes the user experience more confusing.
+As such, the website supports many different types of dimensions by adjusting the canvas size the game draws.
+The colours and fonts were chosen for simplicity
+and readability. 
 
 \subsection{What does exception handling mean in a GUI system?}
+It means showing a warning to a user in the worst-case scenario. In our design,
+we tried to avoid most errors by setting default values to fall back on if something fails. 
 
 \subsection{Do we require a command-line interface for debugging purposes?}
-Yes, because\dots
+Yes, because debugging with a command-line interface is much easier than with the GUI application, which
+might have visual bugs. The CLI is a version of the game stripped down to its bare essentials, which
+allows for easier development.
 
 \subsection{What are Model-View-Controller and Model-View-Viewmodel? Are either applicable to your
 design?}
