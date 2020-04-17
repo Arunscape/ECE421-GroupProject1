@@ -13,7 +13,7 @@ use connect4_coms::{
         PlayMove, Signin,
     },
 };
-use connect4_lib::game::{Chip, Game, Player, PlayerType};
+use connect4_lib::game::{Chip, Game, PlayerType};
 
 use crate::{console_log, log};
 
