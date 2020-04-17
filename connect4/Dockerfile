@@ -15,8 +15,8 @@ RUN npm i -g rollup
 RUN ./build
 RUN pwd
 RUN ls -la
-RUN apt-get intall -y uuid-runtime
-RUN uuidgen
+RUN apt-get install -y uuid-runtime
+RUN export uuid=$(uuidgen)
 ENV JWT_KEY=$uuid
 
 FROM rust:slim-stretch
