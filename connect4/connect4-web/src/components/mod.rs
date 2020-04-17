@@ -11,6 +11,6 @@ pub use game_component::GameComponent;
 pub use game_config::GameConfig;
 pub use homebutton::HomeButton;
 pub use menu::Menu;
-pub use menubutton::MenuButton;
+pub use menubutton::{MenuButtonLight, MenuButton};
 pub use router::ConnectRouter;
 pub use signin::Signin;

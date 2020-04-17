@@ -4,7 +4,11 @@ use crate::coms;
 use crate::{constants, window};
 use connect4_lib::{game, game::Game, games};
 
-pub fn create_game(game_type: String, player1: game::PlayerType, player2: game::PlayerType) -> Game {
+pub fn create_game(
+    game_type: String,
+    player1: game::PlayerType,
+    player2: game::PlayerType,
+) -> Game {
     let game_type = match game_type {
         s if s == constants::game::CONNECT4 => games::GameType::Connect4,
         s if s == constants::game::TOTO => games::GameType::Toto,
@@ -14,9 +18,17 @@ pub fn create_game(game_type: String, player1: game::PlayerType, player2: game::
 }
 
 pub async fn initiate_game(game: Game) -> String {
+    let players = game
+        .players
+        .iter()
+        .map(|p| p.player_type)
+        .filter(|p| match p {
+            game::PlayerType::Remote => false,
+            _ => true,
+        }).collect();
     let game = coms::create_game(game).await;
     match game {
-        Some(game_data) => join_game(game_data.roomcode).await,
+        Some(game_data) => join_game(game_data.roomcode, Some(players)).await,
         None => {
             crate::alert("failed to create game");
             String::new()
@@ -24,8 +36,9 @@ pub async fn initiate_game(game: Game) -> String {
     }
 }
 
-pub async fn join_game(roomcode: String) -> String {
-    let spots = coms::join_game(&roomcode, vec![game::PlayerType::Local]).await;
+pub async fn join_game(roomcode: String, players: Option<Vec<game::PlayerType>>) -> String {
+    let players = players.unwrap_or(vec![game::PlayerType::Local]);
+    let spots = coms::join_game(&roomcode, players).await;
     match spots {
         Some(s) => {
             if !s.iter().any(|x| x.is_none()) {
@@ -52,7 +65,7 @@ pub fn create_game_and_go(game: Game) {
 
 pub fn join_game_and_go(roomcode: String) {
     async fn asyncer(roomcode: String) {
-        let loc = join_game(roomcode).await;
+        let loc = join_game(roomcode, None).await;
         window().location().set_href(&loc).unwrap();
     }
     spawn_local(asyncer(roomcode));
