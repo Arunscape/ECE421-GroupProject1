@@ -4,7 +4,6 @@ RUN rustup default nightly \
  && rustup update
 ENV ROCKET_ENV=production
 ENV DB_URL=mongodb://mongo:27017
-RUN apt-get install -y uuid-runtime
 RUN export JWT_KEY=`uuidgen`
 RUN cargo install connect4-server --git 'https://github.com/Arunscape/ECE421-GroupProject1.git'
 RUN git clone https://github.com/Arunscape/ECE421-GroupProject1.git
