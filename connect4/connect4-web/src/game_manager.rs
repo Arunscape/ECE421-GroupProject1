@@ -25,7 +25,8 @@ pub async fn initiate_game(game: Game) -> String {
         .filter(|p| match p {
             game::PlayerType::Remote => false,
             _ => true,
-        }).collect();
+        })
+        .collect();
     let game = coms::create_game(game).await;
     match game {
         Some(game_data) => join_game(game_data.roomcode, Some(players)).await,

@@ -34,7 +34,6 @@ impl Component for MenuButton {
     }
 }
 
-
 pub struct MenuButtonLight {
     props: Props,
 }

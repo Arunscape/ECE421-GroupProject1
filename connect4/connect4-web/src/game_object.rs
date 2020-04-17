@@ -258,9 +258,9 @@ impl GameOnThread {
             console_log!("send move to server[{}]: {:?}", &gameid, chip);
             let gd = coms::playmove(chip, gameid).await;
             if let Some(gd) = gd {
-              sender.send(Msg::ServerReceived(gd.game));
+                sender.send(Msg::ServerReceived(gd.game));
             } else {
-              sender.send(Msg::InvalidMove);
+                sender.send(Msg::InvalidMove);
             }
         }
         if &self.gameid.clone() != "" || &self.gameid.clone() != "offline" {

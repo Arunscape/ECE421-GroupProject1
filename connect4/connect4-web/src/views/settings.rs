@@ -30,7 +30,7 @@ impl Component for SettingsPage {
         match msg {
             Msg::ToggleColorBlind => {
                 LocalStorage::set_colorblind_setting(!LocalStorage::get_colorblind_setting());
-                while let Err(_) = crate::window().location().reload() {};
+                while let Err(_) = crate::window().location().reload() {}
                 true
             }
         }
@@ -50,7 +50,11 @@ impl Component for SettingsPage {
 }
 
 fn toggle_setting(name: &str, is_on: bool, on_toggle: yew::callback::Callback<MouseEvent>) -> Html {
-    let toggle = icon::html(if is_on { ConnectIcon::ToggleOn } else { ConnectIcon::ToggleOff });
+    let toggle = icon::html(if is_on {
+        ConnectIcon::ToggleOn
+    } else {
+        ConnectIcon::ToggleOff
+    });
 
     let c = "cursor-pointer flex flex-row bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded text-center my-1 mx-1";
     html! {
