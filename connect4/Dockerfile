@@ -16,8 +16,6 @@ RUN npm i -g rollup
 RUN ./build
 RUN pwd
 RUN ls -la
-RUN export uuid=$(uuidgen)
-ENV JWT_KEY=$uuid
 
 FROM rust:slim-stretch
 #RUN addgroup -S rust && adduser -S -G rust rust
