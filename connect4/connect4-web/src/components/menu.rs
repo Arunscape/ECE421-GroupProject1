@@ -3,6 +3,7 @@ use yew::{prelude::*, virtual_dom::VNode, Properties};
 
 use crate::components::icon;
 use crate::components::icon::ConnectIcon;
+use crate::components::{MenuButton, MenuButtonLight};
 
 pub struct Menu {
     props: Props,
@@ -17,10 +18,12 @@ pub struct Props {
     pub children: Children,
 }
 
-pub enum Msg {}
+pub enum Msg {
+    Msg,
+}
 
 impl Component for Menu {
-    type Message = Msg;
+    type Message = ();
     type Properties = Props;
 
     fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
@@ -36,10 +39,13 @@ impl Component for Menu {
     }
 
     fn view(&self) -> Html {
-        let welcome_style = "w-full text-2xl text-left";
+        let welcome_style = "text-2xl text-left";
         html! {
             <div class="h-full flex flex-col items-center justify-between">
-                <div class=welcome_style> { &self.props.topbar } </div>
+                <div class="w-full flex px-5 justify-between">
+                  <p class=welcome_style> { &self.props.topbar } </p>
+                  { signout_or_home(&self.props.title == "Connecty") }
+                </div>
                 <h1 class="font-comic text-6xl">{ &self.props.title }</h1>
                 <div>
                     { self.props.children.render() }
@@ -54,6 +60,26 @@ impl Component for Menu {
         }
     }
 }
+
+fn signout() {
+    crate::storage::LocalStorage::clear_token();
+    crate::window().location().set_href("/");
+}
+
+fn signout_or_home(is_home: bool) -> Html {
+    let c = "bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-center my-1 mx-1";
+    if is_home {
+        render_if(
+            html! {<button class=c onclick={Callback::from(|_| signout())}> { "Sign out" } </button>},
+            crate::storage::LocalStorage::get_token().is_some(),
+        )
+    } else {
+        html! {
+          <MenuButtonLight text="home" dest="/"/>
+        }
+    }
+}
+
 fn icon(i: ConnectIcon, dest: &str) -> VNode {
     html! {
       <a href={ yew::html::Href::from(dest)}> { icon::html(i) } </a>
