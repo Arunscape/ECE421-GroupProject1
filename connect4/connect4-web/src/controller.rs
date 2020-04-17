@@ -161,7 +161,7 @@ pub fn draw_board_mask_column_above(
         canvas.context.rect(
             (box_size) * column_num as f64 + off_x + square,
             (box_size) * y as f64 + off_y,
-            -square,
+            -square-1.0,
             square,
         );
     }
