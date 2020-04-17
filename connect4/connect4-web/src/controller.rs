@@ -283,14 +283,26 @@ pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDe
 
     if let Some(selected_chip) = selected_chip {
         if canvas.is_skinny() {
-            let x1 = x; let y1 = y; let w1 = w / 3.0; let h1 = h;
+            let x1 = x;
+            let y1 = y;
+            let w1 = w / 3.0;
+            let h1 = h;
             draw_selected_move_selection(canvas, selected_chip, x1, y1, w1, h1, fs);
-            let x2 = x + w / 3.0; let y2 = y; let w2 = 2.0 * w / 3.0; let h2 = h;
+            let x2 = x + w / 3.0;
+            let y2 = y;
+            let w2 = 2.0 * w / 3.0;
+            let h2 = h;
             draw_unselected_move_selection(canvas, all_chips, x2, y2, w2, h2, fs);
         } else {
-            let x1 = x; let y1 = y; let w1 = w; let h1 = h / 2.0;
+            let x1 = x;
+            let y1 = y;
+            let w1 = w;
+            let h1 = h / 2.0;
             draw_selected_move_selection(canvas, selected_chip, x1, y1, w1, h1, fs);
-            let x2 = x; let y2 = y + h / 2.0; let w2 = w; let h2 = h / 2.0;
+            let x2 = x;
+            let y2 = y + h / 2.0;
+            let w2 = w;
+            let h2 = h / 2.0;
             draw_unselected_move_selection(canvas, all_chips, x2, y2, w2, h2, fs);
         }
     } else {
@@ -307,12 +319,10 @@ fn draw_selected_move_selection(
     h: f64,
     fontsize: f64,
 ) {
-
     let ratio = 2.0 / 6.0;
     let rbox_size = w.min(h - fontsize);
     let box_size = rbox_size * ratio;
     let r = box_size / 2.0;
-    let pad = r / 3.0;
     place_chip(canvas, chip, x + w / 2.0, y + h / 2.0, r);
     canvas.context.set_text_align("center");
     canvas.context.set_font(&font_size(fontsize as usize));
@@ -330,8 +340,7 @@ fn draw_unselected_move_selection(
     h: f64,
     fontsize: f64,
 ) {
-
-    let ratio = 1.0 / 6.0;
+    let ratio = 2.0 / 6.0;
     let rbox_size = w.min(h - fontsize);
     let box_size = rbox_size * ratio;
     let r = box_size / 2.0;
@@ -343,7 +352,7 @@ fn draw_unselected_move_selection(
         place_chip(
             canvas,
             ch,
-            x + w/2.0 - tw/2.0 + (i as f64) * sw,
+            x + w / 2.0 - tw / 2.0 + (i as f64) * sw,
             y + h - 2.0 * fontsize - 2.0 * pad - 2.0 * r,
             r,
         );
