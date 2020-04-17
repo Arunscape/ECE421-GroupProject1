@@ -79,17 +79,17 @@ Yes, because\dots
 \subsection{What are Model-View-Controller and Model-View-Viewmodel? Are either applicable to your
 design?}
 
-Model-View-Controller is a software design pattern, commonly used for user interfaces. 
+Model-View-Controller is a software design pattern, commonly used for user interfaces.
 The model contains the data structure, the view takes care of how to display the model,
 and the controller handles updates to the model and tells the view when to update.
 
 Model-View-Viewmodel is another software design pattern. The model and view is similar to model-view-controller.
-However, the viewmodel meaning the view model is responsible for converting the data objects from the model in such 
-a way that the objects can be easily presented. 
+However, the viewmodel meaning the view model is responsible for converting the data objects from the model in such
+a way that the objects can be easily presented.
 
 Our application uses the Yew framework, a rust web framework based on Elm, which uses the model
 view controller architecture. Our web components have a Model struct, a Message enum, and the
-struct implementation has a view() function which returns html elements, while the update() 
+struct implementation has a view() function which returns html elements, while the update()
 method determines whether or not the component needs to re-render and how the model should be updated
 based on the message passed to it.
 
@@ -105,16 +105,30 @@ based on the message passed to it.
             \item Users can leave and continue playing on a different computer
         \end{enumerate}
     \item Secure sign in. Passwords are hashed using argon2. JSON Web tokens are used to ensure a user
-        is authorized 
+        is authorized
     \item Online deployment. The games are available to play at \url{http://connect4.woosaree.xyz}
     \item Continuous Integration and Deployment. Builds are automatically done when code is pushed,
         which will publish updated images to DockerHub on success \url{https://hub.docker.com/repository/docker/arunscape/connect4-server}
         the updated image is then pulled, and deployed automatically to \url{http://connect4.woosaree.xyz}
     \item Published on crates.io
-        
+
 \end{enumerate}
 
 \section{Rationale}
+
+We initially wrote connect4 as a command line app to ensure that games and AI's worked. With important game playing functionality written, we could proceed with the rest of the project. We ensured that the basic types in this connect4 library were serializable through the Serde and bson crates, that way we could easily write those basic connect4 objects to the mongoDB database easily.
+
+We also strived to make this project as decoupled from the original specifications as we could. We didnt want to spend time reverse-engineering the app, instead we created a list of functionality that we needed to have, and made the app. We also concluded it would not be that much more difficult to strive for a multiplayer application as it was already a web app. We opted for a restful API built with rocket, and other powerful front end modules like yew.
+
+With a strong preference for Rust over Javascript, we tried to write this project with as much Rust code as possible. Looking back, it may have been easier to have simple button presses implemented with basic javascript. There was a major front end refactor due to click decisions among other things.
+
+We had the time, so we decided to implement security features like argon hased passwords and Json Web Tokens to enable a user to remain logged in for a day.
+
+
+Our dev team likes using apps like Vim, so a lot of this app was developed in the command line. We also used our existing knowledge of Docker to implement the production enviroment.
+
+
+From those guiding decisions, the rest of the app sort of fell into place.
 
 \section{Defects}
 No known defects.
