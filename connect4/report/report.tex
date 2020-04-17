@@ -137,6 +137,12 @@ From a security standpoint, it would be more ideal to serve the site with TLS en
 however, we had issues with enabling non-default features in the rocket library.
 \url{https://github.com/SergioBenitez/Rocket/issues/975}
 
+We wanted to use rocket\_contrib database pools but that was a later objective and we didn't get to it in the end. As a result, if the database is not running requests to the server API may delay or return partially correct results. For example, if the mongo instance is not running and an user tries to sign in, then it it treated as an invalid password. Attempts were made in a connection\_pool git branch on this project.
+
+The documentation we were following for this feature comes from:
+\url{https://api.rocket.rs/v0.4/rocket\_contrib/databases/index.html}
+\url{https://rocket.rs/v0.4/guide/state/#databases}
+
 \section{Remaining MEAN stack code}
 The only thing left over from the MEAN stack is mongodb. Everything
 else has been written in Rust and WebAssembly. In a project with over
