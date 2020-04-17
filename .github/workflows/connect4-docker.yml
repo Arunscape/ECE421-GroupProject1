@@ -12,12 +12,12 @@ jobs:
     - uses: actions/checkout@master
     - name: Publish to Registry
       run: |
-      cd connect4
-      REPO_NAME=connect4-server
-      DOCKER_USERNAME=arunscape
-      echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      # build the docker image and push to an image repository
-      docker build -t $REPO_NAME .
-      docker tag $REPO_NAME $DOCKER_USERNAME/$REPO_NAME
-      docker push $DOCKER_USERNAME/$REPO_NAME 
+        cd connect4
+        REPO_NAME=connect4-server
+        DOCKER_USERNAME=arunscape
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        # build the docker image and push to an image repository
+        docker build -t $REPO_NAME .
+        docker tag $REPO_NAME $DOCKER_USERNAME/$REPO_NAME
+        docker push $DOCKER_USERNAME/$REPO_NAME 
       
