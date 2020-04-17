@@ -1,0 +1,19 @@
+name: Connect 4 Push to Dockerhub
+
+on:
+  push:
+    paths:
+      - 'connect4/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: arunscape/connect4-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      workdir: connect4
