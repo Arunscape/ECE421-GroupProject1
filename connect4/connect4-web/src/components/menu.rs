@@ -3,7 +3,7 @@ use yew::{prelude::*, virtual_dom::VNode, Properties};
 
 use crate::components::icon;
 use crate::components::icon::ConnectIcon;
-use crate::components::{MenuButton, MenuButtonLight};
+use crate::components::{MenuButtonLight};
 
 pub struct Menu {
     props: Props,

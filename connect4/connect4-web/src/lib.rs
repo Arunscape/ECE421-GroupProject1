@@ -1,9 +1,9 @@
 #![recursion_limit = "1024"]
 #![feature(async_closure)]
 
-use connect4_lib::game::Game;
-use connect4_lib::games;
-use connect4_lib::io::{GameIO, TermIO};
+
+
+
 
 mod canvas;
 mod components;

@@ -1,6 +1,6 @@
 use crate::components::GameComponent;
 use crate::coms;
-use crate::{console_log, log};
+
 use connect4_coms::types::GameData;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;

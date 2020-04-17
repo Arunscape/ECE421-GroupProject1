@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::{log, storage::LocalStorage};
+use crate::{storage::LocalStorage};
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;

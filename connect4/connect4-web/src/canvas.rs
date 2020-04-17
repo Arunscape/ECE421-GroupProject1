@@ -1,12 +1,10 @@
-use connect4_lib::{
-    game, game::Board, game::BoardState, game::ChipDescrip, game::Game, games, io, GameIO,
-};
-use js_sys::Promise;
+
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use std::cell::Cell;
-use std::rc::Rc;
+
+
 
 pub struct Canvas {
     pub canvas: web_sys::HtmlCanvasElement,
@@ -32,7 +30,7 @@ impl Canvas {
             .unwrap();
 
         // create actual Canvas object
-        let mut my_can = Canvas { canvas, context };
+        let my_can = Canvas { canvas, context };
 
         my_can
     }
@@ -64,7 +62,7 @@ impl Canvas {
         );
     }
 
-    pub fn register_onclick_listener(&self, onclick: Box<FnMut(web_sys::MouseEvent)>) {
+    pub fn register_onclick_listener(&self, onclick: Box<dyn FnMut(web_sys::MouseEvent)>) {
         let f = Closure::wrap(onclick);
         self.canvas.set_onclick(Some(f.as_ref().unchecked_ref()));
         f.forget();

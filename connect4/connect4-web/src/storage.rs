@@ -1,4 +1,4 @@
-use connect4_coms::types::{ClaimPayload, Claims};
+use connect4_coms::types::{Claims};
 use jsonwebtoken::dangerous_unsafe_decode;
 use web_sys::window;
 
