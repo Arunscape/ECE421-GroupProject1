@@ -116,7 +116,7 @@ based on the message passed to it.
 
 \section{Rationale}
 
-We initially wrote connect4 as a command line app to ensure that games and AI's worked. With important game playing functionality written, we could proceed with the rest of the project. We ensured that the basic types in this connect4 library were serializable through the Serde and bson crates, that way we could easily write those basic connect4 objects to the mongoDB database easily.
+We initially wrote connect4 as a command line app to ensure that games and AI's worked. With important game playing functionality written, we could proceed with the rest of the project. We ensured that the basic types in this connect4 library were serializable through the Serde and bson crates, that way we could easily write those basic connect4 objects to the mongoDB database easily. For example, BSON does not handle usize data types, so many of the connect4 library usizes needed to be re-written as isize instead.
 
 We also strived to make this project as decoupled from the original specifications as we could. We didnt want to spend time reverse-engineering the app, instead we created a list of functionality that we needed to have, and made the app. We also concluded it would not be that much more difficult to strive for a multiplayer application as it was already a web app. We opted for a restful API built with rocket, and other powerful front end modules like yew.
 
