@@ -1,5 +1,7 @@
 // from https://github.com/Keats/jsonwebtoken/blob/master/examples/validation.rs
 
+pub static JWT_KEY: &str = env!("JWT_KEY");
+
 //use jsonwebtoken::errors::ErrorKind;
 use connect4_coms::types::{ClaimPayload, Claims};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
@@ -13,7 +15,7 @@ fn since_epoch_seconds() -> u64 {
 }
 
 fn jwt_token_from_claims(my_claims: Claims) -> String {
-    let key = b"TODO:probablyshouldhidethis";
+    let key = JWT_KEY.as_bytes();
     match encode(
         &Header::default(),
         &my_claims,
@@ -26,7 +28,7 @@ fn jwt_token_from_claims(my_claims: Claims) -> String {
 }
 
 pub fn claims_from_jwt_token(token: String) -> Option<Claims> {
-    let key = b"TODO:probablyshouldhidethis";
+    let key = JWT_KEY.as_bytes();
     let validation = Validation {
         //sub: Some("b@b.com".to_string()), // more validation here
         ..Validation::default()

@@ -15,6 +15,7 @@ RUN npm i -g rollup
 RUN ./build
 RUN pwd
 RUN ls -la
+RUN export JWT_KEY=$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM
 
 FROM rust:slim-stretch
 #RUN addgroup -S rust && adduser -S -G rust rust
