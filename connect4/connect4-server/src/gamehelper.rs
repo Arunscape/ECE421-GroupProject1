@@ -10,40 +10,30 @@ static ROOM_CODE_LEN: usize = 3;
 use connect4_coms::types::{GameData, JoinPlayers};
 
 fn valid_play(game_data: &GameData, username: &str, col: isize, color: game::ChipDescrip) -> bool {
-    if let Some(player_num) = whats_my_player_number(game_data, username) {
-        let valid_turn_num = (game_data.game.get_turn() as usize
-            % game_data.game.get_player_count()) as isize
-            == player_num;
-        let valid_chip = game_data
-            .game
-            .current_player()
-            .chip_options
-            .iter()
-            .fold(false, |valid_chip, chip| valid_chip || *chip == color);
-        let valid_col = !game_data.game.invalid_column(col);
 
-        valid_turn_num && valid_chip && valid_col
-    } else {
-        // panic!("player isnt in DB for some reason?")
-        false
-    }
-}
+    let valid_chip = game_data
+        .game
+        .current_player()
+        .chip_options
+        .iter()
+        .fold(false, |valid_chip, chip| valid_chip || *chip == color);
+    let valid_col = !game_data.game.invalid_column(col);
 
-fn whats_my_player_number(game_data: &GameData, username: &str) -> Option<isize> {
-    let res: Vec<usize> = game_data
+    let valid_turn_num = game_data
         .users
         .iter()
         .enumerate()
-        .filter(|(_i, item)| item.as_str() == username)
-        .map(|(i, _item)| i)
-        .collect();
+        .filter(|(_i, u)| username == u.to_string())
+        .map(|(i, _)| i)
+        .any(|player_num|
+        (game_data.game.get_turn() as usize
+            % game_data.game.get_player_count())
+            == player_num
+        );
 
-    if res.len() == 0 {
-        None
-    } else {
-        Some(res[0] as isize)
-    }
+    valid_turn_num && valid_chip && valid_col
 }
+
 
 // from https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html
 fn gen_roomcode() -> String {
@@ -176,7 +166,7 @@ fn adjust_local_perspective(game_data: &mut GameData, username: &str) {
 // add the player to game_data's users as username
 // TODO: verify player type (AI or not)
 // return the player number in the array 0-indexed
-fn insert_player(game_data: &mut GameData, username: &str, _player: i32) -> Option<isize> {
+fn insert_player(game_data: &mut GameData, username: &str, _player: game::PlayerType) -> Option<isize> {
     let players_in_game = game_data.users.len();
     if players_in_game == game_data.game.get_player_count() {
         // Game is full
@@ -191,7 +181,7 @@ fn insert_player(game_data: &mut GameData, username: &str, _player: i32) -> Opti
 fn insert_players(
     game_data: &mut GameData,
     username: &str,
-    players: Vec<i32>,
+    players: Vec<game::PlayerType>,
 ) -> Vec<Option<isize>> {
     players
         .iter()
@@ -267,7 +257,7 @@ mod test {
             &roomcode,
             "Alex",
             JoinPlayers {
-                players: vec![0, 1],
+                players: vec![game::PlayerType::Local, game::PlayerType::Local],
             },
         );
         assert!(result == vec![Some(0 as isize), Some(1 as isize)]);
@@ -276,7 +266,7 @@ mod test {
         update_game_with_play(&roomcode, "Alex", 1, games::YELLOW_CHIP);
         // arun joins from a second client
         // /api/joinplayers/<roomcode>
-        let result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![2] });
+        let result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![game::PlayerType::Local] });
         assert!(result == vec![Some(2 as isize)]);
     }
 
@@ -298,7 +288,56 @@ mod test {
     }
 
     #[test]
-    fn player_number_test() {}
+    fn invalid_plays_test() {
+        let p1 = "Alex";
+        let p2 = "Arun";
+        let game: game::Game = games::connect4();
+        let mut players = game.players.clone();
+        let red = players.remove(0).chip_options.remove(0);
+        let yellow = players.remove(0).chip_options.remove(0);
+        let game_data = GameData {
+            users: vec![p1.to_string(), p2.to_string()],
+            roomcode: "".to_string(),
+            board_state: game::BoardState::Ongoing,
+            game: game,
+        };
+        // username, column, color
+
+        // not p2's turn
+        assert!(!valid_play(&game_data, p2, 1, yellow));
+        // not valid colum
+        assert!(!valid_play(&game_data, p1, 10, red));
+        // not a p1's color
+        assert!(!valid_play(&game_data, p1, 1, yellow));
+
+        // p1 valid play
+        assert!(valid_play(&game_data, p1, 1,red));
+
+    }
+
+    #[test]
+    fn play_yourself_valid_test() {
+        let p1 = "Alex";
+        let p2 = "Alex";
+        let game: game::Game = games::connect4();
+        let mut players = game.players.clone();
+        let red = players.remove(0).chip_options.remove(0);
+        let yellow = players.remove(0).chip_options.remove(0);
+        let game_data = GameData {
+            users: vec![p1.to_string(), p2.to_string()],
+            roomcode: "".to_string(),
+            board_state: game::BoardState::Ongoing,
+            game: game,
+        };
+        // username, column, color
+
+        // multi users have the same name
+        assert!(valid_play(&game_data, p1, 1,red));
+        assert!(valid_play(&game_data, p2, 1,red));
+        // wrong color test
+        assert!(!valid_play(&game_data, p2, 1, yellow));
+
+    }
 
     #[test]
     #[ignore]
@@ -311,8 +350,8 @@ mod test {
         let roomcode = game_data.roomcode;
 
         // /api/joinplayers/<roomcode>
-        let _result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![0] });
-        let _result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![1] });
+        let _result = join_players(&roomcode, "Alex", JoinPlayers { players: vec![game::PlayerType::Local] });
+        let _result = join_players(&roomcode, "Arun", JoinPlayers { players: vec![game::PlayerType::Local] });
 
         // /api/playmove/<roomcode>
         for i in 0..3 {

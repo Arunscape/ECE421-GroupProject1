@@ -10,6 +10,7 @@ mod components;
 mod coms;
 mod constants;
 mod controller;
+mod game_manager;
 mod game_object;
 mod jq;
 mod storage;

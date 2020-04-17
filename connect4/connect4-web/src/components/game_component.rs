@@ -3,8 +3,6 @@ use crate::constants::{game, player};
 use crate::game_object::GameObject;
 use connect4_lib::{
     ai::{EASY_AI, HARD_AI, MID_AI},
-    game::Board,
-    game::Game,
     game::PlayerType::{Local, Remote, AI},
     games,
 };
@@ -13,7 +11,6 @@ use rand::{thread_rng, Rng};
 use yew::prelude::*;
 
 pub struct GameComponent {
-    link: ComponentLink<Self>,
     props: Props,
     game_object: Option<GameObject>,
     canvas_id: String,
@@ -41,7 +38,6 @@ impl Component for GameComponent {
 
         Self {
             props,
-            link,
             canvas_id,
             game_object: None,
         }

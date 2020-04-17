@@ -49,6 +49,7 @@ fn games_won(games: &Vec<GameData>, username: &str) -> isize {
 fn games_lost(games: &Vec<GameData>, username: &str) -> isize {
     games
         .iter()
+        .filter(|g| g.users.iter().any(|u| u == username))
         .filter_map(|g| match g.board_state {
             BoardState::Win(w) => Some((g, w)),
             _ => None,
@@ -86,6 +87,9 @@ mod test {
     fn mock_games_vec() -> Vec<GameData> {
         vec![
             mock_game_data(BoardState::Win(1), vec![P1, P2]),
+            mock_game_data(BoardState::Win(1), vec!["MrA","MrB"]),
+            mock_game_data(BoardState::Draw, vec!["MrA","MrB"]),
+            mock_game_data(BoardState::Win(1), vec!["MrB","MrA"]),
             mock_game_data(BoardState::Win(1), vec![P1, P2]),
             mock_game_data(BoardState::Win(2), vec![P1, P2]),
             mock_game_data(BoardState::Ongoing, vec![P1, P2]),

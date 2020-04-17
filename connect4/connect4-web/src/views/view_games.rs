@@ -37,7 +37,7 @@ impl Component for ViewPage {
             Msg::Link(i) => {
                 let s = self.games[i].roomcode.clone();
                 crate::window().location().set_href(&format!("/game/{}", s));
-            },
+            }
         }
         true
     }

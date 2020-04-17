@@ -11,10 +11,14 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build Server
+      env:
+        DB_URL: 'mongodb://mongo:27017'
       run: |
         rustup default nightly
         cargo +nightly build --verbose --release --manifest-path=connect4/connect4-server/Cargo.toml
     - name: Test
+      env:
+        DB_URL: 'mongodb://mongo:27017'
       run: cargo +nightly test --no-fail-fast --release --manifest-path=connect4/connect4-server/Cargo.toml
   # Lint:
   #   runs-on: ubuntu-latest

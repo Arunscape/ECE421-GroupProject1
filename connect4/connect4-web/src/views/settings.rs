@@ -1,10 +1,12 @@
 use web_sys::MouseEvent;
 use yew::prelude::*;
-use yew::virtual_dom::VNode;
 
 use crate::components::Menu;
 use crate::storage::LocalStorage;
 use crate::{console_log, log};
+
+use crate::components::icon;
+use crate::components::icon::ConnectIcon;
 
 pub struct SettingsPage {
     link: ComponentLink<Self>,
@@ -28,6 +30,7 @@ impl Component for SettingsPage {
         match msg {
             Msg::ToggleColorBlind => {
                 LocalStorage::set_colorblind_setting(!LocalStorage::get_colorblind_setting());
+                while let Err(_) = crate::window().location().reload() {};
                 true
             }
         }
@@ -47,17 +50,13 @@ impl Component for SettingsPage {
 }
 
 fn toggle_setting(name: &str, is_on: bool, on_toggle: yew::callback::Callback<MouseEvent>) -> Html {
-    let enabled = "bg-green-500";
-    let disabled = "bg-red-500";
-    let classes = |val| if val { enabled } else { disabled };
-    console_log!("I'm {}", classes(is_on));
+    let toggle = icon::html(if is_on { ConnectIcon::ToggleOn } else { ConnectIcon::ToggleOff });
 
-    let bid = "colourblind-settings-btn";
-    let el = crate::document().get_element_by_id(bid);
-    if let Some(e) = el {
-        e.set_class_name(classes(is_on));
-    }
+    let c = "cursor-pointer flex flex-row bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded text-center my-1 mx-1";
     html! {
-        <button id=&bid onclick=on_toggle> { name } </button>
+        <div onclick=on_toggle class=c>
+          <p class="mx-2"> { name } </p>
+          { toggle }
+        </div>
     }
 }
