@@ -116,7 +116,7 @@ based on the message passed to it.
 
 \section{Rationale}
 
-We initially wrote connect4 as a command line app to ensure that games and AI's worked. With important game playing functionality written, we could proceed with the rest of the project. We ensured that the basic types in this connect4 library were serializable through the Serde and bson crates, that way we could easily write those basic connect4 objects to the mongoDB database easily.
+We initially wrote connect4 as a command line app to ensure that games and AI's worked. With important game playing functionality written, we could proceed with the rest of the project. We ensured that the basic types in this connect4 library were serializable through the Serde and bson crates, that way we could easily write those basic connect4 objects to the mongoDB database easily. For example, BSON does not handle usize data types, so many of the connect4 library usizes needed to be re-written as isize instead.
 
 We also strived to make this project as decoupled from the original specifications as we could. We didnt want to spend time reverse-engineering the app, instead we created a list of functionality that we needed to have, and made the app. We also concluded it would not be that much more difficult to strive for a multiplayer application as it was already a web app. We opted for a restful API built with rocket, and other powerful front end modules like yew.
 
@@ -128,7 +128,7 @@ We had the time, so we decided to implement security features like argon hased p
 Our dev team likes using apps like Vim, so a lot of this app was developed in the command line. We also used our existing knowledge of Docker to implement the production enviroment.
 
 
-From those guiding decisions, the rest of the app sort of fell into place.
+From those guiding decisions, the rest of the app sort of fell into place. We were more concerned with the functionality of the website than we were with the looks, or replicating the look of the specifications. We decided that function was more important than form, as we could describe the use in the user manual.
 
 \section{Defects}
 No known defects.
@@ -136,6 +136,12 @@ No known defects.
 From a security standpoint, it would be more ideal to serve the site with TLS encryption over HTTPS,
 however, we had issues with enabling non-default features in the rocket library.
 \url{https://github.com/SergioBenitez/Rocket/issues/975}
+
+We wanted to use rocket\_contrib database pools but that was a later objective and we didn't get to it in the end. As a result, if the database is not running requests to the server API may delay or return partially correct results. For example, if the mongo instance is not running and an user tries to sign in, then it it treated as an invalid password. Attempts were made in a connection\_pool git branch on this project.
+
+The documentation we were following for this feature comes from:
+\url{https://api.rocket.rs/v0.4/rocket\_contrib/databases/index.html}
+\url{https://rocket.rs/v0.4/guide/state/#databases}
 
 \section{Remaining MEAN stack code}
 The only thing left over from the MEAN stack is mongodb. Everything
