@@ -61,6 +61,41 @@ Jacob Reckhard
 \maketitle %insert titlepage here
 
 
+\section{Design}
+\subsection{What can we do on a computer than we can’t do on a printed board?}
+Play against a computer, connect our games to a database for statistics, save a board state for later use, play connect4 and other games with our friends while practicing social distancing, and other things like play validation and easier win condition checking.
+
+\subsection{What is a computerized opponent? What are its objectives?}
+- What characteristics should it possess? Do we need an opponent or opponents?
+
+
+\subsection{What design choices exist for the Interface components?}
+- Color? Font? Dimensions of Windows? Rescale-ability? Scroll Bars? \dots
+
+\subsection{What does exception handling mean in a GUI system?}
+
+\subsection{Do we require a command-line interface for debugging purposes?}
+Yes, because\dots
+
+\subsection{What are Model-View-Controller and Model-View-Viewmodel? Are either applicable to your
+design?}
+
+Model-View-Controller is a software design pattern, commonly used for user interfaces.
+The model contains the data structure, the view takes care of how to display the model,
+and the controller handles updates to the model and tells the view when to update.
+
+Model-View-Viewmodel is another software design pattern. The model and view is similar to model-view-controller.
+However, the viewmodel meaning the view model is responsible for converting the data objects from the model in such
+a way that the objects can be easily presented.
+
+Our application uses the Yew framework, a rust web framework based on Elm, which uses the model
+view controller architecture. Our web components have a Model struct, a Message enum, and the
+struct implementation has a view() function which returns html elements, while the update()
+method determines whether or not the component needs to re-render and how the model should be updated
+based on the message passed to it.
+
+
+
 \section{Innovations (Additional to the specification)}
 \begin{enumerate}
     \item Mobile friendliness
