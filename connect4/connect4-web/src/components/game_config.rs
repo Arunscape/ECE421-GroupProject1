@@ -32,7 +32,8 @@ impl Component for GameConfig {
               <div class="flex flex-col">
                 <MenuButton text="Connect4" dest=format!("/finalizegame?game={}&player={}", constants::game::CONNECT4, player)/>
                 <MenuButton text="Toot and Otto" dest=format!("/finalizegame?game={}&player={}", constants::game::TOTO, player)/>
-                <MenuButton text="Custom Game" dest=format!("/finalizegame?game={}&player={}", constants::game::CUSTOM, player)/>
+                // Custom games work in theory, but no UI was implemented for setting them up
+                // <MenuButton text="Custom Game" dest=format!("/finalizegame?game={}&player={}", constants::game::CUSTOM, player)/>
               </div>
             </Menu>
         }

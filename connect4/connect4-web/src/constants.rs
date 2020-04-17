@@ -31,5 +31,6 @@ pub mod player {
 pub mod game {
     pub const CONNECT4: &'static str = "connect4";
     pub const TOTO: &'static str = "toto";
-    pub const CUSTOM: &'static str = "custom";
+    // Custom games work in theory, but no UI was implemented for setting them up
+    // pub const CUSTOM: &'static str = "custom";
 }
