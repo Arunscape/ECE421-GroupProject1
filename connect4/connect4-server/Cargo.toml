@@ -17,16 +17,23 @@ bson = "0.14.1"
 jsonwebtoken = "7.1.0"
 connect4-lib = { version="0.1.0", path="../connect4-lib" }
 connect4-coms = { version="0.1.0", path="../connect4-coms" }
-serde = { version = "1.0.106", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.51"
 rand = "0.7.3"
-rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
+rocket_cors = "0.5.1"
 rust-argon2 = "0.8.2"
 js-sys = "0.3.37"
-rocket = {git = "https://github.com/SergioBenitez/Rocket", branch = "master", default-features=false, features=["tls"]}
-rocket_contrib = {git = "https://github.com/SergioBenitez/Rocket", branch = "master", default-features=false,  features=["handlebars_templates", "tera_templates", "json"]}
 
 [[bin]]
 name="server"
 path="src/main.rs"
 
+[dependencies.rocket_contrib]
+version = "0.4.4"
+#default-features = false
+features = ["handlebars_templates", "tera_templates", "json"]
+
+[dependencies.rocket]
+version = "0.4.4"
+default-features = false
+features = ["tls"]
