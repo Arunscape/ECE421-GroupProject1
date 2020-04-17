@@ -222,13 +222,43 @@ pub fn get_chip_fall(board: &Board) -> f64 {
 }
 
 pub fn message(canvas: &Canvas, msg: String) {
-    canvas.context.set_font(&font_size(100));
-    canvas.context.fill_text(&msg, 10.0, 150.0);
+    let (x, y, w, h) = get_message_bounds(canvas);
+    let fsize = (h / if canvas.is_skinny() { 4.0 } else { 7.0 }) as usize;
+
+    canvas.context.set_font(&font_size(fsize));
+
+    let mut lines = vec![String::new()];
+
+    for word in msg.split(' ') {
+        let word = String::from(word);
+        let last = lines.len() - 1;
+        if is_msg_width_okay(canvas, &(lines[lines.len() - 1].clone() + &word)) {
+            lines[last] += &(word + " ");
+        } else {
+            if lines[last] == "" {
+                console_log!("Attempted to draw message that would overflow hbox");
+                return;
+            }
+            lines.push(word + " ");
+        }
+    }
+    // TODO: center message in field
+    console_log!("Wrapped to: {:?}", lines);
+    let mut y = y;
+    for line in lines {
+        canvas.context.fill_text(&line, x, y + fsize as f64);
+        y += fsize as f64;
+    }
+}
+
+fn is_msg_width_okay(canvas: &Canvas, msg: &str) -> bool {
+    let (_, _, w, h) = get_message_bounds(canvas);
+    canvas.context.measure_text(msg).ok().map(|t| t.width() < w).unwrap_or(true)
 }
 
 pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDescrip>) {
     canvas.context.set_font(&font_size(30));
-    canvas.context.fill_text("Chip options", 0.0, 30.0);
+    // canvas.context.fill_text("Chip options", 0.0, 30.0);
     let chip = chip.or(player.chip_options.iter().cloned().next()); // default first option
     let r = 30.0;
     for (i, &ch) in player
