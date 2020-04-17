@@ -1,21 +1,12 @@
-use web_sys::MouseEvent;
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
-use yew::InputData;
 
-use crate::components::router::query;
-use crate::components::{Menu, MenuButton};
+use crate::components::{Menu};
 use crate::coms;
-use crate::constants;
-use crate::storage::LocalStorage;
-use crate::window;
-use connect4_coms::types::GameData;
 use connect4_coms::types::GameStats;
-use connect4_lib::{game, games};
 use wasm_bindgen_futures::spawn_local;
 
 pub struct Statistics {
-    link: ComponentLink<Self>,
     stats: GameStats,
 }
 
@@ -45,7 +36,7 @@ impl Component for Statistics {
         }
         spawn_local(get_stats(link.clone()));
         let stats = GameStats::default();
-        Self { stats, link }
+        Self { stats }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -55,19 +46,20 @@ impl Component for Statistics {
                 self.stats = s;
                 true
             }
-            _ => false,
         }
     }
 
     fn view(&self) -> VNode {
         html! {
-          <div>
-            <h2>{format!("Games won: {}", self.stats.games_won)}</h2>
-            <h2>{format!("Games lost: {}", self.stats.games_lost)}</h2>
-            <h2>{format!("Games drawed: {}", self.stats.games_drawed)}</h2>
-            <h2>{format!("Games ongoing: {}", self.stats.games_ongoing)}</h2>
-            <h2>{format!("Games completed: {}", self.stats.games_won + self.stats.games_lost + self.stats.games_drawed)}</h2>
-          </div>
+            <Menu title=format!("Statistics") topbar="" show_settings=false show_stats=false>
+              <div>
+                <h2>{format!("Games won: {}", self.stats.games_won)}</h2>
+                <h2>{format!("Games lost: {}", self.stats.games_lost)}</h2>
+                <h2>{format!("Games drawed: {}", self.stats.games_drawed)}</h2>
+                <h2>{format!("Games ongoing: {}", self.stats.games_ongoing)}</h2>
+                <h2>{format!("Games completed: {}", self.stats.games_won + self.stats.games_lost + self.stats.games_drawed)}</h2>
+              </div>
+            </Menu>
         }
     }
 }
