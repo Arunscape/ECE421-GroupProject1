@@ -18,10 +18,6 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
     let db = new_db(DATABASE_NAME)?;
     let mut query =
         query_collection_for_docs(&db, USER_COLLECTION_NAME, doc! {"username": username});
-    let client_hashed = match js_sys::decode_uri_component(password) {
-        Ok(h) => Some(String::from(h)),
-        _ => None,
-    }?;
     let config = argon2::Config::default();
     // username not in db, add then JWT
     if query.len() == 0 {
@@ -30,14 +26,11 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
             .take(64)
             .collect::<String>();
 
-        let hashed_password = match argon2::hash_encoded(
-            client_hashed.as_bytes(),
-            &random_salt.as_bytes(),
-            &config,
-        ) {
-            Ok(h) => Some(String::from(h)),
-            _ => None,
-        }?;
+        let hashed_password =
+            match argon2::hash_encoded(password.as_bytes(), &random_salt.as_bytes(), &config) {
+                Ok(h) => Some(String::from(h)),
+                _ => None,
+            }?;
 
         let user_doc = object_to_doc(&User {
             username: username.to_string(),
@@ -67,12 +60,8 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
 
     let user: User = bson_to_object(query.remove(0))?;
 
-    let hash = argon2::hash_encoded(
-        client_hashed.as_bytes(),
-        user.random_salt.as_bytes(),
-        &config,
-    )
-    .unwrap();
+    let hash =
+        argon2::hash_encoded(password.as_bytes(), user.random_salt.as_bytes(), &config).unwrap();
     let matches = argon2::verify_encoded(&hash, user.password.as_bytes()).unwrap();
 
     // They exist in the database
