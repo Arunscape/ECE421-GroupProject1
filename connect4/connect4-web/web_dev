@@ -3,4 +3,4 @@ reset
 set -e
 SERVER_URL=localhost:8000 wasm-pack build --dev --target web
 rollup ./main.js --format iife --file ./pkg/bundle.js
-DB_URL=mongodb://localhost:27017 ROCKET_ENV=stage cargo run --manifest-path=../connect4-server/Cargo.toml
+JWT_KEY=jkey DB_URL=mongodb://localhost:27017 ROCKET_ENV=stage cargo run --manifest-path=../connect4-server/Cargo.toml
