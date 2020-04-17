@@ -34,6 +34,7 @@ pub struct ChipAnimation {
     pub final_y: isize,
     pub y: f64,
     pub vy: f64,
+    pub width: isize,
     pub height: isize,
 }
 
@@ -107,9 +108,9 @@ impl GameObject {
             time = newtime;
             thread_data.get_message(delta);
             let timeout = match thread_data.game_state {
-                GameState::WaitingForMove(PlayerType::Remote) => 1000,
+                GameState::WaitingForMove(PlayerType::Remote) => 500,
                 GameState::WaitingForMove(PlayerType::Local) => 200,
-                GameState::WaitingForMove(PlayerType::AI(_)) => 400,
+                GameState::WaitingForMove(PlayerType::AI(_)) => 200,
                 GameState::PlayingMove(_) => 20,
                 GameState::GameOver(_) => 500,
             };
@@ -315,6 +316,7 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
         final_y: y,
         y: controller::get_chip_fall(board),
         vy: 0.0,
+        width: board.width,
         height: board.height,
     };
 

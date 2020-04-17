@@ -32,6 +32,7 @@ rust-argon2 = "0.8.2"
 web-sys = "*"
 features = [
   'CanvasRenderingContext2d',
+  'TextMetrics',
   'Document',
   'Element',
   'HtmlCanvasElement',
