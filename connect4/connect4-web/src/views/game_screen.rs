@@ -1,23 +1,22 @@
-use crate::constants;
 use yew::prelude::*;
 
-use crate::{components::GameComponent, game_object::GameObject};
+use crate::{components::{GameComponent, MenuButtonLight}};
 
 use crate::components::router::query;
 
 use crate::{console_log, log};
 
 pub struct GameScreen {
-    link: ComponentLink<Self>,
 }
 
 impl Component for GameScreen {
     type Message = ();
     type Properties = ();
     // I OWN THE GAME COMPONENT
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { link }
+    fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+        Self { }
     }
+
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
         false
     }
@@ -27,9 +26,15 @@ impl Component for GameScreen {
         let op = query("player").unwrap_or(String::from("local"));
         let id = get_game_code();
         console_log!("Creating game component for room: {}", id);
-        //    active=true
         html! {
-            <GameComponent game_type=gt other_player=op gameid=id active=true/>
+          <div class="w-screen h-screen flex md:flex-col flex-col-reverse md:justify-end md:justify-start">
+            <div class="w-full flex justify-center md:justify-end md:py-4">
+              <MenuButtonLight dest="/" text="Home"/>
+            </div>
+            <div class="h-full w-full">
+              <GameComponent game_type=gt other_player=op gameid=id active=true/>
+            </div>
+          </div>
         }
     }
 }
