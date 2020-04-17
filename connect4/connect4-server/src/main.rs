@@ -75,13 +75,13 @@ use rocket_contrib::databases;
 #[database("my_db")]
 struct MongoDB(databases::mongodb::db::Database);
 
-fn asdf(db: databases::mongodb::db::Database) {
-    let a= db.into_inner().collection("asdf");
+fn asdf(db: &databases::mongodb::db::Database) {
+    let a= &db.client;
 }
 
 #[get("/dbthere")]
 fn dbthere(db: MongoDB) -> content::Json<&'static str> {
-    let asdf: mongodb::Database = db;
+    asdf(&*db);
     content::Json("{ \"DB\": \"connected\" }")
 }
 
