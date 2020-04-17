@@ -178,19 +178,22 @@ pub fn draw_game_pieces(canvas: &Canvas, board: &Board, chips: &[Chip]) {
 }
 
 use crate::{console_log, log};
-pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> Option<isize> {
+pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, y: i32, board: &Board) -> Option<isize> {
     let visual_width = canvas.canvas.get_bounding_client_rect().width();
     let render_width = canvas.canvas.width() as f64;
+    let visual_height = canvas.canvas.get_bounding_client_rect().height();
+    let render_height = canvas.canvas.height() as f64;
     let tx = render_width * (x as f64) / visual_width;
-    let (x, _y, w, h_, _) = get_rendering_gameboard_bounds(canvas, board.width, board.height);
-    console_log!(
-        "TX: {} -> COL: {}",
-        tx,
-        ((tx - x) / w) * (board.width as f64)
-    );
-    if tx < x || tx >= w + x {
+    let ty = render_height * (y as f64) / visual_height;
+    let (x, y, w, h, _) = get_rendering_gameboard_bounds(canvas, board.width, board.height);
+    if tx < x || tx >= w + x || ty < y || ty >= h + y {
         None
     } else {
+        console_log!(
+            "TX: {} -> COL: {}",
+            tx,
+            ((tx - x) / w) * (board.width as f64)
+        );
         Some(((tx - x) / w * (board.width as f64)) as isize)
     }
 }
