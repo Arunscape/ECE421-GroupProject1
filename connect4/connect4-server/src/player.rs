@@ -16,7 +16,8 @@ pub struct User {
 pub fn sign_in(username: &str, password: &str) -> Option<String> {
     // can connect to DB
     let db = new_db(DATABASE_NAME)?;
-    let query = query_collection_for_docs(&db, USER_COLLECTION_NAME, doc! {"username": username});
+    let mut query =
+        query_collection_for_docs(&db, USER_COLLECTION_NAME, doc! {"username": username});
     let client_hashed = match js_sys::decode_uri_component(password) {
         Ok(h) => Some(String::from(h)),
         _ => None,
@@ -64,7 +65,7 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
         panic!("Username should be UNIQUE in database, but that's not the case here");
     }
 
-    let user: User = bson_to_object(query[0])?;
+    let user: User = bson_to_object(query.remove(0))?;
 
     let hash = argon2::hash_encoded(
         client_hashed.as_bytes(),
