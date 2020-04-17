@@ -309,6 +309,7 @@ impl GameOnThread {
             &self.game.get_board(),
             &self.game.get_board().chips[..],
         );
+        controller::message(&self.canvas, String::from(""));
     }
 }
 
