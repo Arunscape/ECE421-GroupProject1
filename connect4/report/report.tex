@@ -79,6 +79,22 @@ Yes, because\dots
 \subsection{What are Model-View-Controller and Model-View-Viewmodel? Are either applicable to your
 design?}
 
+Model-View-Controller is a software design pattern, commonly used for user interfaces. 
+The model contains the data structure, the view takes care of how to display the model,
+and the controller handles updates to the model and tells the view when to update.
+
+Model-View-Viewmodel is another software design pattern. The model and view is similar to model-view-controller.
+However, the viewmodel meaning the view model is responsible for converting the data objects from the model in such 
+a way that the objects can be easily presented. 
+
+Our application uses the Yew framework, a rust web framework based on Elm, which uses the model
+view controller architecture. Our web components have a Model struct, a Message enum, and the
+struct implementation has a view() function which returns html elements, while the update() 
+method determines whether or not the component needs to re-render and how the model should be updated
+based on the message passed to it.
+
+
+
 \section{Innovations (Additional to the specification)}
 \begin{enumerate}
     \item Mobile friendliness
@@ -101,6 +117,11 @@ design?}
 \section{Rationale}
 
 \section{Defects}
+No known defects.
+
+From a security standpoint, it would be more ideal to serve the site with TLS encryption over HTTPS,
+however, we had issues with enabling non-default features in the rocket library.
+\url{https://github.com/SergioBenitez/Rocket/issues/975}
 
 \section{Remaining MEAN stack code}
 The only thing left over from the MEAN stack is mongodb. Everything else has been written
