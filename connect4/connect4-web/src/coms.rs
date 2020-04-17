@@ -67,16 +67,21 @@ pub async fn join_game(game_id: &str, plays: Vec<PlayerType>) -> Option<Vec<Opti
 
 pub async fn refresh() {
     let token = LocalStorage::get_token();
-    let js_json = request::<i32>("GET", "refresh", None, token).await;
-    match js_json.map(|x| x.into_serde::<Signin>()) {
-        Ok(Ok(v)) => {
-            if v.status == status::SUCCESS {
-                LocalStorage::set_token(&v.tok);
-            } else {
+    if token.is_some() {
+        let js_json = request::<i32>("POST", "refresh", None, token).await;
+        match js_json.map(|x| x.into_serde::<Signin>()) {
+            Ok(Ok(v)) => {
+                if v.status == status::SUCCESS {
+                    LocalStorage::set_token(&v.tok);
+                } else {
+                    LocalStorage::clear_token();
+                }
+            }
+            _ => {
                 LocalStorage::clear_token();
+                while let Err(_) = crate::window().location().reload() {}
             }
         }
-        _ => (),
     }
 }
 pub fn sync_refresh() {
