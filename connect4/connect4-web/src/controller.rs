@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::{log, storage::LocalStorage};
+use crate::{storage::LocalStorage};
 
 use connect4_lib::game::Board;
 use connect4_lib::game::Chip;
@@ -36,21 +36,29 @@ pub fn draw_chip(
 ) {
     draw_chip_at(canvas, board_height, chip, x as f64, y as f64);
 }
+// in draw_chip, and draw_chip_at, both x and y are in board coordinates
 pub fn draw_chip_at(
     canvas: &Canvas,
-    board_height: f64,
+    board_height: f64, // in pixels
     chip: connect4_lib::game::ChipDescrip,
     x: f64,
     y: f64,
 ) {
+    let (board_margin_x, board_margin_y, pwidth, pheight, box_size) = get_rendering_gameboard_bounds(canvas, 7, 6);
+    let chip_seperation = (box_size / COLUMN_WIDTH) * CHIP_SEPERATION;
+    let chip_radius = (box_size / COLUMN_WIDTH) * CHIP_RADIUS;
+    let column_width = box_size;
+
     place_chip(
         canvas,
         chip,
-        x * (COLUMN_WIDTH) + BOARD_MARGIN_X + CHIP_RADIUS + CHIP_SEPERATION,
-        board_height - (y * (COLUMN_WIDTH) + BOARD_MARGIN_Y + CHIP_RADIUS + CHIP_SEPERATION),
-        CHIP_RADIUS,
+        x * (column_width) + board_margin_x + chip_radius + chip_seperation,
+        board_margin_y + pheight - (y * (column_width) + chip_radius), // TODO: add chip_seperation when I break this later
+        chip_radius,
     );
 }
+
+// in place_chip both x and y are in canvas coordinates
 pub fn place_chip(
     canvas: &Canvas,
     chip: connect4_lib::game::ChipDescrip,
@@ -95,28 +103,34 @@ pub fn place_chip(
     }
 }
 
-pub fn draw_board_mask(canvas: &Canvas, width: usize, height: isize) {
+pub fn draw_board_mask(canvas: &Canvas, width: isize, height: isize) {
     let bg_color = COLOR_BLUE;
     for x in 0..width {
-        draw_board_mask_column(canvas, height, x, bg_color);
+        draw_board_mask_column(canvas, width, height, x as usize, bg_color);
     }
 }
 pub fn draw_board_mask_column(
     canvas: &Canvas,
+    width: isize,
     height: isize,
     column_num: usize,
     color: &'static str,
 ) {
-    draw_board_mask_column_above(canvas, height, column_num, color, 0);
+    draw_board_mask_column_above(canvas, width, height, column_num, color, 0);
 }
 pub fn draw_board_mask_column_above(
     canvas: &Canvas,
+    width: isize,
     height: isize,
     column_num: usize,
     color: &'static str,
     above: isize,
 ) {
-    let square = 2.0 * CHIP_SEPERATION + CHIP_DIAMETER;
+    let (off_x, off_y, pwidth, pheight, box_size) = get_rendering_gameboard_bounds(canvas, width, height);
+    let chip_seperation = (box_size / COLUMN_WIDTH) * CHIP_SEPERATION;
+    let chip_radius = (box_size / COLUMN_WIDTH) * CHIP_RADIUS;
+    let chip_diameter = (box_size / COLUMN_WIDTH) * CHIP_DIAMETER;
+    let square = 2.0 * chip_seperation + chip_diameter;
     canvas.context.save();
     canvas.context.set_fill_style(&color.into());
     canvas.context.begin_path();
@@ -124,21 +138,21 @@ pub fn draw_board_mask_column_above(
     // boards. It's not a big issue, but it would be nice to fix
     for y in 0..(height - above) {
         canvas.context.clear_rect(
-            (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + square,
-            (COLUMN_WIDTH) * y as f64,
+            (box_size) * column_num as f64 + off_x + square,
+            (box_size) * y as f64 + off_y,
             -square,
             square,
         );
         canvas.context.arc(
-            (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + CHIP_RADIUS + CHIP_SEPERATION,
-            (COLUMN_WIDTH) * y as f64 + BOARD_MARGIN_Y + CHIP_RADIUS + CHIP_SEPERATION,
-            CHIP_RADIUS,
+            (box_size) * column_num as f64 + off_x + chip_radius + chip_seperation,
+            (box_size) * y as f64 + off_y + chip_radius + chip_seperation,
+            chip_radius,
             0.0,
             2.0 * std::f64::consts::PI,
         );
         canvas.context.rect(
-            (COLUMN_WIDTH) * column_num as f64 + BOARD_MARGIN_X + square,
-            (COLUMN_WIDTH) * y as f64,
+            (box_size) * column_num as f64 + off_x + square,
+            (box_size) * y as f64 + off_y,
             -square,
             square,
         );
@@ -148,7 +162,7 @@ pub fn draw_board_mask_column_above(
 }
 
 pub fn draw_gameboard(canvas: &Canvas, board: &connect4_lib::game::Board) {
-    draw_board_mask(canvas, board.width(), board.height);
+    draw_board_mask(canvas, board.width, board.height);
 }
 fn calculate_draw_height(board_height: isize) -> f64 {
     CHIP_SEPERATION + (COLUMN_WIDTH) * (board_height as f64)
@@ -164,20 +178,22 @@ pub fn draw_game_pieces(canvas: &Canvas, board: &Board, chips: &[Chip]) {
     }
 }
 
+use crate::{console_log, log};
 pub fn canvas_loc_to_column(canvas: &Canvas, x: i32, _y: i32, board: &Board) -> Option<isize> {
     let visual_width = canvas.canvas.get_bounding_client_rect().width();
     let render_width = canvas.canvas.width() as f64;
-    let x = render_width * (x as f64) / visual_width;
-    let cx = (x - BOARD_MARGIN_X - CHIP_SEPERATION / 2.0) / COLUMN_WIDTH;
-    if cx < 0.0 || cx >= board.width as f64 {
+    let tx = render_width * (x as f64) / visual_width;
+    let (x, _y, w, h_, _) = get_rendering_gameboard_bounds(canvas, board.width, board.height);
+    console_log!("TX: {} -> COL: {}", tx, ((tx - x) / w) * (board.width as f64));
+    if tx < x || tx >= w + x {
         None
     } else {
-        Some(cx as isize)
+        Some(((tx - x) / w * (board.width as f64)) as isize)
     }
 }
 
-pub fn highlight_column(canvas: &Canvas, height: isize, col: isize) {
-    draw_board_mask_column(canvas, height, col as usize, COLOR_HIGHLIGHT);
+pub fn highlight_column(canvas: &Canvas, width: isize, height: isize, col: isize) {
+    draw_board_mask_column(canvas, width, height, col as usize, COLOR_HIGHLIGHT);
 }
 
 pub fn do_falling_piece_frame(
@@ -189,7 +205,7 @@ pub fn do_falling_piece_frame(
     ani.y += delta * ani.vy;
     if (ani.y / COLUMN_WIDTH) > ani.final_y as f64 {
         // TODO: clear rectangle behind first
-        draw_board_mask_column_above(canvas, ani.height, ani.x as usize, COLOR_BLUE, ani.final_y);
+        draw_board_mask_column_above(canvas, ani.width, ani.height, ani.x as usize, COLOR_BLUE, ani.final_y);
         draw_chip_at(
             canvas,
             calculate_draw_height(ani.height),
@@ -228,5 +244,67 @@ pub fn draw_move_selection(canvas: &Canvas, player: &Player, chip: Option<ChipDe
 }
 
 pub fn font_size(size: usize) -> String {
-    format!("{}px Arial", size)
+    format!("{}px Poppins", size)
+}
+
+fn get_message_bounds(canvas: &Canvas) -> (f64, f64, f64, f64) {
+    if canvas.is_skinny() {
+        (0.0, 0.0, canvas.get_width(), canvas.get_height() / 4.0)
+    } else {
+        (
+            0.0,
+            0.0,
+            canvas.get_width() / 4.0,
+            canvas.get_height() / 2.0,
+        )
+    }
+}
+
+fn get_gameboard_bounds(canvas: &Canvas) -> (f64, f64, f64, f64) {
+    if canvas.is_skinny() {
+        (
+            0.0,
+            canvas.get_height() / 4.0,
+            canvas.get_width(),
+            canvas.get_height() / 2.0,
+        )
+    } else {
+        (
+            canvas.get_width() / 4.0,
+            0.0,
+            3.0 * canvas.get_width() / 4.0,
+            canvas.get_height(),
+        )
+    }
+}
+
+fn get_chipselect_bounds(canvas: &Canvas) -> (f64, f64, f64, f64) {
+    if canvas.is_skinny() {
+        (
+            0.0,
+            3.0 * canvas.get_height() / 4.0,
+            canvas.get_width(),
+            canvas.get_height() / 4.0,
+        )
+    } else {
+        (
+            0.0,
+            canvas.get_height() / 2.0,
+            canvas.get_width() / 4.0,
+            canvas.get_height() / 2.0,
+        )
+    }
+}
+
+fn get_rendering_gameboard_bounds(canvas: &Canvas, bwidth: isize, bheight: isize) -> (f64, f64, f64, f64, f64) {
+    let bwidth = bwidth as f64;
+    let bheight = bheight as f64;
+    let (x, y, w, h) = get_gameboard_bounds(canvas);
+    let mw = w / bwidth;
+    let mh = h / bheight;
+
+    let mm = mw.floor().min(mh.floor());
+
+    // TODO: adjust calculated min, to account for the extra board border on bottom
+    (x, y, bwidth * mm, bheight * mm, mm)
 }

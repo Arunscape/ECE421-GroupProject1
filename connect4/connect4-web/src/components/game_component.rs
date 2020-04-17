@@ -9,6 +9,7 @@ use connect4_lib::{
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use yew::prelude::*;
+use wasm_bindgen::JsCast;
 
 pub struct GameComponent {
     props: Props,
@@ -66,6 +67,7 @@ impl Component for GameComponent {
 
         let game = GameObject::new(canvas, self.props.active, game, self.props.gameid.clone());
         self.game_object = Some(game);
+        self.update_size();
         true
     }
 
@@ -74,9 +76,25 @@ impl Component for GameComponent {
     }
 
     fn view(&self) -> Html {
+        self.update_size();
         html! {
            <canvas id={&self.canvas_id} height="1080" width="1960"
                       class="h-full w-full" style="outline: black 3px solid;"/>
+        }
+    }
+}
+impl GameComponent {
+    fn update_size(&self) {
+        let canvas = crate::document().get_element_by_id(&self.canvas_id);
+        if let Some(canvas) = canvas {
+            let parent = canvas.parent_element().unwrap();
+            let canvas: web_sys::HtmlCanvasElement = canvas
+                .dyn_into::<web_sys::HtmlCanvasElement>()
+                .map_err(|_| ())
+                .unwrap();
+            let bounds = parent.get_bounding_client_rect();
+            canvas.set_height(bounds.height() as u32);
+            canvas.set_width(bounds.width() as u32);
         }
     }
 }

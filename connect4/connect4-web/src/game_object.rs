@@ -34,6 +34,7 @@ pub struct ChipAnimation {
     pub final_y: isize,
     pub y: f64,
     pub vy: f64,
+    pub width: isize,
     pub height: isize,
 }
 
@@ -315,6 +316,7 @@ fn start_animation(canvas: &Canvas, board: &Board, sender: JSender<Msg>) {
         final_y: y,
         y: controller::get_chip_fall(board),
         vy: 0.0,
+        width: board.width,
         height: board.height,
     };
 
