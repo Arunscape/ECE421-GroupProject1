@@ -1,6 +1,6 @@
 use crate::components::GameComponent;
 use crate::coms;
-use crate::{console_log, log};
+
 use connect4_coms::types::GameData;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -36,7 +36,10 @@ impl Component for ViewPage {
             Msg::Server(data) => self.games = data,
             Msg::Link(i) => {
                 let s = self.games[i].roomcode.clone();
-                crate::window().location().set_href(&format!("/game/{}", s));
+                crate::window()
+                    .location()
+                    .set_href(&format!("/game/{}", s))
+                    .expect("unable to redirect to /game");
             }
         }
         true
@@ -49,14 +52,14 @@ impl Component for ViewPage {
               <h1>{"View"}</h1>
               <ul class={list_styles}>{
                   self.games.iter().enumerate()
-                      .map(|(i, x)| renderGameView(x, i, self.link.clone())).collect::<Html>()
+                      .map(|(i, x)| render_game_view(x, i, self.link.clone())).collect::<Html>()
               }</ul>
             </div>
         }
     }
 }
 
-fn renderGameView(game: &GameData, index: usize, link: ComponentLink<ViewPage>) -> Html {
+fn render_game_view(game: &GameData, index: usize, link: ComponentLink<ViewPage>) -> Html {
     let game_style = "";
 
     let id = index;

@@ -3,7 +3,7 @@ use yew::prelude::*;
 
 use crate::components::Menu;
 use crate::storage::LocalStorage;
-use crate::{console_log, log};
+
 
 use crate::components::icon;
 use crate::components::icon::ConnectIcon;
@@ -35,7 +35,7 @@ impl Component for SettingsPage {
             }
         }
     }
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
         true
     }
 

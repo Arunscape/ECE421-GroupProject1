@@ -1,4 +1,4 @@
-use yew::{prelude::*, virtual_dom::VList, virtual_dom::VNode, Properties};
+use yew::{prelude::*, virtual_dom::VNode};
 
 pub struct HomeButton;
 
