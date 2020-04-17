@@ -4,7 +4,6 @@ use yew::prelude::*;
 use crate::components::Menu;
 use crate::storage::LocalStorage;
 
-
 use crate::components::icon;
 use crate::components::icon::ConnectIcon;
 

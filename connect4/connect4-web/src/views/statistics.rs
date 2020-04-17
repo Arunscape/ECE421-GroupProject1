@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 
-use crate::components::{Menu};
+use crate::components::Menu;
 use crate::coms;
 use connect4_coms::types::GameStats;
 use wasm_bindgen_futures::spawn_local;

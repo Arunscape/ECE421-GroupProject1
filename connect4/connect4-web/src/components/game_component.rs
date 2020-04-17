@@ -8,8 +8,8 @@ use connect4_lib::{
 };
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use yew::prelude::*;
 use wasm_bindgen::JsCast;
+use yew::prelude::*;
 
 pub struct GameComponent {
     props: Props,

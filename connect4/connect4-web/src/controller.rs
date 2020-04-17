@@ -413,11 +413,22 @@ pub fn selected_new_move(
     let sw = 3.0 * r;
     let tw = sw * chips.len() as f64 - sw;
 
-    let off_x = x + w / 2.0 - tw / 2.0 - r - r/2.0; // r/2 is for spaceing, r is cause circles are drawn from center
+    let off_x = x + w / 2.0 - tw / 2.0 - r - r / 2.0; // r/2 is for spaceing, r is cause circles are drawn from center
     let off_y = y + h - 2.0 * fs - 2.0 * pad - 2.0 * r;
     let sloc = (tx - off_x, ty - off_y + r);
-    console_log!("Touched at: {:?}, which is {:?} relativly -> {:?}", loc, sloc, chips.get((sloc.0 / sw) as usize));
-    console_log!("    touch data: i={} r={}, tw={}, sw={}", (sloc.0 / sw), r, tw, sw);
+    console_log!(
+        "Touched at: {:?}, which is {:?} relativly -> {:?}",
+        loc,
+        sloc,
+        chips.get((sloc.0 / sw) as usize)
+    );
+    console_log!(
+        "    touch data: i={} r={}, tw={}, sw={}",
+        (sloc.0 / sw),
+        r,
+        tw,
+        sw
+    );
     let i = sloc.0 / sw;
     if sloc.1.abs() <= (r * 2.0) && i >= 0.0 && i < chips.len() as f64 {
         return Some(chips[i as usize]);
@@ -501,4 +512,3 @@ fn get_rendering_gameboard_bounds(
 
     (x, y, bwidth * mm, bheight * mm, mm)
 }
-

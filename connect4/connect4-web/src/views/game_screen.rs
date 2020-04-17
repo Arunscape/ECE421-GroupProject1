@@ -1,20 +1,19 @@
 use yew::prelude::*;
 
-use crate::{components::{GameComponent, MenuButtonLight}};
+use crate::components::{GameComponent, MenuButtonLight};
 
 use crate::components::router::query;
 
 use crate::{console_log, log};
 
-pub struct GameScreen {
-}
+pub struct GameScreen {}
 
 impl Component for GameScreen {
     type Message = ();
     type Properties = ();
     // I OWN THE GAME COMPONENT
     fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Self { }
+        Self {}
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {

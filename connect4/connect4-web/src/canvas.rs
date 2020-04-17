@@ -35,7 +35,9 @@ impl Canvas {
         self.context.set_fill_style(&fill.into());
         self.context.set_stroke_style(&stroke.into());
         self.context.begin_path();
-        self.context.arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI).unwrap();
+        self.context
+            .arc(x, y, r, 0.0, 2.0 * std::f64::consts::PI)
+            .unwrap();
         self.context.fill();
         self.context.restore();
     }

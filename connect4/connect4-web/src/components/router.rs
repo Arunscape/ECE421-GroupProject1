@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use yew::virtual_dom::{VList, VNode};
-use yew_router::switch::{Permissive};
+use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
 
 use crate::components::{GameConfig, Signin}; // TODO: move these to views
