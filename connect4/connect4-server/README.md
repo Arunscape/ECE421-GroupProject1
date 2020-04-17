@@ -1,5 +1,11 @@
 # Connect 4 like games in rust
 
+
+
+## envirment variables
+export ROCKET_DATABASES='{my_db={url="mongodb://localhost:27017"}}'
+
+
 ## AI
 A lot of the AI stuff is based off this
 http://blog.gamesolver.org/solving-connect-four/01-introduction/
