@@ -16,4 +16,4 @@ jobs:
         name: arunscape/connect4-server
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-      workdir: connect4
+        workdir: connect4

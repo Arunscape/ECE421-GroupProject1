@@ -10,6 +10,11 @@ use connect4_lib::io;
 const COLOR_BLUE: &'static str = "blue";
 const COLOR_RED: &'static str = "red";
 const COLOR_YELLOW: &'static str = "yellow";
+const COLOR_GREEN: &'static str = "green";
+const COLOR_BLACK: &'static str = "black";
+const COLOR_WHITE: &'static str = "white";
+const COLOR_MAGENTA: &'static str = "fuchsia";
+const COLOR_CYAN: &'static str = "cyan";
 
 const COLOR_HIGHLIGHT: &'static str = "#0099CC";
 
@@ -56,7 +61,13 @@ pub fn place_chip(
     let colour = match chip.fg_color {
         io::RED => COLOR_RED,
         io::YEL => COLOR_YELLOW,
-        _ => unreachable!(),
+        io::BLK => COLOR_RED,
+        io::WHT => COLOR_WHITE,
+        io::GRN => COLOR_BLACK,
+        io::BLU => COLOR_BLUE,
+        io::MAG => COLOR_MAGENTA,
+        io::CYN => COLOR_CYAN,
+        _ => COLOR_BLACK,
     };
     canvas.draw_circle(x, y, radius, colour.into(), "black".into());
 

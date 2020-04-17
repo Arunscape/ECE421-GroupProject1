@@ -1,6 +1,6 @@
 pub mod player {
-    use connect4_lib::game::PlayerType;
     use connect4_lib::ai;
+    use connect4_lib::game::PlayerType;
 
     pub const AI_EASY: &'static str = "ai_easy";
     pub const AI_EASY2: &'static str = "ai_easy2";
