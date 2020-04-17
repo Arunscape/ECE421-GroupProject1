@@ -3,7 +3,7 @@ version: '3'
 services:
 ################################################################################
   connect4:
-    image: arunscape/connect4-server
+    build: .
     container_name: connect4
     ports:
             - 80:8000
