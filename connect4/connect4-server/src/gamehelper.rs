@@ -288,7 +288,56 @@ mod test {
     }
 
     #[test]
-    fn player_number_test() {}
+    fn invalid_plays_test() {
+        let p1 = "Alex";
+        let p2 = "Arun";
+        let game: game::Game = games::connect4();
+        let mut players = game.players.clone();
+        let red = players.remove(0).chip_options.remove(0);
+        let yellow = players.remove(0).chip_options.remove(0);
+        let game_data = GameData {
+            users: vec![p1.to_string(), p2.to_string()],
+            roomcode: "".to_string(),
+            board_state: game::BoardState::Ongoing,
+            game: game,
+        };
+        // username, column, color
+
+        // not p2's turn
+        assert!(!valid_play(&game_data, p2, 1, yellow));
+        // not valid colum
+        assert!(!valid_play(&game_data, p1, 10, red));
+        // not a p1's color
+        assert!(!valid_play(&game_data, p1, 1, yellow));
+
+        // p1 valid play
+        assert!(valid_play(&game_data, p1, 1,red));
+
+    }
+
+    #[test]
+    fn play_yourself_valid_test() {
+        let p1 = "Alex";
+        let p2 = "Alex";
+        let game: game::Game = games::connect4();
+        let mut players = game.players.clone();
+        let red = players.remove(0).chip_options.remove(0);
+        let yellow = players.remove(0).chip_options.remove(0);
+        let game_data = GameData {
+            users: vec![p1.to_string(), p2.to_string()],
+            roomcode: "".to_string(),
+            board_state: game::BoardState::Ongoing,
+            game: game,
+        };
+        // username, column, color
+
+        // multi users have the same name
+        assert!(valid_play(&game_data, p1, 1,red));
+        assert!(valid_play(&game_data, p2, 1,red));
+        // wrong color test
+        assert!(!valid_play(&game_data, p2, 1, yellow));
+
+    }
 
     #[test]
     #[ignore]
