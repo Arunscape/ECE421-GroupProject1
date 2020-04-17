@@ -165,6 +165,12 @@ pub fn draw_board_mask_column_above(
             square,
         );
     }
+    canvas.context.clear_rect(
+        (box_size) * column_num as f64 + off_x + square,
+        off_y,
+        -square,
+        -1000.0,
+    );
     canvas.context.fill();
     canvas.context.restore();
 }
