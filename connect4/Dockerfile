@@ -4,6 +4,9 @@ RUN rustup default nightly \
  && rustup update
 ENV ROCKET_ENV=production
 ENV DB_URL=mongodb://mongo:27017
+RUN apt-get intall -y uuid-runtime
+RUN uuidgen
+ENV JWT_KEY=$uuid
 RUN cargo install connect4-server --git 'https://github.com/Arunscape/ECE421-GroupProject1.git'
 RUN git clone https://github.com/Arunscape/ECE421-GroupProject1.git
 WORKDIR /usr/src/myapp/ECE421-GroupProject1/connect4/connect4-web
@@ -15,9 +18,6 @@ RUN npm i -g rollup
 RUN ./build
 RUN pwd
 RUN ls -la
-RUN apt-get intall -y uuid-runtime
-RUN uuidgen
-ENV JWT_KEY=$uuid
 
 FROM rust:slim-stretch
 #RUN addgroup -S rust && adduser -S -G rust rust
