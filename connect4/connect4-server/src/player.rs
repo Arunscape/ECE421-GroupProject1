@@ -60,9 +60,7 @@ pub fn sign_in(username: &str, password: &str) -> Option<String> {
 
     let user: User = bson_to_object(query.remove(0))?;
 
-    let hash =
-        argon2::hash_encoded(password.as_bytes(), user.random_salt.as_bytes(), &config).unwrap();
-    let matches = argon2::verify_encoded(&hash, user.password.as_bytes()).unwrap();
+    let matches = argon2::verify_encoded(&user.password, password.as_bytes()).unwrap();
 
     // They exist in the database
     if matches {
