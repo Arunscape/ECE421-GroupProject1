@@ -171,7 +171,7 @@ pub async fn get_player_stats() -> Option<GameStats> {
 }
 
 fn build_url(postfix: &str) -> String {
-    format!("http://{}/api/{}", SERVER_LOC, postfix)
+    format!("https://{}/api/{}", SERVER_LOC, postfix)
 }
 
 async fn request<T: Serialize>(
