@@ -34,5 +34,5 @@ version = "0.4.4"
 features = ["handlebars_templates", "tera_templates", "json"]
 
 [dependencies.rocket]
-version = "0.4.4"
+version = "0.4.7"
 default-features = false
